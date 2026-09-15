@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sumi House — 献立 Meal Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;600;700&family=Zen+Kaku+Gothic+New:wght@300;400;500;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --char:      #17130E;
+  --char-2:    #2B2925;  /* cast concrete */
+  --char-3:    #34312B;
+  --seam:      #3C382F;
+  --washi:     #EFE7D7;
+  --stone:     #99907F;
+  --oak:       #C89F6E;
+  --copper:    #C0754A;
+  --copper-hi: #DE9163;
+  --copper-lo: #8C4E2E;
+  --moss:      #8B9678;
+  --mizu:      #7E93A0;
+  --oak-hi:    #DDBB8C;
+  --oak-lo:    #8C6B42;
+  --moss-hi:   #A8B394;
+  --moss-lo:   #5F6B4E;
+  --mizu-hi:   #9FB4C0;
+  --mizu-lo:   #566C78;
+  --me-hi:     var(--copper-hi);
+  --me-lo:     var(--copper-lo);
+  --me-glaze:  rgba(192,117,74,.13);
+  --me-border: rgba(192,117,74,.45);
+  --r-card: 6px;
+  --r-chip: 4px;
+  --font-display:"Zen Old Mincho",Georgia,serif;
+  --font-ui:"Zen Kaku Gothic New","Helvetica Neue",sans-serif;
+  --font-data:"IBM Plex Mono","Courier New",monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,.28) 0px, rgba(0,0,0,.28) 1px, transparent 1px, transparent 96px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.012) 0px, rgba(255,255,255,.012) 48px, transparent 48px, transparent 96px),
+    linear-gradient(180deg,#1B1610 0%, #15110C 100%);
+  background-color:var(--char);
+  color:var(--washi);
+  font-family:var(--font-ui);
+  font-weight:300;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  padding:26px 16px 60px;
+}
+.wrap{max-width:440px;margin:0 auto}
+
+/* ---------- concrete card ---------- */
+.card{
+  background:
+    url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='160'%20height='160'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.8'%20numOctaves='2'%20stitchTiles='stitch'/%3E%3C/filter%3E%3Crect%20width='160'%20height='160'%20filter='url(%23n)'%20opacity='0.045'/%3E%3C/svg%3E"),
+    radial-gradient(140% 120% at 12% -10%, #34312B 0%, rgba(52,49,43,0) 55%),
+    var(--char-2);
+  border:1px solid var(--seam);
+  border-radius:var(--r-card);
+  padding:16px;
+  position:relative;
+  overflow:hidden;
+  margin-bottom:14px;
+}
+
+/* ---------- header ---------- */
+.week{font-family:var(--font-data);font-size:11px;color:var(--stone);letter-spacing:.14em;margin-bottom:12px}
+
+/* ---------- person seals ---------- */
+.people{display:flex;gap:8px;align-items:center;margin-bottom:2px}
+.people .lbl{font-size:10.5px;color:var(--stone);letter-spacing:.16em;text-transform:uppercase;margin-right:2px}
+.seal{
+  width:34px;height:34px;border-radius:50%;
+  border:1px solid var(--seam);background:var(--char);
+  color:var(--stone);font-family:var(--font-display);font-size:15px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:all .2s ease;user-select:none;
+}
+.seal:hover{opacity:.82}
+.seal[data-p="tomek"]{color:var(--copper-hi);border-color:var(--copper-lo)}
+.seal[data-p="ania"]{color:var(--oak-hi);border-color:var(--oak-lo)}
+.seal[data-p="olaf"]{color:var(--moss-hi);border-color:var(--moss-lo)}
+.seal[data-p="zoja"]{color:var(--mizu-hi);border-color:var(--mizu-lo)}
+.seal.me{
+  background:var(--me-glaze);
+  box-shadow:0 0 0 1px var(--me-lo);
+}
+
+/* ---------- section titles ---------- */
+.sec{
+  font-family:var(--font-display);font-size:13px;font-weight:600;letter-spacing:.1em;
+  color:var(--washi);display:flex;align-items:baseline;gap:8px;margin:2px 0 10px;
+}
+.sec small{font-family:var(--font-ui);font-weight:300;font-size:10.5px;color:var(--stone);letter-spacing:.14em;text-transform:uppercase}
+
+/* ---------- today slots ---------- */
+.slot{
+  border:1px solid var(--seam);border-radius:var(--r-chip);
+  background:var(--char);padding:12px 13px;position:relative;overflow:hidden;
+  margin-bottom:10px;transition:border-color .4s;
+}
+.slot.approved{border-color:var(--copper-lo)}
+.slot .kind{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.slot .kanji{
+  font-family:var(--font-display);font-size:13px;color:var(--stone);
+  border:1px solid var(--seam);border-radius:3px;padding:1px 6px;line-height:1.5;
+}
+.slot.approved .kanji{color:var(--copper-hi);border-color:var(--copper-lo)}
+.slot .kname{font-size:10.5px;color:var(--stone);letter-spacing:.16em;text-transform:uppercase;flex:1}
+.slot .until{font-family:var(--font-data);font-size:10px;color:var(--stone)}
+.slot .meal{font-family:var(--font-display);font-size:16px;font-weight:600;letter-spacing:.02em;position:relative;z-index:1}
+.slot .desc{font-size:12px;color:var(--stone);line-height:1.5;margin-top:3px;position:relative;z-index:1}
+.slot .empty{font-size:12.5px;color:var(--stone);font-style:italic}
+.slot .vein{position:absolute;left:0;right:0;bottom:0;height:26px;pointer-events:none;opacity:0;transition:opacity 1s ease}
+.slot.approved .vein{opacity:1}
+.vein path{
+  fill:none;stroke:url(#cu);stroke-width:1.2;
+  stroke-dasharray:6 5;animation:flow 5s linear infinite;
+}
+.vein .fiss{stroke-width:.8;opacity:.7}
+@keyframes flow{to{stroke-dashoffset:-44}}
+
+.rbtn{
+  margin-top:8px;display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;letter-spacing:.1em;color:var(--copper-hi);
+  border:1px solid var(--copper-lo);border-radius:var(--r-chip);
+  background:rgba(192,117,74,.10);padding:4px 10px;cursor:pointer;
+  position:relative;z-index:1;
+}
+.recipe{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed var(--seam);position:relative;z-index:1}
+.recipe.open{display:block}
+.recipe h4{font-family:var(--font-display);font-size:12px;font-weight:600;letter-spacing:.12em;color:var(--oak);margin-bottom:5px}
+.recipe ul{list-style:none;margin-bottom:8px}
+.recipe ul li{font-size:12px;color:var(--washi);padding:1.5px 0;display:flex;justify-content:space-between;gap:10px}
+.recipe ul li span{font-family:var(--font-data);font-size:11px;color:var(--stone);white-space:nowrap}
+.recipe ol{margin-left:16px}
+.recipe ol li{font-size:12px;color:var(--stone);padding:2px 0}
+
+/* ---------- pool rows ---------- */
+.pool .grp-head{
+  font-family:var(--font-display);font-size:10.5px;letter-spacing:.16em;
+  color:var(--stone);text-transform:uppercase;
+  display:flex;align-items:center;gap:8px;margin:12px 0 7px;
+}
+.pool .grp-head:first-child{margin-top:0}
+.pool .grp-head .ln{flex:1;height:1px;background:var(--seam)}
+.pool .grp-head.d{color:var(--mizu)}
+.pool .row{
+  display:flex;align-items:center;gap:10px;
+  background:var(--char);border:1px solid var(--seam);border-left-width:2px;border-radius:var(--r-chip);
+  padding:9px 11px;margin-bottom:7px;cursor:pointer;
+  transition:background .2s,border-color .2s;user-select:none;
+}
+.pool .row.lunch{border-left-color:var(--oak-lo)}
+.pool .row.dinner{border-left-color:var(--mizu-lo)}
+.pool .row:hover{background:#1D1913}
+.pool .row.mine{border-color:var(--me-border);border-left-color:var(--me-lo)}
+.tag{
+  font-family:var(--font-display);font-size:12px;flex:none;
+  color:var(--stone);border:1px solid var(--seam);border-radius:3px;
+  padding:0 5px;line-height:1.7;
+}
+.tag.d{color:var(--mizu)}
+.row .nm{font-size:13.5px;font-weight:400;flex:1;line-height:1.35}
+.votes{display:flex;gap:3px;flex:none}
+.vdot{
+  width:18px;height:18px;border-radius:50%;
+  font-family:var(--font-display);font-size:9.5px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--seam);color:var(--stone);
+}
+.vdot[data-p="tomek"]{border-color:var(--copper-lo);color:var(--copper-hi);background:rgba(192,117,74,.15)}
+.vdot[data-p="ania"]{border-color:var(--oak-lo);color:var(--oak-hi);background:rgba(200,159,110,.16)}
+.vdot[data-p="olaf"]{border-color:var(--moss-lo);color:var(--moss-hi);background:rgba(139,150,120,.18)}
+.vdot[data-p="zoja"]{border-color:var(--mizu-lo);color:var(--mizu-hi);background:rgba(126,147,160,.18)}
+.approve{
+  flex:none;width:28px;height:28px;border-radius:3px;
+  font-family:var(--font-display);font-size:13px;font-weight:600;
+  border:1px solid var(--seam);background:transparent;color:var(--stone);
+  cursor:pointer;transition:all .2s;
+}
+.approve:hover{border-color:var(--copper-lo);color:var(--copper-hi);background:rgba(192,117,74,.10)}
+.hint{font-size:10.5px;color:var(--stone);letter-spacing:.04em;margin:2px 0 0;opacity:.8}
+
+/* ---------- eaten ---------- */
+.eaten .row{
+  display:flex;align-items:center;gap:10px;padding:6px 2px;
+  border-bottom:1px solid rgba(60,56,47,.5);
+}
+.eaten .row:last-child{border-bottom:none}
+.eaten .nm{font-size:12.5px;color:var(--stone);flex:1;text-decoration:line-through;text-decoration-color:rgba(153,144,127,.4)}
+.eaten .day{font-family:var(--font-data);font-size:10px;color:var(--stone);opacity:.7;letter-spacing:.08em}
+.eaten .tag{opacity:.55}
+
+/* ---------- footer demo / loader ---------- */
+.foot{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px}
+.foot .lbl{font-size:10px;color:var(--stone);letter-spacing:.16em;text-transform:uppercase}
+.chip{
+  font-family:var(--font-data);font-size:10.5px;color:var(--stone);
+  border:1px solid var(--seam);border-radius:var(--r-chip);
+  background:var(--char);padding:3px 9px;cursor:pointer;transition:all .2s;
+}
+.chip:hover{color:var(--washi)}
+.chip.on{color:var(--copper-hi);border-color:var(--copper-lo);background:rgba(192,117,74,.13)}
+.clock{font-family:var(--font-data);font-size:11px;color:var(--oak);margin-left:auto;letter-spacing:.06em}
+.loader{margin-top:10px;display:none}
+.loader.open{display:block}
+.loader textarea{
+  width:100%;height:110px;background:var(--char);border:1px solid var(--seam);border-radius:var(--r-chip);
+  color:var(--washi);font-family:var(--font-data);font-size:10.5px;padding:8px;resize:vertical;
+}
+.loader .go{margin-top:6px}
+.toast{
+  position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(10px);
+  background:var(--char-3);border:1px solid var(--copper-lo);border-radius:var(--r-chip);
+  color:var(--washi);font-size:12px;padding:7px 14px;opacity:0;pointer-events:none;
+  transition:all .35s ease;white-space:nowrap;z-index:9;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+<linearGradient id="cu" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#8C4E2E"/><stop offset=".5" stop-color="#DE9163"/><stop offset="1" stop-color="#C0754A"/>
+</linearGradient></defs></svg>
+
+<div class="wrap">
+
+  <div class="card">
+    <div class="week" id="weekLbl"></div>
+    <div class="people">
+      <span class="lbl">I am</span>
+      <div class="seal" data-p="tomek">T</div>
+      <div class="seal" data-p="ania">A</div>
+      <div class="seal" data-p="olaf">O</div>
+      <div class="seal" data-p="zoja">Z</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec">今日 <small>today</small></div>
+    <div id="slots"></div>
+  </div>
+
+  <div class="card pool">
+    <div class="sec">残り <small>still on the table</small></div>
+    <div id="pool"></div>
+    <div class="hint">Tap a meal to vote · 決 seals it for today</div>
+  </div>
+
+  <div class="card eaten">
+    <div class="sec">頂きました <small>eaten this week</small></div>
+    <div id="eaten"></div>
+  </div>
+
+  <div class="card">
+    <div class="foot">
+      <span class="lbl">demo clock</span>
+      <button class="chip" data-t="live">live</button>
+      <button class="chip" data-t="08:00">08:00</button>
+      <button class="chip" data-t="15:05">15:05</button>
+      <button class="chip" data-t="22:05">22:05</button>
+      <button class="chip" id="newWeek">new week…</button>
+      <button class="chip" id="resetBtn">reset demo</button>
+      <span class="clock" id="clock"></span>
+    </div>
+    <div class="loader" id="loader">
+      <textarea id="json" spellcheck="false"></textarea>
+      <button class="rbtn go" id="loadJson">Load weekly plan</button>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const PEOPLE = {tomek:"T", ania:"A", olaf:"O", zoja:"Z"};
+const PCOLOR = {
+  tomek:{hi:"#DE9163", lo:"#8C4E2E", glaze:"rgba(192,117,74,.13)", border:"rgba(192,117,74,.45)"},
+  ania: {hi:"#DDBB8C", lo:"#8C6B42", glaze:"rgba(200,159,110,.15)", border:"rgba(200,159,110,.5)"},
+  olaf: {hi:"#A8B394", lo:"#5F6B4E", glaze:"rgba(139,150,120,.17)", border:"rgba(139,150,120,.55)"},
+  zoja: {hi:"#9FB4C0", lo:"#566C78", glaze:"rgba(126,147,160,.17)", border:"rgba(126,147,160,.55)"}
+};
+const DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+const DEFAULT_WEEK = {
+  week: "W36",
+  meals: [
+    {id:"m1", type:"lunch",  name:"Pumpkin miso ramen",
+      recipe:{ing:[["Ramen noodles","320 g"],["Hokkaido pumpkin","400 g"],["White miso","3 tbsp"],["Dashi or veg stock","1.2 l"],["Soft eggs","4"],["Spring onion","2"]],
+      steps:["Roast pumpkin at 200°C until soft, blend into the stock.","Whisk in miso off the heat.","Cook noodles, assemble with egg halves and spring onion."]}},
+    {id:"m2", type:"lunch",  name:"Pierogi ruskie",
+      recipe:{ing:[["Pierogi","~40 pcs"],["Butter","40 g"],["Onion","2"],["Sour cream","to serve"]],
+      steps:["Boil pierogi until they float, plus 2 min.","Brown butter with onion, pour over.","Serve with sour cream."]}},
+    {id:"m3", type:"lunch",  name:"Salmon teriyaki, sesame rice",
+      desc:"Pan-seared salmon glazed in soy-mirin, over sesame rice with pickled cucumber."},
+    {id:"m4", type:"lunch",  name:"Leczo with smoked sausage",
+      desc:"Peppers, tomato and courgette stewed with smoked sausage — served with crusty bread."},
+    {id:"m5", type:"dinner", name:"Soba with grilled vegetables",
+      desc:"Chilled soba noodles, char-grilled seasonal vegetables, sesame-soy dressing."},
+    {id:"m6", type:"dinner", name:"Tamago sando & miso soup",
+      recipe:{ing:[["Eggs","8"],["Kewpie mayo","4 tbsp"],["Shokupan / toast bread","8 slices"],["Miso soup set","1"]],
+      steps:["Boil eggs 9 min, chop, fold with mayo.","Fill sandwiches, trim crusts.","Warm miso soup alongside."]}},
+    {id:"m7", type:"dinner", name:"Caprese with sourdough",
+      desc:"Heirloom tomatoes, buffalo mozzarella, basil oil — thick-cut toasted sourdough."},
+    {id:"m8", type:"dinner", name:"Żurek with white sausage",
+      desc:"Sour rye soup with white sausage, marjoram and a soft-boiled egg."}
+  ],
+  eaten: [
+    {name:"Kotlety schabowe, mizeria", type:"lunch",  day:"Mon"},
+    {name:"Greek salad, pita",          type:"dinner", day:"Mon"},
+    {name:"Butter chicken",             type:"lunch",  day:"Tue"}
+  ]
+};
+
+let S = null;
+let demoTime = "08:00"; // "HH:MM" or null = live
+
+function load(){
+  try{
+    const raw = localStorage.getItem("sumi-meals");
+    if(raw){ S = JSON.parse(raw); return; }
+  }catch(e){}
+  S = fresh();
+}
+function fresh(){
+  const w = JSON.parse(JSON.stringify(DEFAULT_WEEK));
+  return {week:w.week, meals:w.meals, eaten:w.eaten,
+          votes:{tomek:{},ania:{},olaf:{},zoja:{}},
+          today:{lunch:"m1",dinner:"m6"}, me:"tomek", open:{m1:true,m6:true}};
+}
+function save(){ try{ localStorage.setItem("sumi-meals", JSON.stringify(S)); }catch(e){} }
+
+function now(){
+  const d = new Date();
+  if(demoTime){ const [h,m]=demoTime.split(":"); d.setHours(+h,+m,0,0); }
+  return d;
+}
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  clearTimeout(t._x); t._x=setTimeout(()=>t.classList.remove("show"),2200);
+}
+
+/* automation: 15:00 lunch eaten, 22:00 dinner eaten */
+function autoEat(){
+  const d=now(), mins=d.getHours()*60+d.getMinutes(), day=DAYS[d.getDay()];
+  let changed=false;
+  [["lunch",15*60],["dinner",22*60]].forEach(([k,cut])=>{
+    if(mins>=cut && S.today[k]){
+      const meal=S.meals.find(m=>m.id===S.today[k]);
+      if(meal){
+        S.eaten.push({name:meal.name,type:meal.type,day});
+        S.meals=S.meals.filter(m=>m.id!==meal.id);
+        toast((k==="lunch"?"昼 lunch":"夜 dinner")+" marked eaten — vein healed");
+      }
+      S.today[k]=null;
+      Object.values(S.votes).forEach(v=>delete v[k]);
+      changed=true;
+    }
+  });
+  if(changed){ save(); render(); }
+}
+
+function vote(mealId){
+  const meal=S.meals.find(m=>m.id===mealId); if(!meal) return;
+  const v=S.votes[S.me];
+  v[meal.type] = (v[meal.type]===mealId) ? undefined : mealId;
+  if(v[meal.type]===undefined) delete v[meal.type];
+  save(); render();
+}
+function approve(mealId){
+  const meal=S.meals.find(m=>m.id===mealId); if(!meal) return;
+  const d=now(), mins=d.getHours()*60+d.getMinutes();
+  if(meal.type==="lunch" && mins>=15*60){ toast("Past 15:00 — lunch is closed for today"); return; }
+  if(meal.type==="dinner" && mins>=22*60){ toast("Past 22:00 — dinner is closed for today"); return; }
+  S.today[meal.type]=mealId;
+  Object.values(S.votes).forEach(v=>delete v[meal.type]);
+  save(); render();
+  toast(meal.name+" sealed for "+(meal.type==="lunch"?"lunch":"dinner"));
+}
+
+function veinSVG(){
+  return `<svg class="vein" viewBox="0 0 400 26" preserveAspectRatio="none">
+    <path d="M-4,20 L52,17 L88,22 L146,12 L188,18 L242,9 L286,16 L338,11 L404,15"/>
+    <path class="fiss" d="M146,12 L162,4 M242,9 L252,2 M88,22 L96,26"/>
+  </svg>`;
+}
+
+function render(){
+  const d=now(), mins=d.getHours()*60+d.getMinutes();
+  document.getElementById("weekLbl").textContent = S.week + " · " + DAYS[d.getDay()].toUpperCase();
+  document.getElementById("clock").textContent =
+    String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+(demoTime?" (demo)":"");
+
+  const mc=PCOLOR[S.me], root=document.documentElement.style;
+  root.setProperty("--me-hi", mc.hi); root.setProperty("--me-lo", mc.lo);
+  root.setProperty("--me-glaze", mc.glaze); root.setProperty("--me-border", mc.border);
+  document.querySelectorAll(".seal").forEach(s=>s.classList.toggle("me", s.dataset.p===S.me));
+
+  /* today slots */
+  const slots=document.getElementById("slots"); slots.innerHTML="";
+  [["lunch","昼","LUNCH","until 15:00",15*60],["dinner","夜","DINNER","until 22:00",22*60]].forEach(([k,kj,nm,until,cut])=>{
+    const id=S.today[k], meal=id?S.meals.find(m=>m.id===id):null;
+    const closed=mins>=cut;
+    const el=document.createElement("div");
+    el.className="slot"+(meal?" approved":"");
+    let inner=`<div class="kind"><span class="kanji">${kj}</span><span class="kname">${nm}</span><span class="until">${closed?"closed":until}</span></div>`;
+    if(meal){
+      inner+=`<div class="meal">${meal.name}</div>`;
+      if(meal.recipe){
+        inner+=`<button class="rbtn" data-r="${meal.id}">レシピ · recipe</button>
+        <div class="recipe${S.open[meal.id]?" open":""}">
+          <h4>Ingredients</h4><ul>${meal.recipe.ing.map(i=>`<li>${i[0]}<span>${i[1]}</span></li>`).join("")}</ul>
+          <h4>Method</h4><ol>${meal.recipe.steps.map(s=>`<li>${s}</li>`).join("")}</ol>
+        </div>`;
+      } else if(meal.desc){
+        inner+=`<div class="desc">${meal.desc}</div>`;
+      }
+      inner+=veinSVG();
+    } else {
+      inner+=`<div class="empty">${closed?"— passed for today —":"not decided yet — the table is still open"}</div>`;
+    }
+    el.innerHTML=inner;
+    slots.appendChild(el);
+  });
+  slots.querySelectorAll("[data-r]").forEach(b=>b.onclick=e=>{
+    const id=b.dataset.r; S.open[id]=!S.open[id]; save(); render();
+  });
+
+  /* pool — grouped by lunch / dinner */
+  const pool=document.getElementById("pool"); pool.innerHTML="";
+  ["lunch","dinner"].forEach(type=>{
+    const items=S.meals.filter(m=>m.type===type && S.today[type]!==m.id);
+    if(!items.length) return;
+    const head=document.createElement("div");
+    head.className="grp-head"+(type==="dinner"?" d":"");
+    head.innerHTML=`<span>${type==="lunch"?"昼 Lunch":"夜 Dinner"}</span><span class="ln"></span>`;
+    pool.appendChild(head);
+    items.forEach(m=>{
+      const voters=Object.entries(S.votes).filter(([p,v])=>v[type]===m.id).map(([p])=>p);
+      const mine=voters.includes(S.me);
+      const row=document.createElement("div");
+      row.className="row "+type+(mine?" mine":"");
+      row.innerHTML=`<span class="tag${type==="dinner"?" d":""}">${type==="lunch"?"昼":"夜"}</span>
+        <span class="nm">${m.name}</span>
+        <span class="votes">${voters.map(p=>`<span class="vdot" data-p="${p}">${PEOPLE[p]}</span>`).join("")}</span>
+        <button class="approve" title="Seal for today">決</button>`;
+      row.onclick=()=>vote(m.id);
+      row.querySelector(".approve").onclick=e=>{e.stopPropagation();approve(m.id)};
+      pool.appendChild(row);
+    });
+  });
+  if(!pool.children.length) pool.innerHTML=`<div class="hint">The week's table is empty — load a new plan below.</div>`;
+
+  /* eaten */
+  const eat=document.getElementById("eaten");
+  eat.innerHTML = S.eaten.length
+    ? S.eaten.map(e=>`<div class="row"><span class="tag${e.type==="dinner"?" d":""}">${e.type==="lunch"?"昼":"夜"}</span><span class="nm">${e.name}</span><span class="day">${e.day}</span></div>`).join("")
+    : `<div class="hint">Nothing yet this week.</div>`;
+
+  document.querySelectorAll("[data-t]").forEach(c=>c.classList.toggle("on",(c.dataset.t==="live"&&!demoTime)||c.dataset.t===demoTime));
+}
+
+/* wiring */
+document.querySelectorAll(".seal").forEach(s=>s.onclick=()=>{S.me=s.dataset.p;save();render();});
+document.querySelectorAll("[data-t]").forEach(c=>c.onclick=()=>{
+  demoTime = c.dataset.t==="live"?null:c.dataset.t;
+  render(); autoEat();
+});
+document.getElementById("newWeek").onclick=()=>{
+  const l=document.getElementById("loader"); l.classList.toggle("open");
+  document.getElementById("json").value=JSON.stringify({week:"W37",meals:[
+    {id:"m1",type:"lunch",name:"…"},{id:"m2",type:"dinner",name:"…"}]},null,1);
+};
+document.getElementById("loadJson").onclick=()=>{
+  try{
+    const w=JSON.parse(document.getElementById("json").value);
+    if(!Array.isArray(w.meals)) throw 0;
+    S.week=w.week||S.week; S.meals=w.meals; S.eaten=[];
+    S.votes={tomek:{},ania:{},olaf:{},zoja:{}}; S.today={lunch:null,dinner:null};
+    save(); render(); toast("New week loaded — "+S.meals.length+" meals on the table");
+    document.getElementById("loader").classList.remove("open");
+  }catch(e){ toast("Couldn't parse that JSON"); }
+};
+document.getElementById("resetBtn").onclick=()=>{
+  try{localStorage.removeItem("sumi-meals");}catch(e){}
+  S=fresh(); demoTime=null; render();
+};
+
+load(); render(); autoEat();
+setInterval(()=>{render();autoEat();},30000);
+</script>
+</body>
+</html>

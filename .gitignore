@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
+preview/theme.css
+preview/cardmod.css
+.vscode/
+.claude/settings.local.json

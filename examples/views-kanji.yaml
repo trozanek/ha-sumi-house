@@ -1,0 +1,21 @@
+# The theme prefixes each dashboard tab with a Mincho kanji, keyed by the view's `path:`.
+# Give every view one of these paths (the label stays whatever `title:` says).
+#
+#   home / overview  家     living / living-room  居     kitchen  台     dining  食
+#   bedroom / master 寝     kids / olaf / zoja    子     guest    客     hall / entrance 玄
+#   mezzanine        階     attic                 屋     pantry   蔵     laundry 洗
+#   garage           車     bathroom / wellness / sauna 湯         garden / terrace 庭
+#   energy           電     media                 映     cameras  目     system / settings 設
+#
+# Add or change a kanji in themes/sumi_house.yaml → card-mod-root (one selector per path).
+views:
+  - title: Home
+    path: home
+  - title: Living room
+    path: living
+  - title: Bedroom
+    path: bedroom
+  - title: Kids' rooms
+    path: kids
+  - title: Garden & wellness
+    path: garden

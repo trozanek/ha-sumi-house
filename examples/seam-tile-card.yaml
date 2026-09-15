@@ -1,0 +1,82 @@
+# Two tiers of "active" (spec §5.3, tightened after review). Both are set per card with a
+# card_mod template on the card's own entity; the theme never lights anything on its own.
+#
+#   --sumi-active: 1         any running device → a quiet copper trace on the card frame.
+#                            Use this for the many small tiles: lights, media, mowers,
+#                            vacuum, valves, covers, washer.
+#   --sumi-seam-opacity: 1   the kintsugi vein. Reserve it for the few major cards whose
+#                            activity is what the dashboard is about: sauna heating, solar
+#                            producing, hot tub heating. It implies the frame trace.
+#
+# --sumi-seam picks the edge for the vein: 1 top (default) · 2 bottom · 3 left · 4 right ·
+# 5 top, first 62% from the left. Vary it so two neighbouring heroes are not identical.
+#
+# "Active" per domain — anything else is idle and gets no copper:
+#   light / switch / input_boolean       state == on
+#   climate                              attribute hvac_action in (heating, cooling) — not merely "on" at setpoint
+#   water_heater                         state == on and hvac_action heating, or state in (heat_pump, performance, high_demand)
+#   media_player                         state == playing
+#   vacuum                               state == cleaning
+#   lawn_mower                           state == mowing
+#   valve                                state == open
+#   washer / dryer (sensor)              state in (run, running, washing, drying)
+#   solar production (sensor, W)         value > 0
+#   camera                               streaming while its card is viewed — handled by the camera card itself
+
+# ── Tier 1 · frame trace — ordinary tiles ─────────────────────────────────────────────
+
+- type: tile
+  entity: light.living_room_pendant
+  card_mod:
+    style: |
+      ha-card {
+        --sumi-active: {{ 1 if is_state(config.entity, 'on') else 0 }};
+      }
+
+- type: tile
+  entity: media_player.mezzanine
+  card_mod:
+    style: |
+      ha-card {
+        --sumi-active: {{ 1 if is_state(config.entity, 'playing') else 0 }};
+      }
+
+- type: tile
+  entity: lawn_mower.back_garden
+  card_mod:
+    style: |
+      ha-card {
+        --sumi-active: {{ 1 if is_state(config.entity, 'mowing') else 0 }};
+      }
+
+# ── Tier 2 · kintsugi vein — hero cards only ─────────────────────────────────────────
+
+# Sauna — only while actually heating, never at setpoint
+- type: thermostat
+  entity: climate.sauna
+  card_mod:
+    style: |
+      ha-card {
+        --sumi-seam: var(--sumi-seam-1);
+        --sumi-seam-opacity: {{ 1 if state_attr(config.entity, 'hvac_action') in ['heating', 'cooling'] else 0 }};
+      }
+
+# Solar — producing means > 0 W
+- type: entity
+  entity: sensor.solar_power
+  card_mod:
+    style: |
+      ha-card {
+        --sumi-seam: var(--sumi-seam-2);
+        --sumi-seam-opacity: {{ 1 if (states(config.entity) | float(0)) > 0 else 0 }};
+      }
+
+# Hot tub — heating only
+- type: tile
+  entity: water_heater.hot_tub
+  card_mod:
+    style: |
+      ha-card {
+        --sumi-seam: var(--sumi-seam-3);
+        --sumi-seam-opacity: {{ 1 if state_attr(config.entity, 'hvac_action') == 'heating' or states(config.entity) in ['heat_pump', 'performance', 'high_demand'] else 0 }};
+      }

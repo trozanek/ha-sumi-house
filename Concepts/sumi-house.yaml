@@ -1,0 +1,71 @@
+# Sumi House — Japandi theme for Home Assistant
+# Materials: charred ground (#17130E), cast-concrete cards (#211E1A), copper kintsugi accents.
+# Concrete grain (subtle) via card-mod; the kintsugi crack seam is applied to view headers ONLY.
+# Place in config/themes/sumi-house.yaml (with "themes: !include_dir_merge_named themes" in configuration.yaml)
+# Fonts: add ?fontcombo or load via card-mod theme below (Zen Old Mincho, Zen Kaku Gothic New, IBM Plex Mono)
+
+Sumi House:
+  # ground
+  primary-background-color: "#17130E"
+  secondary-background-color: "#141009"
+  card-background-color: "#211E1A"
+  ha-card-background: "#211E1A"
+  ha-card-border-color: "#34302A"
+  ha-card-border-width: "1px"
+  ha-card-border-radius: "6px"
+  ha-card-box-shadow: "none"
+
+  # text
+  primary-text-color: "#EFE7D7"
+  secondary-text-color: "#99907F"
+  text-primary-color: "#17130E"
+  disabled-text-color: "#5C554A"
+
+  # accents — copper is "active", oak is warm neutral
+  primary-color: "#C0754A"
+  accent-color: "#C89F6E"
+  light-primary-color: "#DE9163"
+  dark-primary-color: "#8C4E2E"
+
+  # states
+  state-icon-color: "#99907F"
+  state-icon-active-color: "#C0754A"
+  paper-item-icon-active-color: "#C0754A"
+  switch-checked-color: "#C0754A"
+  switch-unchecked-button-color: "#99907F"
+  switch-unchecked-track-color: "#34302A"
+  slider-color: "#C0754A"
+  slider-bar-color: "#34302A"
+
+  # semantic
+  success-color: "#8B9678"     # moss — healthy / on-ok
+  warning-color: "#C89F6E"
+  error-color: "#B0563E"
+  info-color: "#7E93A0"        # mizu — water systems
+
+  # header / sidebar
+  app-header-background-color: "#17130E"
+  app-header-text-color: "#EFE7D7"
+  sidebar-background-color: "#14100A"
+  sidebar-text-color: "#99907F"
+  sidebar-selected-text-color: "#DE9163"
+  sidebar-selected-icon-color: "#C0754A"
+  sidebar-icon-color: "#6E665A"
+  divider-color: "#34302A"
+
+  # inputs & misc
+  input-fill-color: "#211E1A"
+  input-ink-color: "#EFE7D7"
+  input-label-ink-color: "#99907F"
+  input-idle-line-color: "#34302A"
+  input-hover-line-color: "#8C4E2E"
+  input-focused-line-color: "#C0754A"
+  scrollbar-thumb-color: "#34302A"
+
+  # typography (applied app-wide; cards refine via card-mod)
+  ha-font-family-body: "'Zen Kaku Gothic New', sans-serif"
+  ha-font-family-heading: "'Zen Old Mincho', serif"
+  ha-font-family-code: "'IBM Plex Mono', monospace"
+
+  # card-mod theme hook — plank header texture & copper heat-line
+  card-mod-theme: sumi-house

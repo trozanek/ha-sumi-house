@@ -1,0 +1,14 @@
+# Dashboard resources for the custom cards in www/sumi-house/cards/.
+# UI mode: Settings → Dashboards → ⋮ → Resources → Add, one entry per card.
+# YAML mode: under `lovelace:` in configuration.yaml:
+#
+# lovelace:
+#   mode: yaml
+#   resources:
+#     - url: /local/sumi-house/cards/sumi-meal-planner.js?v=1
+#       type: module
+#
+# Bump ?v= whenever the file changes so browsers stop serving the cached copy.
+resources:
+  - url: /local/sumi-house/cards/sumi-meal-planner.js?v=1
+    type: module

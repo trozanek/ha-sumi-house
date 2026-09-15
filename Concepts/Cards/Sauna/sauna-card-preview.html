@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sumi House — Sauna Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;600;700&family=Zen+Kaku+Gothic+New:wght@300;400;500;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* mirrors themes/sumi-house.yaml — same names HA exposes, so the real
+     card can read var(--primary-color) etc. and inherit the live theme
+     instead of these hardcoded fallbacks */
+  --primary-background-color: #17130E;
+  --card-background-color:    #211E1A;
+  --divider-color:            #34302A;
+  --primary-text-color:       #EFE7D7;
+  --secondary-text-color:     #99907F;
+  --accent-color:              #C89F6E;  /* oak */
+  --primary-color:             #C0754A;  /* copper */
+  --light-primary-color:       #DE9163;  /* copper-hi */
+  --dark-primary-color:        #8C4E2E;  /* copper-lo */
+  --success-color:             #8B9678;  /* moss */
+  --info-color:                #7E93A0;  /* mizu */
+  --font-display:"Zen Old Mincho",serif;
+  --font-ui:"Zen Kaku Gothic New",sans-serif;
+  --font-data:"IBM Plex Mono",monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--primary-background-color);color:var(--primary-text-color);
+  font-family:var(--font-ui);font-weight:300;line-height:1.5;
+  -webkit-font-smoothing:antialiased;padding:0;
+}
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px 90px}
+.masthead{padding:48px 0 6px}
+.eyebrow{font-family:var(--font-data);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--primary-color)}
+h1{font-family:var(--font-display);font-weight:600;font-size:clamp(26px,4vw,36px);margin:12px 0 10px}
+.masthead p{color:var(--secondary-text-color);max-width:66ch;font-size:14px}
+.spec{padding:44px 0 16px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.spec h2{font-family:var(--font-display);font-weight:600;font-size:20px}
+.spec small{font-family:var(--font-data);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--primary-color)}
+.spec p{width:100%;color:var(--secondary-text-color);font-size:13px;max-width:70ch;margin-top:4px}
+
+/* ============================================================
+   THE CARD  —  <aha-sauna-card>, custom:aha-sauna-card
+   ============================================================ */
+.sauna-card{
+  --aspect: 8/5;
+  container-type: inline-size;
+  position:relative;
+  aspect-ratio: var(--aspect);
+  width:100%;
+  border-radius:6px;
+  overflow:hidden;
+  border:1px solid var(--divider-color);
+  background:
+    url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='160'%20height='160'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.8'%20numOctaves='2'%20stitchTiles='stitch'/%3E%3C/filter%3E%3Crect%20width='160'%20height='160'%20filter='url(%23n)'%20opacity='0.035'/%3E%3C/svg%3E"),
+    radial-gradient(140% 120% at 8% -10%, #282520 0%, rgba(40,37,32,0) 55%),
+    radial-gradient(130% 140% at 108% 118%, #191712 0%, rgba(25,23,18,0) 50%),
+    var(--card-background-color);
+  transition: border-color .5s ease, box-shadow .5s ease;
+  font-family:var(--font-ui);
+}
+.sauna-card.heating{
+  border-color: rgba(192,117,74,.45);
+  animation: saunaGlow 3.6s ease-in-out infinite alternate;
+}
+@keyframes saunaGlow{
+  from{ box-shadow: 0 0 0 rgba(192,117,74,0); }
+  to{   box-shadow: 0 0 16px rgba(192,117,74,.10); }
+}
+@media (prefers-reduced-motion: reduce){ .sauna-card.heating{ animation:none; box-shadow:0 0 12px rgba(192,117,74,.10);} }
+
+.sc-layer{position:absolute;inset:0;z-index:0;pointer-events:none}
+.sc-content{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;padding:4cqw 4.4cqw 3cqw}
+
+/* ---- header ---- */
+.sc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.sc-name{font-family:var(--font-display);font-weight:600;font-size:clamp(15px,3.6cqw,20px);letter-spacing:.02em}
+.sc-status{font-family:var(--font-data);font-size:clamp(10px,2cqw,12px);color:var(--secondary-text-color);margin-top:4px}
+.sc-status b{font-weight:400}
+.sc-status.heat b{color:var(--primary-color)}
+.sc-status.ready b{color:var(--success-color)}
+.sc-toggle{
+  width:40px;height:22px;border-radius:3px;border:1px solid var(--divider-color);
+  position:relative;background:var(--primary-background-color);flex:none;margin-top:2px;
+}
+.sc-toggle i{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:2px;background:var(--secondary-text-color);transition:all .2s}
+.sc-toggle.on{border-color:var(--dark-primary-color);background:rgba(192,117,74,.14)}
+.sc-toggle.on i{left:21px;background:var(--primary-color)}
+
+/* ---- 3-column grid ---- */
+.sc-grid{display:flex;gap:3cqw;flex:1;margin-top:2.6cqw;min-height:0}
+.sc-col{flex:1 1 0;display:flex;flex-direction:column;min-width:0}
+.sc-col + .sc-col{border-left:1px solid var(--divider-color);padding-left:3cqw}
+.sc-label{
+  font-family:var(--font-data);font-size:clamp(9px,1.7cqw,10px);letter-spacing:.2em;
+  text-transform:uppercase;color:var(--secondary-text-color);flex:0 0 auto;
+}
+.sc-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:2cqw;min-height:0}
+
+/* ---- column 1 : temperature ring ---- */
+.ring-wrap{position:relative;width:min(100%,34cqw);touch-action:none;user-select:none}
+.ring-wrap.off{opacity:.38;pointer-events:none;filter:grayscale(.4)}
+.ring-wrap svg{width:100%;height:auto;display:block}
+.ring-track{stroke:var(--divider-color);stroke-width:3;fill:none;stroke-linecap:round}
+.ring-value{stroke:url(#ringGrad);stroke-width:3;fill:none;stroke-linecap:round;transition:stroke-dasharray .05s linear}
+.ring-thumb{fill:var(--primary-text-color);stroke:var(--card-background-color);stroke-width:3;cursor:grab}
+.ring-thumb:active{cursor:grabbing}
+.ring-cur-dot{fill:var(--success-color);stroke:var(--card-background-color);stroke-width:2}
+.ring-center{font-family:var(--font-data)}
+.ring-target{font-size:2.1em;fill:var(--primary-text-color)}
+.ring-target-lbl{font-size:.62em;fill:var(--secondary-text-color);letter-spacing:.15em;text-transform:uppercase}
+.cur-line{
+  font-family:var(--font-data);font-size:clamp(11px,2.2cqw,13px);color:var(--secondary-text-color);
+  margin-top:1.6cqw;text-align:center;
+}
+.cur-line b{color:var(--primary-text-color);font-weight:400}
+.presets{display:flex;gap:.9cqw;margin-top:2.4cqw;flex-wrap:wrap;justify-content:center}
+.preset-chip{
+  font-family:var(--font-data);font-size:clamp(10px,2cqw,12px);
+  border:1px solid var(--divider-color);border-radius:4px;
+  padding:.45cqw 1.3cqw;color:var(--secondary-text-color);transition:all .2s;
+}
+.preset-chip.active,.preset-chip:hover{color:var(--light-primary-color);border-color:var(--dark-primary-color)}
+.preset-chip.active{background:rgba(192,117,74,.13)}
+
+/* ---- column 2 : lighting ---- */
+.sc-body.lighting{align-items:stretch;justify-content:flex-start;gap:2.4cqw;width:100%}
+.light-block{width:100%}
+.light-block + .light-block{border-top:1px solid var(--divider-color);padding-top:2.2cqw;margin-top:.2cqw}
+.lb-head{display:flex;align-items:center;gap:.8cqw;justify-content:space-between}
+.lb-head .nm{display:flex;align-items:center;gap:.7cqw;font-size:clamp(11px,2.2cqw,13px)}
+.lb-head .bulb{width:9px;height:9px;border-radius:2px;flex:none;background:var(--divider-color)}
+.lb-head .bulb.on{background:var(--accent-color);box-shadow:0 0 6px rgba(200,159,110,.5)}
+.slider-row{display:flex;align-items:center;gap:.8cqw;margin-top:1.4cqw}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;flex:1;height:2px;border-radius:1px;outline:none;
+  background:linear-gradient(90deg,var(--dark-primary-color) 0%,var(--accent-color) var(--v,50%),var(--divider-color) var(--v,50%));
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:11px;height:11px;border-radius:50%;
+  background:var(--primary-text-color);box-shadow:0 0 0 3px var(--card-background-color);cursor:pointer;
+}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border:none;border-radius:50%;background:var(--primary-text-color);box-shadow:0 0 0 3px var(--card-background-color);cursor:pointer}
+.pct{font-family:var(--font-data);font-size:clamp(9px,1.8cqw,11px);color:var(--secondary-text-color);width:2.6em;text-align:right}
+.swatches{display:flex;gap:.7cqw;margin-top:1.4cqw;flex-wrap:wrap}
+.swatch-dot{
+  width:clamp(13px,2.8cqw,17px);height:clamp(13px,2.8cqw,17px);border-radius:3px;
+  border:1px solid rgba(255,255,255,.14);cursor:pointer;transition:box-shadow .2s,transform .2s;
+}
+.swatch-dot.sel{box-shadow:0 0 0 2px var(--card-background-color),0 0 0 3.5px var(--primary-color);transform:translateY(-1px)}
+.effects{display:flex;gap:.6cqw;margin-top:1.4cqw;flex-wrap:wrap}
+.eff-chip{
+  font-family:var(--font-data);font-size:clamp(9px,1.7cqw,10.5px);letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid var(--divider-color);border-radius:4px;padding:.4cqw 1cqw;color:var(--secondary-text-color);
+}
+.eff-chip.on{color:var(--light-primary-color);border-color:var(--dark-primary-color);background:rgba(192,117,74,.13)}
+
+/* ---- column 3 : music ---- */
+.sc-body.music{align-items:flex-start;justify-content:flex-start;width:100%}
+.mtitle{font-size:clamp(11px,2.2cqw,13px);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+.msub{font-family:var(--font-data);font-size:clamp(9px,1.8cqw,11px);color:var(--secondary-text-color);margin-top:2px}
+.transport{display:flex;align-items:center;gap:3.4cqw;margin-top:2.2cqw}
+.transport button{font-size:clamp(13px,3cqw,17px);color:var(--secondary-text-color);transition:color .2s}
+.transport button.play{color:var(--light-primary-color);font-size:clamp(16px,3.6cqw,20px)}
+.transport button:hover{color:var(--primary-text-color)}
+.vol-row{display:flex;align-items:center;gap:.8cqw;margin-top:2cqw;width:100%}
+select.playlist{
+  margin-top:1.8cqw;width:100%;background:var(--primary-background-color);
+  border:1px solid var(--divider-color);border-radius:4px;color:var(--primary-text-color);
+  font-family:var(--font-ui);font-size:clamp(10px,2cqw,12px);padding:.6em .7em;
+}
+
+/* ---- background decoration: watermark + ambient (no layout impact) ---- */
+.watermark{position:absolute;right:1%;bottom:-4%;width:40%;opacity:.09;transition:opacity .6s,color .6s;color:var(--secondary-text-color)}
+.watermark.heat{color:var(--primary-color);opacity:.14}
+.ambient{position:absolute;inset:-10%;filter:blur(7cqw);opacity:.5;transition:opacity .6s}
+.ambient .g{position:absolute;inset:0;border-radius:50%}
+.ambient.mode-solid .g{background:radial-gradient(45% 45% at 78% 30%,var(--amb,#8C4E2E) 0%,transparent 70%);animation:ambBreath 6s ease-in-out infinite}
+.ambient.mode-fade .g{background:radial-gradient(50% 50% at 78% 30%,var(--amb,#8C4E2E) 0%,transparent 70%);animation:ambFade 3.2s ease-in-out infinite}
+.ambient.mode-rainbow .g{
+  background:conic-gradient(from 0deg at 78% 30%,#FF3B30,#FF9F0A,#FFD60A,#34C759,#30D5C8,#0A84FF,#5E5CE6,#BF5AF2,#FF3B30);
+  opacity:.35;animation:ambSpin 8s linear infinite;
+}
+@keyframes ambBreath{0%,100%{opacity:.35}50%{opacity:.65}}
+@keyframes ambFade{0%,100%{opacity:.2}50%{opacity:.75}}
+@keyframes ambSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.ambient .g{animation:none}}
+
+/* ---- demo page scaffolding (not part of the card) ---- */
+.demo-block{margin-top:10px}
+.demo-note{font-family:var(--font-data);font-size:11px;color:var(--secondary-text-color);margin-top:10px;max-width:60ch}
+.frames{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+.frame-col{flex:1 1 480px;min-width:280px}
+.frame-col.narrow{flex:0 1 340px}
+.frame-tag{font-family:var(--font-data);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--secondary-text-color);margin-bottom:10px}
+.note{padding:50px 0 70px;color:var(--secondary-text-color);font-size:13px;max-width:74ch}
+.note b{color:var(--primary-text-color);font-weight:500}
+.note code{font-family:var(--font-data);font-size:12px;color:var(--accent-color)}
+.toast{
+  position:fixed;left:50%;bottom:24px;transform:translate(-50%,16px);opacity:0;
+  background:#292620;border:1px solid var(--divider-color);border-radius:4px;
+  padding:9px 16px;font-size:12.5px;color:var(--primary-text-color);pointer-events:none;
+  transition:all .3s ease;z-index:50;box-shadow:0 12px 40px rgba(0,0,0,.5);font-family:var(--font-ui)
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <div class="masthead">
+    <div class="eyebrow">Widget · Sumi House</div>
+    <h1>Sauna card</h1>
+    <p>Adopted from the AHA sauna card spec into the Sumi House material language: cast-concrete surface, copper as the live signal, washi &amp; stone text, our three type families. No crack seam here — per our rule, kintsugi stays on view headers only; an active session shows instead as a slow copper glow at the card's edge.</p>
+  </div>
+  <div class="spec">
+    <small>01</small><h2>Widget · full width</h2>
+    <p>Header carries name, status and the on/off toggle. Three columns — temperature, lighting, music — only render the sections you configure. Drag the ring, or tap a preset. Toggle the header switch to start heating and watch the current temperature climb toward target; the edge glow and status color respond as it goes.</p>
+  </div>
+  <div class="demo-block">
+    <div class="sauna-card" data-aspect="8/5" id="card-wide">
+      <div class="sc-layer">
+        <div class="ambient mode-solid" id="amb-wide"><div class="g"></div></div>
+        <svg class="watermark" id="wm-wide" viewBox="0 0 200 140" fill="currentColor" fill-rule="evenodd">
+          <path d="M20 40 Q20 24 40 20 L150 20 Q170 24 170 40 L170 118 Q170 128 158 128 L32 128 Q20 128 20 118 Z
+                   M96 30 L96 118 L100 118 L100 30 Z
+                   M60 60 L130 60 L130 66 L60 66 Z
+                   M60 90 L130 90 L130 96 L60 96 Z
+                   M78 78 Q78 70 90 70 L106 70 Q118 70 118 78 L118 112 L78 112 Z
+                   M92 84 Q92 80 98 80 L100 80 Q106 80 106 84 L106 100 L92 100 Z"/>
+          <rect x="82" y="6" width="14" height="16" rx="2"/>
+          <path d="M84 2 Q80 -6 86 -10 M96 2 Q100 -6 94 -12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="sc-content">
+        <div class="sc-head">
+          <div>
+            <div class="sc-name">Sauna</div>
+            <div class="sc-status heat" id="status-wide">Off</div>
+          </div>
+          <button class="sc-toggle" id="power-wide"><i></i></button>
+        </div>
+
+        <div class="sc-grid">
+          <div class="sc-col">
+            <div class="sc-label">Temperature</div>
+            <div class="sc-body">
+              <div class="ring-wrap off" id="ring-wide">
+                <svg viewBox="0 0 200 200">
+                  <defs>
+                    <linearGradient id="ringGrad" x1="0" y1="1" x2="1" y2="0">
+                      <stop offset="0" stop-color="#8C4E2E"/><stop offset="1" stop-color="#DE9163"/>
+                    </linearGradient>
+                  </defs>
+                  <path class="ring-track" id="track-wide" d=""/>
+                  <path class="ring-value" id="value-wide" d=""/>
+                  <circle class="ring-cur-dot" id="curdot-wide" r="3"/>
+                  <circle class="ring-thumb" id="thumb-wide" r="6"/>
+                  <text class="ring-center ring-target" id="targettxt-wide" x="100" y="98" text-anchor="middle"></text>
+                  <text class="ring-center ring-target-lbl" x="100" y="120" text-anchor="middle">cel</text>
+                </svg>
+              </div>
+              <div class="cur-line"><b id="curtxt-wide">42°</b> obecnie</div>
+              <div class="presets" id="presets-wide"></div>
+            </div>
+          </div>
+
+          <div class="sc-col">
+            <div class="sc-label">Lighting</div>
+            <div class="sc-body lighting">
+              <div class="light-block">
+                <div class="lb-head">
+                  <span class="nm"><span class="bulb" id="vbulb-wide"></span>Vestibule</span>
+                  <button class="sc-toggle" id="vtog-wide"><i></i></button>
+                </div>
+                <div class="slider-row">
+                  <input type="range" min="1" max="100" value="40" id="vslide-wide">
+                  <span class="pct" id="vpct-wide">40%</span>
+                </div>
+              </div>
+              <div class="light-block">
+                <div class="lb-head">
+                  <span class="nm"><span class="bulb on" id="lbulb-wide"></span>Bench LED</span>
+                  <button class="sc-toggle on" id="ltog-wide"><i></i></button>
+                </div>
+                <div class="swatches" id="swatches-wide"></div>
+                <div class="slider-row">
+                  <input type="range" min="1" max="100" value="55" id="lslide-wide">
+                  <span class="pct" id="lpct-wide">55%</span>
+                </div>
+                <div class="effects" id="effects-wide"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sc-col">
+            <div class="sc-label">Music</div>
+            <div class="sc-body music">
+              <div class="mtitle">Ryuichi Sakamoto — async</div>
+              <div class="msub" id="mstate-wide">Paused</div>
+              <div class="transport">
+                <button data-med="prev">◁</button>
+                <button data-med="play" class="play" id="playbtn-wide">▷</button>
+                <button data-med="next">▷|</button>
+              </div>
+              <div class="vol-row">
+                <input type="range" min="0" max="100" value="35" id="volslide-wide">
+                <span class="pct" id="volpct-wide">35%</span>
+              </div>
+              <select class="playlist">
+                <option>Chill</option>
+                <option>Onsen ambient</option>
+                <option>Deep focus</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="demo-note">Aspect ratio 8:5 · scales fluidly via <code>container-type: inline-size</code> and <code>cqw</code> units — no fixed height needed.</div>
+  </div>
+
+  <div class="spec">
+    <small>02</small><h2>Two panel sizes, same markup</h2>
+    <p>The same component at desktop width and at an NSPanel-style footprint (3:2, ~480px). Nothing is swapped — column widths, ring size and type all resample from the card's own width.</p>
+  </div>
+  <div class="demo-block frames">
+    <div class="frame-col">
+      <div class="frame-tag">Wall panel · wide</div>
+      <div class="sauna-card" data-aspect="8/5" id="card-mid">
+        <div class="sc-layer">
+          <div class="ambient mode-fade" id="amb-mid"><div class="g"></div></div>
+        </div>
+        <div class="sc-content">
+          <div class="sc-head">
+            <div><div class="sc-name">Sauna</div><div class="sc-status" id="status-mid">Heating · <b id="statusnum-mid">58° → 85°</b></div></div>
+            <button class="sc-toggle on" id="power-mid"><i></i></button>
+          </div>
+          <div class="sc-grid">
+            <div class="sc-col">
+              <div class="sc-label">Temperature</div>
+              <div class="sc-body">
+                <div class="ring-wrap" id="ring-mid">
+                  <svg viewBox="0 0 200 200">
+                    <path class="ring-track" id="track-mid" d=""/>
+                    <path class="ring-value" id="value-mid" d=""/>
+                    <circle class="ring-cur-dot" id="curdot-mid" r="3"/>
+                    <circle class="ring-thumb" id="thumb-mid" r="6"/>
+                    <text class="ring-center ring-target" id="targettxt-mid" x="100" y="98" text-anchor="middle"></text>
+                    <text class="ring-center ring-target-lbl" x="100" y="120" text-anchor="middle">cel</text>
+                  </svg>
+                </div>
+                <div class="cur-line"><b id="curtxt-mid">58°</b> obecnie</div>
+                <div class="presets" id="presets-mid"></div>
+              </div>
+            </div>
+            <div class="sc-col">
+              <div class="sc-label">Lighting</div>
+              <div class="sc-body lighting">
+                <div class="light-block">
+                  <div class="lb-head"><span class="nm"><span class="bulb on" id="lbulb-mid"></span>Bench LED</span><button class="sc-toggle on" id="ltog-mid"><i></i></button></div>
+                  <div class="swatches" id="swatches-mid"></div>
+                  <div class="slider-row"><input type="range" min="1" max="100" value="65" id="lslide-mid"><span class="pct" id="lpct-mid">65%</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="frame-col narrow">
+      <div class="frame-tag">NSPanel · 3:2, ~480px</div>
+      <div class="sauna-card" data-aspect="3/2" id="card-narrow">
+        <div class="sc-layer"><div class="ambient mode-solid" id="amb-narrow"><div class="g"></div></div></div>
+        <div class="sc-content">
+          <div class="sc-head">
+            <div><div class="sc-name">Sauna</div><div class="sc-status" id="status-narrow">Ready · 85°</div></div>
+            <button class="sc-toggle on" id="power-narrow"><i></i></button>
+          </div>
+          <div class="sc-grid">
+            <div class="sc-col">
+              <div class="sc-label">Temp</div>
+              <div class="sc-body">
+                <div class="ring-wrap" id="ring-narrow">
+                  <svg viewBox="0 0 200 200">
+                    <path class="ring-track" id="track-narrow" d=""/>
+                    <path class="ring-value" id="value-narrow" d=""/>
+                    <circle class="ring-cur-dot" id="curdot-narrow" r="3"/>
+                    <circle class="ring-thumb" id="thumb-narrow" r="6"/>
+                    <text class="ring-center ring-target" id="targettxt-narrow" x="100" y="98" text-anchor="middle"></text>
+                    <text class="ring-center ring-target-lbl" x="100" y="120" text-anchor="middle">cel</text>
+                  </svg>
+                </div>
+                <div class="cur-line"><b id="curtxt-narrow">85°</b> obecnie</div>
+              </div>
+            </div>
+            <div class="sc-col">
+              <div class="sc-label">Light</div>
+              <div class="sc-body lighting">
+                <div class="light-block">
+                  <div class="lb-head"><span class="nm"><span class="bulb on"></span>LED</span><button class="sc-toggle on" id="ltog-narrow"><i></i></button></div>
+                  <div class="swatches" id="swatches-narrow"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>Mapped from the spec, 1:1 unless noted:</b> ring geometry, drag/throttle behaviour, direct-DOM
+    update during drag, off-state graying, watermark + ambient as non-layout absolute layers, and the
+    hass-update-skip pattern all carry over as written — they're layout/behaviour decisions, not styling.
+    <br><br>
+    <b>What changed for Sumi House:</b> tokens now read the same custom-property names HA themes expose
+    (<code>--primary-color</code>, <code>--card-background-color</code>, <code>--divider-color</code>…) mapped
+    to our palette, so the real card inherits <code>themes/sumi-house.yaml</code> automatically rather than
+    hardcoding hex — the spec's own §8 recommendation, applied. Card surface is our cast-concrete texture,
+    not a flat gradient. Fonts are Zen Old Mincho (name), Zen Kaku Gothic New (labels/UI), IBM Plex Mono
+    (every number). Border-radius 10px instead of the sharper Apple-Home corner. No orange pulse border —
+    the "heating" signal is a slow, quiet copper glow at the edge, consistent with every other Sumi House
+    widget: activity shows as a trace of warmth, never a flashing alert. The LED swatch row leads with the
+    house's own copper and oak before the full RGB spectrum, since those are genuinely good sauna-light
+    colors and it ties the widget back to the material palette without limiting the feature.
+    <br><br>
+    <b>Left untouched on purpose:</b> the full-spectrum rainbow ambient/effect option — it's a real feature
+    (LED color cycling), not a decorative motif, so it stays outside the restrained palette rather than
+    being tamed to match it.
+  </div>
+
+  <div class="toast" id="toast"><span id="toast-msg"></span></div>
+</div>
+
+<script>
+(function(){
+  var TAU=Math.PI/180;
+  function pt(cx,cy,r,angleDeg){
+    var a=angleDeg*TAU;
+    return {x:cx+r*Math.sin(a), y:cy-r*Math.cos(a)};
+  }
+  var START=225, SWEEP=270, R=78, CX=100, CY=100;
+
+  function arcPath(fromA,toA,r){
+    var p1=pt(CX,CY,r,fromA), p2=pt(CX,CY,r,toA);
+    var sweepDeg=((toA-fromA)%360+360)%360;
+    var large=sweepDeg>180?1:0;
+    return 'M '+p1.x+' '+p1.y+' A '+r+' '+r+' 0 '+large+' 1 '+p2.x+' '+p2.y;
+  }
+
+  var toastTimer;
+  function toast(msg){
+    var t=document.getElementById('toast');
+    document.getElementById('toast-msg').textContent=msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(function(){t.classList.remove('show')},1800);
+  }
+
+  var COLORS=['#C0754A','#C89F6E','#FF3B30','#FF9F0A','#FFD60A','#34C759','#30D5C8','#0A84FF','#5E5CE6','#BF5AF2','#FFFFFF'];
+  var PRESETS=[50,60,70,80,90,100];
+
+  function initCard(id, opts){
+    opts=opts||{};
+    var min=40,max=110;
+    var el=document.getElementById(id);
+    var suffix=id.split('-')[1];
+    var q=function(s){return document.getElementById(s+'-'+suffix)};
+
+    var state={
+      power: opts.power!==undefined?opts.power:false,
+      target: opts.target||80,
+      current: opts.current||42,
+      heatTimer:null,
+      ledOn: opts.ledOn!==undefined?opts.ledOn:true,
+      ledColor: opts.ledColor||'#C0754A',
+      ledMode: opts.ledMode||'solid'
+    };
+
+    var track=q('track'), valueEl=q('value'), thumb=q('thumb'), curdot=q('curdot'),
+        targettxt=q('targettxt'), curtxt=q('curtxt'), ringWrap=q('ring'),
+        statusEl=q('status'), power=q('power'), amb=q('amb'), wm=document.getElementById('wm-'+suffix);
+
+    if(track) track.setAttribute('d', arcPath(START, START+SWEEP, R));
+
+    function tempToAngle(t){
+      var f=(t-min)/(max-min);
+      return START + f*SWEEP;
+    }
+    function angleToTemp(a){
+      var f=(a-START)/SWEEP;
+      f=Math.max(0,Math.min(1,f));
+      return Math.round(min + f*(max-min));
+    }
+
+    function paintRing(){
+      if(!valueEl) return;
+      var a=tempToAngle(state.target);
+      valueEl.setAttribute('d', arcPath(START, a, R));
+      var tp=pt(CX,CY,R,a);
+      thumb.setAttribute('cx',tp.x); thumb.setAttribute('cy',tp.y);
+      var ca=tempToAngle(Math.min(state.current,max));
+      var cp=pt(CX,CY,R-2,ca);
+      curdot.setAttribute('cx',cp.x); curdot.setAttribute('cy',cp.y);
+      targettxt.textContent=Math.round(state.target)+'°';
+      if(curtxt) curtxt.textContent=Math.round(state.current)+'°';
+    }
+
+    function paintPresets(){
+      var box=q('presets');
+      if(!box) return;
+      box.innerHTML='';
+      PRESETS.forEach(function(p){
+        if(p<min||p>max) return;
+        var b=document.createElement('button');
+        b.className='preset-chip'+(p===state.target?' active':'');
+        b.textContent=p+'°';
+        b.addEventListener('click',function(){
+          state.target=p; paintRing(); paintPresets();
+          toast('Target '+p+'°');
+        });
+        box.appendChild(b);
+      });
+    }
+
+    function paintStatus(){
+      if(!statusEl) return;
+      if(!state.power){
+        statusEl.textContent='Off';
+        statusEl.className='sc-status';
+        el.classList.remove('heating');
+        return;
+      }
+      if(Math.round(state.current)>=Math.round(state.target)){
+        statusEl.innerHTML='Ready · <b>'+Math.round(state.current)+'°</b>';
+        statusEl.className='sc-status ready';
+        el.classList.remove('heating');
+      } else {
+        statusEl.innerHTML='Heating · <b>'+Math.round(state.current)+'° → '+Math.round(state.target)+'°</b>';
+        statusEl.className='sc-status heat';
+        el.classList.add('heating');
+      }
+    }
+
+    function tickHeat(){
+      if(!state.power) return;
+      if(state.current<state.target){
+        state.current=Math.min(state.target, state.current+0.6);
+        paintRing(); paintStatus();
+      } else {
+        paintStatus();
+      }
+    }
+
+    if(power){
+      power.addEventListener('click',function(){
+        state.power=!state.power;
+        power.classList.toggle('on',state.power);
+        if(ringWrap) ringWrap.classList.toggle('off',!state.power);
+        if(state.power){
+          if(!state.heatTimer) state.heatTimer=setInterval(tickHeat,700);
+          toast('Sauna on');
+        } else {
+          toast('Sauna off');
+        }
+        paintStatus();
+      });
+    }
+
+    if(ringWrap){
+      var svg=ringWrap.querySelector('svg');
+      var dragging=false, raf=null;
+      function angleFromEvent(e){
+        var rect=svg.getBoundingClientRect();
+        var cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+        var x=e.clientX-cx, y=e.clientY-cy;
+        var ang=(Math.atan2(x,-y)*180/Math.PI+360)%360;
+        var rel=((ang-START)%360+360)%360;
+        if(rel>SWEEP){
+          rel = (rel-SWEEP) < (360-rel) ? SWEEP : 0;
+        }
+        return START+rel;
+      }
+      function apply(e){
+        if(!state.power) return;
+        var a=angleFromEvent(e);
+        state.target=angleToTemp(a);
+        if(raf) return;
+        raf=requestAnimationFrame(function(){ paintRing(); paintPresets(); raf=null; });
+      }
+      ringWrap.addEventListener('pointerdown',function(e){
+        if(!state.power) return;
+        dragging=true; ringWrap.setPointerCapture(e.pointerId); apply(e);
+      });
+      ringWrap.addEventListener('pointermove',function(e){ if(dragging) apply(e); });
+      ringWrap.addEventListener('pointerup',function(e){
+        if(!dragging) return;
+        dragging=false;
+        toast('Target '+Math.round(state.target)+'°');
+      });
+    }
+
+    paintRing(); paintPresets(); paintStatus();
+
+    var vtog=q('vtog'), vslide=q('vslide'), vpct=q('vpct'), vbulb=q('vbulb');
+    if(vtog){
+      vtog.addEventListener('click',function(){
+        vtog.classList.toggle('on');
+        if(vbulb) vbulb.classList.toggle('on', vtog.classList.contains('on'));
+      });
+    }
+    if(vslide){
+      var paintV=function(){ vslide.style.setProperty('--v',vslide.value+'%'); if(vpct)vpct.textContent=vslide.value+'%'; };
+      vslide.addEventListener('input',paintV); paintV();
+    }
+
+    var ltog=q('ltog'), lslide=q('lslide'), lpct=q('lpct'), lbulb=q('lbulb');
+    var swBox=q('swatches'), effBox=q('effects');
+    function applyAmbient(){
+      if(!amb) return;
+      amb.style.setProperty('--amb', state.ledOn ? state.ledColor : '#8C4E2E');
+      amb.className='ambient mode-'+(state.ledOn?state.ledMode:(state.power?'fade':'solid'));
+    }
+    function applyWatermark(){
+      if(!wm) return;
+      wm.classList.toggle('heat', state.power || state.ledOn);
+      wm.style.color = state.ledOn ? state.ledColor : (state.power?'#C0754A':'');
+    }
+    if(ltog){
+      ltog.addEventListener('click',function(){
+        ltog.classList.toggle('on');
+        state.ledOn=ltog.classList.contains('on');
+        if(lbulb) lbulb.classList.toggle('on', state.ledOn);
+        applyAmbient(); applyWatermark();
+      });
+    }
+    if(lslide){
+      var paintL=function(){ lslide.style.setProperty('--v',lslide.value+'%'); if(lpct)lpct.textContent=lslide.value+'%'; };
+      lslide.addEventListener('input',paintL); paintL();
+    }
+    if(swBox){
+      COLORS.forEach(function(c){
+        var d=document.createElement('div');
+        d.className='swatch-dot'+(c.toLowerCase()===state.ledColor.toLowerCase()?' sel':'');
+        d.style.background=c;
+        d.addEventListener('click',function(){
+          swBox.querySelectorAll('.swatch-dot').forEach(function(x){x.classList.remove('sel')});
+          d.classList.add('sel');
+          state.ledColor=c;
+          applyAmbient(); applyWatermark();
+        });
+        swBox.appendChild(d);
+      });
+    }
+    if(effBox){
+      ['Solid','Fade','Rainbow'].forEach(function(name){
+        var b=document.createElement('button');
+        var mode=name.toLowerCase();
+        b.className='eff-chip'+(mode===state.ledMode?' on':'');
+        b.textContent=name;
+        b.addEventListener('click',function(){
+          effBox.querySelectorAll('.eff-chip').forEach(function(x){x.classList.remove('on')});
+          b.classList.add('on');
+          state.ledMode=mode;
+          applyAmbient();
+        });
+        effBox.appendChild(b);
+      });
+    }
+    applyAmbient(); applyWatermark();
+
+    var playbtn=q('playbtn'), mstate=q('mstate'), volslide=q('volslide'), volpct=q('volpct');
+    if(playbtn){
+      var playing=false;
+      playbtn.addEventListener('click',function(){
+        playing=!playing;
+        playbtn.textContent=playing?'❚❚':'▷';
+        if(mstate) mstate.textContent='Living room speakers · '+(playing?'playing':'paused');
+      });
+    }
+    if(volslide){
+      var paintVol=function(){ volslide.style.setProperty('--v',volslide.value+'%'); if(volpct)volpct.textContent=volslide.value+'%'; };
+      volslide.addEventListener('input',paintVol); paintVol();
+    }
+
+    return state;
+  }
+
+  initCard('card-wide',   {power:false, target:80, current:42, ledOn:true,  ledColor:'#C0754A', ledMode:'solid'});
+  initCard('card-mid',    {power:true,  target:85, current:58, ledOn:true,  ledColor:'#DE9163', ledMode:'fade'});
+  initCard('card-narrow', {power:true,  target:85, current:85, ledOn:true,  ledColor:'#C0754A', ledMode:'solid'});
+})();
+</script>
+</body>
+</html>

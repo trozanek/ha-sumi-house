@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en" data-mode="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sumi House · theme preview</title>
+<!-- order matters: HA-like defaults, then the theme (as HA applies it on <html>), then card-mod blocks -->
+<link rel="stylesheet" href="mock.css">
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="cardmod.css" id="cardmod-css">
+<!-- the genuine font loader, served at the same path Home Assistant uses -->
+<script type="module" src="/local/sumi-house/sumi-fonts.js"></script>
+</head>
+<body>
+<div class="frame">
+
+  <ha-sidebar>
+    <div class="brand"><span class="kanji">墨の家</span><span class="name">Sumi House</span></div>
+    <ha-list-item-button class="selected"><span class="icon" slot="start" style="--m:url(icons/home-outline.svg)"></span>Overview</ha-list-item-button>
+    <ha-list-item-button><span class="icon" slot="start" style="--m:url(icons/lightning-bolt-outline.svg)"></span>Energy</ha-list-item-button>
+    <ha-list-item-button><span class="icon" slot="start" style="--m:url(icons/history.svg)"></span>History</ha-list-item-button>
+    <ha-list-item-button><span class="icon" slot="start" style="--m:url(icons/calendar-outline.svg)"></span>Calendar</ha-list-item-button>
+    <ha-list-item-button><span class="icon" slot="start" style="--m:url(icons/cctv.svg)"></span>Cameras</ha-list-item-button>
+    <div class="spacer"></div>
+    <div class="divider"></div>
+    <ha-list-item-button><span class="icon" slot="start" style="--m:url(icons/cog-outline.svg)"></span>Settings</ha-list-item-button>
+    <ha-list-item-button><span class="icon" slot="start" style="--m:url(icons/account-outline.svg)"></span>Tomek</ha-list-item-button>
+  </ha-sidebar>
+
+  <hui-root>
+    <div class="header">
+      <div class="toolbar">
+        <button class="icon-button" title="menu"><span class="icon" style="--m:url(icons/menu.svg)"></span></button>
+        <div class="main-title">Sumi House</div>
+        <div class="tabs">
+          <ha-tab-group-tab data-path="home" active>Home</ha-tab-group-tab><ha-tab-group-tab data-path="living">Living room</ha-tab-group-tab><ha-tab-group-tab data-path="bedroom">Bedroom</ha-tab-group-tab><ha-tab-group-tab data-path="kids">Kids' rooms</ha-tab-group-tab><ha-tab-group-tab data-path="garden">Garden</ha-tab-group-tab>
+        </div>
+        <div class="action-items">
+          <button class="icon-button" title="edit"><span class="icon" style="--m:url(icons/pencil-outline.svg)"></span></button>
+          <button class="icon-button" title="more"><span class="icon" style="--m:url(icons/dots-vertical.svg)"></span></button>
+        </div>
+      </div>
+    </div>
+
+    <hui-view>
+      <div class="preview-bar">
+        <button class="pbtn" id="mode-toggle" aria-pressed="false"><span class="t">Dark · 墨</span></button>
+        <button class="pbtn" id="cardmod-toggle" aria-pressed="true"><span class="t">card-mod on</span></button>
+        <button class="pbtn" id="all-off">All off</button>
+        <button class="pbtn" id="all-on">Ignite all</button>
+        <span id="audit"></span>
+        <span class="note" id="font-status">Fonts: loading…</span>
+      </div>
+
+      <div class="sections">
+
+        <!-- ── Living room ─────────────────────────────────────────────── -->
+        <div class="section">
+          <div class="heading"><span class="kanji">居間</span><span class="title">Living room</span>
+            <span class="badges"><span class="badge"><span class="icon sm" style="--m:url(icons/thermometer.svg)"></span>21.4°</span><span class="badge"><span class="icon sm" style="--m:url(icons/water-outline.svg)"></span>46%</span></span></div>
+          <div class="grid2">
+            <ha-card class="tile" data-device="pendant" data-on="1" data-on-text="On · <span class=num>72</span><span class=unit>%</span>" data-off-text="Off" data-icon="lightbulb-outline" data-icon-on="lightbulb-on-outline" style="--sumi-seam: var(--sumi-seam-2); --tile-active-color: var(--state-light-active-color)">
+              <div class="tile-content"><div class="icon-shape"><span class="icon"></span></div><ha-tile-info><span class="primary">Pendant</span><span class="secondary"></span></ha-tile-info></div></ha-card>
+            <ha-card class="tile" data-device="shelf" data-on="0" data-on-text="On" data-off-text="Off" data-icon="lightbulb-outline" data-icon-on="lightbulb-on-outline" style="--sumi-seam: var(--sumi-seam-3); --tile-active-color: var(--state-light-active-color)">
+              <div class="tile-content"><div class="icon-shape"><span class="icon"></span></div><ha-tile-info><span class="primary">Shelf strip</span><span class="secondary"></span></ha-tile-info></div></ha-card>
+            <ha-card class="tile" data-device="media" data-on="0" data-on-text="Playing · Nils Frahm" data-off-text="Idle" data-icon="speaker" style="--sumi-seam: var(--sumi-seam-5); --tile-active-color: var(--state-media_player-active-color)">
+              <div class="tile-content"><div class="icon-shape"><span class="icon" style="--m:url(icons/speaker.svg)"></span></div><ha-tile-info><span class="primary">Mezzanine</span><span class="secondary"></span></ha-tile-info></div></ha-card>
+            <ha-card class="tile" data-device="shutter" data-on="0" data-on-text="Opening · <span class=num>40</span><span class=unit>%</span>" data-off-text="Closed" style="--sumi-seam: var(--sumi-seam-4); --tile-active-color: var(--state-cover-active-color)">
+              <div class="tile-content"><div class="icon-shape"><span class="icon" style="--m:url(icons/window-shutter.svg)"></span></div><ha-tile-info><span class="primary">Terrace shutter</span><span class="secondary"></span></ha-tile-info></div></ha-card>
+          </div>
+          <ha-card class="entity">
+            <div class="header"><span class="name">Living room temperature</span><span class="icon" style="--m:url(icons/thermometer.svg)"></span></div>
+            <div class="info"><span class="value">21.4</span><span class="measurement">°C</span></div>
+            <div class="footer">humidity <span style="font-family:var(--ha-font-family-code)">46</span>% · last changed 4 min ago</div>
+          </ha-card>
+        </div>
+
+        <!-- ── Wellness ────────────────────────────────────────────────── -->
+        <div class="section">
+          <div class="heading"><span class="kanji">湯</span><span class="title">Wellness</span></div>
+          <ha-card class="tile" data-device="sauna" data-on="0" data-on-text="Heating · <span class=num>68</span><span class=unit>°C</span> → <span class=num>85</span>" data-off-text="Off · <span class=num>24</span><span class=unit>°C</span>" style="--sumi-seam: var(--sumi-seam-1); --tile-active-color: var(--state-climate-heat-color)">
+            <div class="tile-content"><div class="icon-shape"><span class="icon" style="--m:url(icons/radiator.svg)"></span></div><ha-tile-info><span class="primary">Sauna</span><span class="secondary"></span></ha-tile-info></div>
+            <ha-gauge>
+              <svg viewBox="0 0 200 110" aria-hidden="true">
+                <path class="levels-base" d="M20 100 A80 80 0 0 1 180 100" stroke-width="10"/>
+                <path class="level" id="gauge-level" d="M20 100 A80 80 0 0 1 180 100" stroke-width="10" stroke-dasharray="45 251"/>
+                <text class="value-text" id="gauge-text" x="100" y="96" text-anchor="middle" style="font-size:36px;font-weight:300">24</text>
+                <text x="100" y="108" text-anchor="middle" style="font-size:9px;letter-spacing:.2em;fill:var(--sumi-ink-faint)">°C · TARGET 85</text>
+              </svg>
+            </ha-gauge>
+          </ha-card>
+          <div class="grid2">
+            <ha-card class="tile" data-device="hottub" data-on="0" data-on-text="Heating · <span class=num>36</span><span class=unit>°C</span>" data-off-text="Idle · <span class=num>31</span><span class=unit>°C</span>" style="--sumi-seam: var(--sumi-seam-3); --tile-active-color: var(--state-water_heater-active-color)">
+              <div class="tile-content"><div class="icon-shape"><span class="icon" style="--m:url(icons/hot-tub.svg)"></span></div><ha-tile-info><span class="primary">Hot tub</span><span class="secondary"></span></ha-tile-info></div></ha-card>
+            <ha-card class="tile" data-device="pool" data-on="0" data-on-text="Filtering" data-off-text="<span class=num>24</span><span class=unit>°C</span>" style="--sumi-seam: var(--sumi-seam-2); --tile-active-color: var(--state-valve-active-color)">
+              <div class="tile-content"><div class="icon-shape"><span class="icon" style="--m:url(icons/pool.svg)"></span></div><ha-tile-info><span class="primary">Pool</span><span class="secondary"></span></ha-tile-info></div></ha-card>
+          </div>
+          <ha-card>
+            <div class="card-header">Household</div>
+            <div class="people">
+              <span class="person" style="--p:var(--sumi-person-tomek)"><i class="seal"></i>Tomek <span class="where">home</span></span>
+              <span class="person" style="--p:var(--sumi-person-ania)"><i class="seal"></i>Ania <span class="where">home</span></span>
+              <span class="person" style="--p:var(--sumi-person-olaf)"><i class="seal"></i>Olaf <span class="where">school</span></span>
+              <span class="person away" style="--p:var(--sumi-person-zoja)"><i class="seal"></i>Zoja <span class="where">away</span></span>
+            </div>
+          </ha-card>
+        </div>
+
+        <!-- ── Garden & energy ─────────────────────────────────────────── -->
+        <div class="section">
+          <div class="heading"><span class="kanji">庭</span><span class="title">Garden</span></div>
+          <div class="grid2">
+            <ha-card class="tile" data-device="mower-back" data-on="0" data-on-text="Mowing · <span class=num>64</span><span class=unit>%</span>" data-off-text="Docked" style="--sumi-seam: var(--sumi-seam-4); --tile-active-color: var(--state-lawn_mower-active-color)">
+              <div class="tile-content"><div class="icon-shape"><span class="icon" style="--m:url(icons/robot-mower-outline.svg)"></span></div><ha-tile-info><span class="primary">Back mower</span><span class="secondary"></span></ha-tile-info></div></ha-card>
+            <ha-card class="tile" data-device="mower-front" data-on="0" data-on-text="Mowing" data-off-text="Charging · <span class=num>88</span><span class=unit>%</span>" style="--sumi-seam: var(--sumi-seam-1); --tile-active-color: var(--state-lawn_mower-active-color)">
+              <div class="tile-content"><div class="icon-shape"><span class="icon" style="--m:url(icons/robot-mower-outline.svg)"></span></div><ha-tile-info><span class="primary">Front mower</span><span class="secondary"></span></ha-tile-info></div></ha-card>
+            <ha-card class="tile" data-device="sprinklers" data-on="0" data-on-text="Open · zone <span class=num>2</span>" data-off-text="Closed" style="--sumi-seam: var(--sumi-seam-5); --tile-active-color: var(--state-valve-active-color)">
+              <div class="tile-content"><div class="icon-shape"><span class="icon" style="--m:url(icons/sprinkler-variant.svg)"></span></div><ha-tile-info><span class="primary">Sprinklers</span><span class="secondary"></span></ha-tile-info></div></ha-card>
+            <ha-card class="tile" data-device="lock" data-on="0" data-on-text="Unlocked" data-off-text="Locked" style="--tile-active-color: var(--state-lock-unlocked-color); --tile-color: var(--state-lock-locked-color)">
+              <div class="tile-content"><div class="icon-shape"><span class="icon" style="--m:url(icons/lock-outline.svg)"></span></div><ha-tile-info><span class="primary">Front door</span><span class="secondary"></span></ha-tile-info></div></ha-card>
+          </div>
+          <ha-card class="tile" data-device="solar" data-on="1" data-on-text="Producing" data-off-text="Night · <span class=num>0</span><span class=unit>W</span>" style="--sumi-seam: var(--sumi-seam-3); --tile-active-color: var(--energy-solar-color)">
+            <div class="tile-content"><div class="icon-shape"><span class="icon" style="--m:url(icons/solar-power-variant-outline.svg)"></span></div><ha-tile-info><span class="primary">Solar</span><span class="secondary"></span></ha-tile-info></div>
+            <div class="energy">
+              <div class="node"><span class="k">solar</span><span class="v">3.2<small>kW</small></span><span class="bar" style="--c:var(--energy-solar-color);--w:64%"><i></i></span></div>
+              <div class="node"><span class="k">grid</span><span class="v">0.4<small>kW</small></span><span class="bar" style="--c:var(--energy-grid-consumption-color);--w:12%"><i></i></span></div>
+              <div class="node"><span class="k">return</span><span class="v">1.1<small>kW</small></span><span class="bar" style="--c:var(--energy-grid-return-color);--w:30%"><i></i></span></div>
+              <div class="node"><span class="k">battery</span><span class="v">86<small>%</small></span><span class="bar" style="--c:var(--energy-battery-in-color);--w:86%"><i></i></span></div>
+            </div>
+          </ha-card>
+          <div class="grid2">
+            <ha-card class="tile" data-device="washer" data-on="0" data-on-text="Washing · <span class=num>0:42</span> left" data-off-text="Done" style="--sumi-seam: var(--sumi-seam-2); --tile-active-color: var(--state-switch-active-color)">
+              <div class="tile-content"><div class="icon-shape"><span class="icon" style="--m:url(icons/washing-machine.svg)"></span></div><ha-tile-info><span class="primary">Washer</span><span class="secondary"></span></ha-tile-info></div></ha-card>
+            <ha-card class="tile" data-device="vacuum" data-on="0" data-on-text="Cleaning · kitchen" data-off-text="Docked" style="--sumi-seam: var(--sumi-seam-4); --tile-active-color: var(--state-vacuum-active-color)">
+              <div class="tile-content"><div class="icon-shape"><span class="icon" style="--m:url(icons/robot-vacuum.svg)"></span></div><ha-tile-info><span class="primary">Vacuum</span><span class="secondary"></span></ha-tile-info></div></ha-card>
+          </div>
+        </div>
+
+        <!-- ── Type ────────────────────────────────────────────────────── -->
+        <div class="section">
+          <div class="heading"><span class="kanji">字</span><span class="title">Type</span></div>
+          <ha-card>
+            <div class="specimen">
+              <div class="display"><span class="k">墨の家</span>Sumi House</div>
+              <div class="row"><span class="label">display · mincho</span><div style="font-family:var(--ha-font-family-heading);font-size:var(--ha-font-size-xl);letter-spacing:.02em">Zażółć gęślą jaźń · Łódź, Wielkopolska</div></div>
+              <div class="row"><span class="label">ui · kaku gothic</span><div class="ui">Pralka skończy za czterdzieści minut. <span class="light">Kosiarka wraca do stacji, gdy zaczyna padać.</span><div class="weights"><span style="font-weight:300">light 300</span><span style="font-weight:400">normal 400</span><span style="font-weight:500">medium 500</span><span style="font-weight:600">bold 600 → 500 face</span></div></div></div>
+              <div class="row"><span class="label">data · plex mono</span><div class="mono"><span class="hero">21.4<small>°C</small></span><span>3.20 kW · 0.42 kW · 1.10 kW</span><span>12:07 · 00:42 remaining · 88 %</span><span>1 234 567,89 <span class="unit">PLN</span></span></div></div>
+            </div>
+          </ha-card>
+        </div>
+
+        <!-- ── Components ──────────────────────────────────────────────── -->
+        <div class="section">
+          <div class="heading"><span class="kanji">具</span><span class="title">Components</span></div>
+          <ha-card>
+            <div class="controls">
+              <div class="row"><span class="label">switch</span><span class="ha-switch checked" role="switch"></span><span class="ha-switch" role="switch"></span></div>
+              <div class="row"><span class="label">slider</span><input class="ha-slider" type="range" min="0" max="100" value="62"></div>
+              <div class="row"><span class="label">buttons</span><button class="ha-button primary">Turn on</button><button class="ha-button outlined">Details</button><button class="ha-button text">Cancel</button><button class="ha-button neutral">Neutral</button><button class="ha-button danger">Delete</button><button class="ha-button primary" disabled>Disabled</button></div>
+              <div class="row"><span class="label">chips</span><span class="chip active" data-toggle>Evening</span><span class="chip" data-toggle>Cinema</span><span class="chip outlined" data-toggle>Night</span></div>
+              <div class="row"><span class="label">inputs</span><span class="textfield"><label>Name</label><input value="Sauna heat-up"></span><span class="textfield outlined"><label>Target</label><input value="85"></span></div>
+              <div class="row"><span class="label">selection</span><span class="checkbox checked"><i></i>Notify Tomek</span><span class="checkbox"><i></i>Notify Ania</span><span class="checkbox radio checked"><i></i>Auto</span><span class="checkbox radio"><i></i>Manual</span></div>
+              <div class="row"><span class="label">badges</span><span class="badge-row">
+                <span class="ha-badge" style="--badge-color:var(--state-person-home-color)"><span class="icon sm" style="--m:url(icons/account-outline.svg)"></span><span class="info"><span class="label">Tomek</span><span class="content">Home</span></span></span>
+                <span class="ha-badge" style="--badge-color:var(--state-sensor-battery-low-color)"><span class="icon sm" style="--m:url(icons/battery-outline.svg)"></span><span class="info"><span class="label">Mower</span><span class="content">14%</span></span></span>
+                <span class="ha-badge"><span class="icon sm" style="--m:url(icons/weather-partly-cloudy.svg)"></span><span class="info"><span class="label">Outside</span><span class="content">17.2°</span></span></span></span></div>
+              <div class="row"><span class="label">alerts</span></div>
+              <div class="alert" style="--a:var(--error-color)"><span class="icon sm" style="--m:url(icons/flash-outline.svg)"></span><div><b>Leak</b> detected under the washer.</div></div>
+              <div class="alert" style="--a:var(--warning-color)"><span class="icon sm" style="--m:url(icons/battery-outline.svg)"></span><div><b>Battery low</b> · back mower 14%.</div></div>
+              <div class="alert" style="--a:var(--success-color)"><span class="icon sm" style="--m:url(icons/lock-outline.svg)"></span><div><b>Armed</b> · all doors locked.</div></div>
+              <div class="alert" style="--a:var(--info-color)"><span class="icon sm" style="--m:url(icons/history.svg)"></span><div><b>Update</b> available for the frontend.</div></div>
+              <div class="row"><span class="label">dialog</span><button class="ha-button outlined" id="open-dialog">Open more-info</button></div>
+            </div>
+          </ha-card>
+        </div>
+
+        <!-- ── Data ────────────────────────────────────────────────────── -->
+        <div class="section">
+          <div class="heading"><span class="kanji">数</span><span class="title">Data</span></div>
+          <ha-card>
+            <div class="card-header">Energy today</div>
+            <div class="chart">
+              <svg viewBox="0 0 400 150" preserveAspectRatio="none">
+                <g class="grid"><line x1="0" y1="30" x2="400" y2="30"/><line x1="0" y1="70" x2="400" y2="70"/><line x1="0" y1="110" x2="400" y2="110"/></g>
+                <path d="M0 140 C60 138 90 60 150 40 S250 30 300 45 S360 120 400 135" fill="none" stroke="var(--graph-color-1)" stroke-width="1.5"/>
+                <path d="M0 120 C70 118 110 105 160 100 S260 95 310 90 S370 100 400 105" fill="none" stroke="var(--graph-color-2)" stroke-width="1.5"/>
+                <path d="M0 145 C60 145 120 130 180 120 S260 100 320 95 S370 110 400 125" fill="none" stroke="var(--graph-color-3)" stroke-width="1.5"/>
+                <path d="M0 135 C50 130 100 125 150 128 S250 130 300 128 S360 130 400 132" fill="none" stroke="var(--graph-color-4)" stroke-width="1.5" stroke-dasharray="3 3"/>
+                <text x="4" y="26">3 kW</text><text x="4" y="66">2 kW</text><text x="4" y="106">1 kW</text>
+                <text x="0" y="149">06:00</text><text x="190" y="149">12:00</text><text x="368" y="149">18:00</text>
+              </svg>
+              <div class="legend"><span><i style="--c:var(--graph-color-1)"></i>Solar</span><span><i style="--c:var(--graph-color-2)"></i>Grid</span><span><i style="--c:var(--graph-color-3)"></i>Return</span><span><i style="--c:var(--graph-color-4)"></i>Battery</span><span><i style="--c:var(--graph-color-5)"></i>Gas</span><span><i style="--c:var(--graph-color-6)"></i>Water</span><span><i style="--c:var(--graph-color-7)"></i>7</span><span><i style="--c:var(--graph-color-8)"></i>8</span><span><i style="--c:var(--graph-color-9)"></i>9</span><span><i style="--c:var(--graph-color-10)"></i>10</span></div>
+            </div>
+          </ha-card>
+          <ha-card>
+            <table class="data-table">
+              <thead><tr><th>Device</th><th>State</th><th style="text-align:right">Power</th><th style="text-align:right">Today</th></tr></thead>
+              <tbody>
+                <tr><td><i class="dot" style="--c:var(--state-active-color)"></i>Pendant</td><td>on</td><td class="num">42 W</td><td class="num">0.31 kWh</td></tr>
+                <tr><td><i class="dot" style="--c:var(--state-inactive-color)"></i>Sauna</td><td>off</td><td class="num">0 W</td><td class="num">6.80 kWh</td></tr>
+                <tr><td><i class="dot" style="--c:var(--state-vacuum-active-color)"></i>Vacuum</td><td>cleaning</td><td class="num">38 W</td><td class="num">0.12 kWh</td></tr>
+                <tr><td><i class="dot" style="--c:var(--state-unavailable-color)"></i>Garage cam</td><td>unavailable</td><td class="num">—</td><td class="num">—</td></tr>
+              </tbody>
+            </table>
+          </ha-card>
+          <ha-card>
+            <div class="card-header">YAML editor</div>
+            <div class="card-content"><div class="codemirror"><span class="prop">type</span>: <span class="str">tile</span>
+<span class="prop">entity</span>: <span class="str">light.living_room_pendant</span>
+<span class="prop">card_mod</span>:
+  <span class="prop">style</span>: <span class="kw">|</span>
+    <span class="cm"># copper only while the light is on</span>
+    ha-card {
+      --sumi-seam-opacity: {{ <span class="num">1</span> <span class="kw">if</span> is_state(config.entity, <span class="str">'on'</span>) <span class="kw">else</span> <span class="num">0</span> }};
+    }
+<span class="prop">features_position</span>: <span class="atom">bottom</span></div></div>
+          </ha-card>
+        </div>
+
+        <!-- ── Palette & state colours ─────────────────────────────────── -->
+        <div class="section wide">
+          <div class="heading"><span class="kanji">色</span><span class="title">Palette</span></div>
+          <ha-card>
+            <div class="swatches">
+              <div class="swatch" data-token="sumi-ground"><i style="--c:var(--sumi-ground)"></i><b>ground</b><code></code></div>
+              <div class="swatch" data-token="sumi-view"><i style="--c:var(--sumi-view)"></i><b>view</b><code></code></div>
+              <div class="swatch" data-token="sumi-surface"><i style="--c:var(--sumi-surface)"></i><b>surface</b><code></code></div>
+              <div class="swatch" data-token="sumi-surface-raised"><i style="--c:var(--sumi-surface-raised)"></i><b>raised</b><code></code></div>
+              <div class="swatch" data-token="sumi-line"><i style="--c:var(--sumi-line)"></i><b>line</b><code></code></div>
+              <div class="swatch" data-token="sumi-muted"><i style="--c:var(--sumi-muted)"></i><b>muted</b><code></code></div>
+              <div class="swatch" data-token="sumi-ink"><i style="--c:var(--sumi-ink)"></i><b>ink</b><code></code></div>
+              <div class="swatch" data-token="sumi-ink-soft"><i style="--c:var(--sumi-ink-soft)"></i><b>ink soft</b><code></code></div>
+              <div class="swatch" data-token="sumi-ink-faint"><i style="--c:var(--sumi-ink-faint)"></i><b>ink faint</b><code></code></div>
+              <div class="swatch" data-token="sumi-ink-disabled"><i style="--c:var(--sumi-ink-disabled)"></i><b>ink disabled</b><code></code></div>
+              <div class="swatch" data-token="sumi-copper"><i style="--c:var(--sumi-copper)"></i><b>copper</b><code></code></div>
+              <div class="swatch" data-token="sumi-copper-glow"><i style="--c:var(--sumi-copper-glow)"></i><b>copper glow</b><code></code></div>
+              <div class="swatch" data-token="sumi-copper-deep"><i style="--c:var(--sumi-copper-deep)"></i><b>copper deep</b><code></code></div>
+              <div class="swatch" data-token="sumi-oak"><i style="--c:var(--sumi-oak)"></i><b>oak</b><code></code></div>
+              <div class="swatch" data-token="sumi-moss"><i style="--c:var(--sumi-moss)"></i><b>moss</b><code></code></div>
+              <div class="swatch" data-token="sumi-mizu"><i style="--c:var(--sumi-mizu)"></i><b>mizu</b><code></code></div>
+              <div class="swatch" data-token="sumi-stone"><i style="--c:var(--sumi-stone)"></i><b>stone</b><code></code></div>
+              <div class="swatch" data-token="sumi-alert"><i style="--c:var(--sumi-alert)"></i><b>alert</b><code></code></div>
+              <div class="swatch" data-token="sumi-caution"><i style="--c:var(--sumi-caution)"></i><b>caution</b><code></code></div>
+              <div class="swatch" data-token="sumi-ok"><i style="--c:var(--sumi-ok)"></i><b>ok</b><code></code></div>
+              <div class="swatch" data-token="sumi-info"><i style="--c:var(--sumi-info)"></i><b>info</b><code></code></div>
+              <div class="swatch" data-token="ha-color-primary-70"><i style="--c:var(--ha-color-primary-70)"></i><b>primary-70 (ramp)</b><code></code></div>
+              <div class="swatch" data-token="ha-color-fill-primary-normal-resting"><i style="--c:var(--ha-color-fill-primary-normal-resting)"></i><b>fill primary</b><code></code></div>
+              <div class="swatch" data-token="ha-color-fill-neutral-normal-resting"><i style="--c:var(--ha-color-fill-neutral-normal-resting)"></i><b>fill neutral</b><code></code></div>
+            </div>
+            <div class="heading" style="padding-left:var(--ha-space-4)"><span class="kanji">態</span><span class="title" style="font-size:var(--ha-font-size-l)">State colours</span></div>
+            <div class="states">
+              <div class="state" style="--c:var(--state-light-active-color)"><span class="icon" style="--m:url(icons/lightbulb-on-outline.svg)"></span>light on</div>
+              <div class="state" style="--c:var(--state-inactive-color)"><span class="icon" style="--m:url(icons/lightbulb-outline.svg)"></span>light off</div>
+              <div class="state" style="--c:var(--state-climate-heat-color)"><span class="icon" style="--m:url(icons/radiator.svg)"></span>heating</div>
+              <div class="state" style="--c:var(--state-climate-cool-color)"><span class="icon" style="--m:url(icons/thermometer.svg)"></span>cooling</div>
+              <div class="state" style="--c:var(--state-media_player-active-color)"><span class="icon" style="--m:url(icons/speaker.svg)"></span>playing</div>
+              <div class="state" style="--c:var(--state-vacuum-active-color)"><span class="icon" style="--m:url(icons/robot-vacuum.svg)"></span>cleaning</div>
+              <div class="state" style="--c:var(--state-lawn_mower-active-color)"><span class="icon" style="--m:url(icons/robot-mower-outline.svg)"></span>mowing</div>
+              <div class="state" style="--c:var(--state-valve-active-color)"><span class="icon" style="--m:url(icons/sprinkler-variant.svg)"></span>valve open</div>
+              <div class="state" style="--c:var(--state-lock-locked-color)"><span class="icon" style="--m:url(icons/lock-outline.svg)"></span>locked</div>
+              <div class="state" style="--c:var(--state-lock-unlocked-color)"><span class="icon" style="--m:url(icons/lock-outline.svg)"></span>unlocked</div>
+              <div class="state" style="--c:var(--state-alarm_control_panel-triggered-color)"><span class="icon" style="--m:url(icons/flash-outline.svg)"></span>triggered</div>
+              <div class="state" style="--c:var(--state-person-home-color)"><span class="icon" style="--m:url(icons/account-outline.svg)"></span>person home</div>
+              <div class="state" style="--c:var(--state-update-active-color)"><span class="icon" style="--m:url(icons/history.svg)"></span>update</div>
+              <div class="state" style="--c:var(--state-unavailable-color)"><span class="icon" style="--m:url(icons/cctv.svg)"></span>unavailable</div>
+              <div class="state" style="--c:var(--energy-grid-consumption-color)"><span class="icon" style="--m:url(icons/transmission-tower.svg)"></span>grid</div>
+              <div class="state" style="--c:var(--energy-solar-color)"><span class="icon" style="--m:url(icons/solar-power-variant-outline.svg)"></span>solar</div>
+            </div>
+          </ha-card>
+        </div>
+
+      </div>
+    </hui-view>
+  </hui-root>
+</div>
+
+<!-- more-info dialog -->
+<div class="scrim" id="scrim" hidden>
+  <div class="dialog" role="dialog" aria-modal="true">
+    <div class="dialog-header"><button class="icon-button" data-close title="close"><span class="icon" style="--m:url(icons/menu.svg)"></span></button><h2>Sauna</h2><button class="icon-button" title="settings"><span class="icon" style="--m:url(icons/cog-outline.svg)"></span></button></div>
+    <div class="state-header"><div class="state">68<span style="font-size:var(--ha-font-size-l);color:var(--secondary-text-color)"> °C</span></div><div class="last-changed">heating for 14 minutes</div></div>
+    <div class="dialog-content">
+      <input class="ha-slider" type="range" min="40" max="100" value="85" style="width:100%">
+      <div class="attributes"><span>Target</span><span class="num">85 °C</span><span>Mode</span><span>heat</span><span>Bench light</span><span>on</span><span>Playlist</span><span>Onsen ambient</span></div>
+    </div>
+    <div class="dialog-actions"><button class="ha-button text" data-close>Close</button><button class="ha-button primary" data-close>Turn off</button></div>
+  </div>
+</div>
+
+<script src="mock.js"></script>
+</body>
+</html>

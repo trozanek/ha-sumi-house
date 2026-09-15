@@ -1,0 +1,20 @@
+# The frontend: block Sumi House needs. Merge into your configuration.yaml.
+frontend:
+  # Every *.yaml in /config/themes/ becomes a theme — sumi_house.yaml among them.
+  themes: !include_dir_merge_named themes/
+  # Theme YAML cannot declare @font-face; this module injects the self-hosted fonts.
+  extra_module_url:
+    - /local/sumi-house/sumi-fonts.js
+
+# Optional: make the theme the default on every device at startup.
+# (Theme selection is otherwise per browser profile.)
+# automation:
+#   - alias: Sumi House theme on start
+#     triggers:
+#       - trigger: homeassistant
+#         event: start
+#     actions:
+#       - action: frontend.set_theme
+#         data:
+#           name: Sumi House
+#           mode: dark   # or omit to follow each device's light/dark setting
