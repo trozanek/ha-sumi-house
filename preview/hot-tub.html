@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en" data-mode="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sumi-hot-tub-card · harness</title>
+<link rel="stylesheet" href="mock.css">
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="cardmod.css" id="cardmod-css">
+<script type="module" src="/local/sumi-house/sumi-fonts.js"></script>
+<style>
+  .harness { max-width: 1100px; margin: 0 auto; padding: 24px 16px 48px; display: grid; gap: 16px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; align-items: start; }
+  .log { font-family: var(--ha-font-family-code); font-size: 11px; color: var(--secondary-text-color); background: var(--sumi-ground); border: 1px solid var(--divider-color); border-radius: var(--ha-border-radius-sm); padding: 10px 12px; max-height: 180px; overflow: auto; white-space: pre-wrap; }
+  .log b { color: var(--sumi-copper-glow); font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="frame">
+  <hui-root style="flex:1">
+    <div class="header"><div class="toolbar"><div class="main-title">sumi-hot-tub-card · harness</div></div></div>
+    <hui-view>
+      <div class="harness">
+        <div class="preview-bar">
+          <button class="pbtn" id="mode-toggle" aria-pressed="false"><span class="t">Dark · 墨</span></button>
+          <button class="pbtn" id="sim-heat">Simulate heat-up</button>
+          <button class="pbtn" id="sim-bubbles">Toggle bubbles</button>
+          <button class="pbtn" id="sim-manual">Nudge target (manual override)</button>
+          <button class="pbtn" id="sim-overdue">Make filter overdue</button>
+          <span class="note">Fake hass: every action is logged below and applied to the fake state, so the card round-trips like it would in HA. Sauna sits alongside for a side-by-side check (spec §2).</span>
+        </div>
+        <div class="cards">
+          <sumi-hot-tub-card id="tub"></sumi-hot-tub-card>
+          <sumi-sauna-card id="sauna"></sumi-sauna-card>
+        </div>
+        <div class="log" id="log"></div>
+      </div>
+    </hui-view>
+  </hui-root>
+</div>
+<script type="module" src="/local/sumi-house/cards/sumi-hot-tub-card.js"></script>
+<script type="module" src="/local/sumi-house/cards/sumi-sauna-card.js"></script>
+<script type="module" src="hot-tub-harness.js"></script>
+</body>
+</html>

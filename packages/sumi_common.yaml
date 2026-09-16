@@ -1,0 +1,18 @@
+# ═══════════════════════════════════════════════════════════════════════════
+#  Sumi House · Common
+#  House-wide values every other package reads. One number, one place.
+#
+#  Install:  /config/packages/sumi_common.yaml
+# ═══════════════════════════════════════════════════════════════════════════
+
+input_number:
+  energy_price:
+    name: Energy price
+    min: 0
+    max: 5
+    step: 0.01
+    unit_of_measurement: PLN/kWh
+    mode: box
+    icon: mdi:cash
+    # Set to 0.98 on first run. Every synthetic cost sensor in the house
+    # multiplies by this — change it here when the tariff changes, nowhere else.

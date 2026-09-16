@@ -1,0 +1,181 @@
+# ═══════════════════════════════════════════════════════════════════════════
+#  Sumi House · Hot tub package
+#  Everything sumi-hot-tub-card needs beyond the controller itself: the daily
+#  schedule, its enable switch, a `binary_sensor.hot_tub_heating` alias the card
+#  reads by that fixed name, and cost (wrapped in utility_meter — the Bestway
+#  MQTT bridge only exposes a lifetime energy total, not monthly/yearly).
+#
+#  Install:  /config/packages/sumi_hot_tub.yaml
+#  Requires: packages/sumi_common.yaml  (input_number.energy_price)
+#
+#  ── Bound to the live Bestway/Lay-Z-Spa MQTT integration (verified against
+#     the instance on 2026-09-17 — adjust here if the entity ids ever change). ──
+#    climate.layzspa_sterowanie_temperatura   temperature, current + target
+#    switch.layzspa_regulacja_grzania         heater (the persistent toggle —
+#                                              not switch.layzspa_przycisk_grzalki,
+#                                              which is a momentary button)
+#    switch.layzspa_pompa                     circulation pump
+#    switch.layzspa_babelki                   bubbles
+#    binary_sensor.layzspa_grzalka            the device's own "element firing"
+#                                              sensor (device_class heat) — used
+#                                              directly, no heuristic needed
+#    sensor.layzspa_energia                   lifetime kWh, state_class total_increasing
+#
+#  Service tracking lives entirely on the controller — four "days since" sensors
+#  and four reset buttons, wired straight into the card's config (not this
+#  package). Real ids and real intervals: see examples/hot-tub-card.yaml.
+#
+#  No light: switch.layzspa_jasnosc / number entities describe brightness only,
+#  and the one nearby ZHA light (light.porch_led_5_hottub_light) is unavailable —
+#  the card's light row stays unconfigured until a real light.* entity exists.
+#
+#  No `initial:` is set on any helper on purpose — HA restores the last value
+#  across restarts, and an `initial:` would stamp on your edits every reboot.
+#  Set the starting values once from the UI; see docs/cards/hot-tub.md §9.
+# ═══════════════════════════════════════════════════════════════════════════
+
+input_boolean:
+  tub_schedule_enabled:
+    name: Hot tub schedule
+    icon: mdi:calendar-clock
+
+# ───────────────────────────────────────────────────────────────────────────
+#  The daily schedule — four setpoints, the same every day.
+#  A slot is a time and the temperature that holds from that time until the
+#  next slot. The heater is never scheduled off: a hot tub cools by lowering
+#  its setpoint, not by killing the heater.
+#
+#  Suggested starting values:
+#    1  06:00  36.0    morning eco
+#    2  14:00  37.5    afternoon warm-up
+#    3  17:30  38.5    evening
+#    4  22:30  35.0    overnight drop
+# ───────────────────────────────────────────────────────────────────────────
+input_datetime:
+  tub_slot_1_time: { name: Hot tub slot 1 time, has_date: false, has_time: true }
+  tub_slot_2_time: { name: Hot tub slot 2 time, has_date: false, has_time: true }
+  tub_slot_3_time: { name: Hot tub slot 3 time, has_date: false, has_time: true }
+  tub_slot_4_time: { name: Hot tub slot 4 time, has_date: false, has_time: true }
+
+input_number:
+  tub_slot_1_temp: { name: Hot tub slot 1 temperature, min: 20, max: 40, step: 0.5, unit_of_measurement: "°C", mode: box }
+  tub_slot_2_temp: { name: Hot tub slot 2 temperature, min: 20, max: 40, step: 0.5, unit_of_measurement: "°C", mode: box }
+  tub_slot_3_temp: { name: Hot tub slot 3 temperature, min: 20, max: 40, step: 0.5, unit_of_measurement: "°C", mode: box }
+  tub_slot_4_temp: { name: Hot tub slot 4 temperature, min: 20, max: 40, step: 0.5, unit_of_measurement: "°C", mode: box }
+
+template:
+  - binary_sensor:
+      # The card reads this fixed name; the Bestway bridge already computes
+      # "element actually firing" itself (binary_sensor.layzspa_grzalka), so
+      # this is a plain alias, not the heuristic other controllers need.
+      - name: Hot tub heating
+        unique_id: sumi_tub_heating
+        device_class: heat
+        availability: >
+          {{ states('binary_sensor.layzspa_grzalka') not in ['unknown', 'unavailable'] }}
+        state: "{{ is_state('binary_sensor.layzspa_grzalka', 'on') }}"
+
+  - sensor:
+      # Which setpoint the schedule says should be in effect right now.
+      # Contains now(), so HA re-renders it at the top of every minute.
+      # Single definition — the automation reads this rather than repeating
+      # the slot-picking logic.
+      - name: Hot tub scheduled temperature
+        unique_id: sumi_tub_scheduled_temperature
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state: >
+          {% set now_s = now().strftime('%H:%M:%S') %}
+          {% set past = namespace(t=none, at='') %}
+          {% set last = namespace(t=none, at='') %}
+          {% for i in range(1, 5) %}
+            {% set at = states('input_datetime.tub_slot_' ~ i ~ '_time') %}
+            {% set temp = states('input_number.tub_slot_' ~ i ~ '_temp') %}
+            {% if at not in ['unknown', 'unavailable'] %}
+              {% if at <= now_s and at >= past.at %}
+                {% set past.at = at %}{% set past.t = temp %}
+              {% endif %}
+              {% if at >= last.at %}
+                {% set last.at = at %}{% set last.t = temp %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {# before the day's first slot, yesterday's last slot is still in force #}
+          {{ (past.t if past.t is not none else last.t) | float(38) }}
+
+      - name: Hot tub cost monthly
+        unique_id: sumi_tub_cost_monthly
+        unit_of_measurement: PLN
+        device_class: monetary
+        state_class: total
+        availability: >
+          {{ states('sensor.hot_tub_energy_monthly') not in ['unknown', 'unavailable'] }}
+        state: >
+          {{ (states('sensor.hot_tub_energy_monthly') | float(0)
+              * states('input_number.energy_price') | float(0.98)) | round(2) }}
+
+      - name: Hot tub cost yearly
+        unique_id: sumi_tub_cost_yearly
+        unit_of_measurement: PLN
+        device_class: monetary
+        state_class: total
+        availability: >
+          {{ states('sensor.hot_tub_energy_yearly') not in ['unknown', 'unavailable'] }}
+        state: >
+          {{ (states('sensor.hot_tub_energy_yearly') | float(0)
+              * states('input_number.energy_price') | float(0.98)) | round(2) }}
+
+# ───────────────────────────────────────────────────────────────────────────
+#  Cost — the Bestway bridge exposes sensor.layzspa_energia as a lifetime total
+#  (state_class total_increasing) and its own sensor.layzspa_koszt_energii, but
+#  that one has no monthly/yearly split either. Same fix as the sauna package:
+#  wrap the lifetime energy total in utility_meter, then price it here so the
+#  house's one shared tariff (packages/sumi_common.yaml) stays the single
+#  source of truth — the device's own price number is left alone, unused.
+# ───────────────────────────────────────────────────────────────────────────
+utility_meter:
+  hot_tub_energy_monthly:
+    name: Hot tub energy monthly
+    source: sensor.layzspa_energia
+    cycle: monthly
+
+  hot_tub_energy_yearly:
+    name: Hot tub energy yearly
+    source: sensor.layzspa_energia
+    cycle: yearly
+
+# ───────────────────────────────────────────────────────────────────────────
+#  One automation runs the whole schedule. It fires at each slot time, and
+#  again the moment the schedule is switched back on, so enabling it at 15:00
+#  applies the 14:00 setpoint immediately instead of waiting for 17:30.
+# ───────────────────────────────────────────────────────────────────────────
+automation:
+  - id: sumi_tub_apply_schedule
+    alias: Hot tub · apply the scheduled setpoint
+    mode: single
+    triggers:
+      - trigger: time
+        at:
+          - input_datetime.tub_slot_1_time
+          - input_datetime.tub_slot_2_time
+          - input_datetime.tub_slot_3_time
+          - input_datetime.tub_slot_4_time
+      - trigger: state
+        entity_id: input_boolean.tub_schedule_enabled
+        to: "on"
+    conditions:
+      - condition: state
+        entity_id: input_boolean.tub_schedule_enabled
+        state: "on"
+      - condition: template
+        value_template: >
+          {{ states('sensor.hot_tub_scheduled_temperature') | float(0) > 0 }}
+    actions:
+      - action: climate.set_temperature
+        target:
+          entity_id: climate.layzspa_sterowanie_temperatura
+        data:
+          temperature: "{{ states('sensor.hot_tub_scheduled_temperature') | float(38) }}"
+      - action: switch.turn_on
+        target:
+          entity_id: switch.layzspa_regulacja_grzania

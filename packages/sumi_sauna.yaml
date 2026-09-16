@@ -1,0 +1,227 @@
+# ═══════════════════════════════════════════════════════════════════════════
+#  Sumi House · Sauna package
+#  Everything sumi-sauna-card needs that the BleBox saunaBox does not provide:
+#  session timer, heating detection, and synthetic energy / cost accounting.
+#
+#  Install:  /config/packages/sumi_sauna.yaml
+#            homeassistant:
+#              packages: !include_dir_named packages
+#
+#  Replace climate.sauna with your own entity id if it differs.
+# ═══════════════════════════════════════════════════════════════════════════
+
+input_number:
+  sauna_heater_power:
+    name: Sauna heater power
+    min: 1
+    max: 24
+    step: 0.5
+    unit_of_measurement: kW
+    mode: box
+    icon: mdi:radiator
+
+input_select:
+  sauna_session_length:
+    name: Sauna session length
+    options: ["60", "90", "120"]
+    icon: mdi:timer-outline
+
+input_datetime:
+  sauna_session_started:
+    name: Sauna session started
+    has_date: true
+    has_time: true
+
+timer:
+  sauna_session:
+    name: Sauna session
+    duration: "01:30:00"
+    restore: true
+
+# ───────────────────────────────────────────────────────────────────────────
+#  Heating detection
+#  saunaBox exposes hvac_action on most firmwares. When it does not, fall back
+#  to "mode is heat AND we are more than 1 degree below target", which tracks
+#  the element closely enough for cost purposes.
+# ───────────────────────────────────────────────────────────────────────────
+template:
+  - binary_sensor:
+      - name: Sauna heating
+        unique_id: sumi_sauna_heating
+        device_class: heat
+        availability: >
+          {{ states('climate.sauna') not in ['unknown', 'unavailable'] }}
+        state: >
+          {% set e = 'climate.sauna' %}
+          {% set action = state_attr(e, 'hvac_action') %}
+          {% if action is not none %}
+            {{ action == 'heating' }}
+          {% else %}
+            {{ is_state(e, 'heat')
+               and state_attr(e, 'current_temperature') | float(0)
+                   < state_attr(e, 'temperature') | float(0) - 1 }}
+          {% endif %}
+
+  - sensor:
+      # Synthetic power draw. The element is either on at its rated load or off.
+      - name: Sauna power
+        unique_id: sumi_sauna_power
+        unit_of_measurement: W
+        device_class: power
+        state_class: measurement
+        availability: >
+          {{ states('binary_sensor.sauna_heating') not in ['unknown', 'unavailable'] }}
+        state: >
+          {{ (states('input_number.sauna_heater_power') | float(9) * 1000)
+             if is_state('binary_sensor.sauna_heating', 'on') else 0 }}
+
+      - name: Sauna cost monthly
+        unique_id: sumi_sauna_cost_monthly
+        unit_of_measurement: PLN
+        device_class: monetary
+        state_class: total
+        state: >
+          {{ (states('sensor.sauna_energy_monthly') | float(0)
+              * states('input_number.energy_price') | float(0.98)) | round(2) }}
+
+      - name: Sauna cost yearly
+        unique_id: sumi_sauna_cost_yearly
+        unit_of_measurement: PLN
+        device_class: monetary
+        state_class: total
+        state: >
+          {{ (states('sensor.sauna_energy_yearly') | float(0)
+              * states('input_number.energy_price') | float(0.98)) | round(2) }}
+
+# ───────────────────────────────────────────────────────────────────────────
+#  Energy
+#  Left Riemann sum is the correct method for a step function: the element
+#  holds its value until the next state change. max_sub_interval keeps the
+#  integral advancing during a long unbroken heating run.
+# ───────────────────────────────────────────────────────────────────────────
+sensor:
+  - platform: integration
+    source: sensor.sauna_power
+    name: Sauna energy
+    unique_id: sumi_sauna_energy
+    unit_prefix: k
+    unit_time: h
+    method: left
+    max_sub_interval: "00:01:00"
+    round: 3
+
+  - platform: history_stats
+    name: Sauna hours monthly
+    unique_id: sumi_sauna_hours_monthly
+    entity_id: binary_sensor.sauna_heating
+    state: "on"
+    type: time
+    start: "{{ today_at().replace(day=1) }}"
+    end: "{{ now() }}"
+
+utility_meter:
+  sauna_energy_monthly:
+    name: Sauna energy monthly
+    source: sensor.sauna_energy
+    cycle: monthly
+
+  sauna_energy_yearly:
+    name: Sauna energy yearly
+    source: sensor.sauna_energy
+    cycle: yearly
+
+# ───────────────────────────────────────────────────────────────────────────
+#  Session length
+#  The card writes input_select.sauna_session_length; these automations turn
+#  that selection into a real auto-off. The timer is the single source of
+#  truth for "how long until the heater cuts out", and the card reads it.
+# ───────────────────────────────────────────────────────────────────────────
+automation:
+  - id: sumi_sauna_session_start
+    alias: Sauna · start session timer
+    description: Heater turned on — stamp the start time and run the countdown.
+    mode: single
+    triggers:
+      - trigger: state
+        entity_id: climate.sauna
+        to: heat
+    actions:
+      - action: input_datetime.set_datetime
+        target:
+          entity_id: input_datetime.sauna_session_started
+        data:
+          timestamp: "{{ now().timestamp() | int }}"
+      - action: timer.start
+        target:
+          entity_id: timer.sauna_session
+        data:
+          duration: "{{ states('input_select.sauna_session_length') | int(90) * 60 }}"
+
+  - id: sumi_sauna_session_finished
+    alias: Sauna · auto-off when the session ends
+    description: The countdown ran out — cut the heater.
+    mode: single
+    triggers:
+      - trigger: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.sauna_session
+    actions:
+      - action: climate.set_hvac_mode
+        target:
+          entity_id: climate.sauna
+        data:
+          hvac_mode: "off"
+
+  - id: sumi_sauna_session_cancelled
+    alias: Sauna · cancel the timer when turned off by hand
+    mode: single
+    triggers:
+      - trigger: state
+        entity_id: climate.sauna
+        to: "off"
+    conditions:
+      - condition: not
+        conditions:
+          - condition: state
+            entity_id: timer.sauna_session
+            state: idle
+    actions:
+      - action: timer.cancel
+        target:
+          entity_id: timer.sauna_session
+
+  - id: sumi_sauna_session_relength
+    alias: Sauna · re-length a session already running
+    description: >
+      Changing the length mid-session keeps the original start time, so picking
+      90m twenty minutes in leaves seventy minutes — not ninety. Picking a
+      length already elapsed ends the session now.
+    mode: single
+    triggers:
+      - trigger: state
+        entity_id: input_select.sauna_session_length
+    conditions:
+      - condition: state
+        entity_id: timer.sauna_session
+        state: active
+    variables:
+      elapsed: >
+        {{ (now().timestamp()
+            - state_attr('input_datetime.sauna_session_started', 'timestamp') | float(0)) | int }}
+      total: "{{ states('input_select.sauna_session_length') | int(90) * 60 }}"
+    actions:
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ total - elapsed <= 0 }}"
+            sequence:
+              - action: timer.finish
+                target:
+                  entity_id: timer.sauna_session
+        default:
+          - action: timer.start
+            target:
+              entity_id: timer.sauna_session
+            data:
+              duration: "{{ total - elapsed }}"

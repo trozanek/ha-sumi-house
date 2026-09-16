@@ -1,5 +1,15 @@
 # Sumi House custom cards
 
+| Card | Spec | Package |
+|---|---|---|
+| `sumi-sauna-card.js` | [docs/cards/sauna.md](../../../docs/cards/sauna.md) | `packages/sumi_sauna.yaml` |
+| `sumi-hot-tub-card.js` | [docs/cards/hot-tub.md](../../../docs/cards/hot-tub.md) | `packages/sumi_hot_tub.yaml` + `packages/sumi_common.yaml` |
+
+`sumi-vessel-shared.js` is not a card — it's gauge geometry, the drag/debounce/
+optimistic-hold state machine, and the light-swatch matching logic shared by every
+vessel card above, imported by relative URL. It needs no resource entry of its own;
+registering a vessel card's `.js` pulls it in automatically.
+
 Drop the house's Lovelace cards here, one `*.js` module per card, e.g.
 `sumi-meal-planner.js`. `scripts/install.sh` mirrors this folder to
 `/config/www/sumi-house/cards/`, which Home Assistant serves at

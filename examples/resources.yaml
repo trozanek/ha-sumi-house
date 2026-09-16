@@ -9,6 +9,12 @@
 #       type: module
 #
 # Bump ?v= whenever the file changes so browsers stop serving the cached copy.
+# sumi-vessel-shared.js needs no entry of its own — the vessel cards import it by
+# relative URL, and the browser fetches it as part of loading the card module.
 resources:
+  - url: /local/sumi-house/cards/sumi-sauna-card.js?v=2
+    type: module
+  - url: /local/sumi-house/cards/sumi-hot-tub-card.js?v=1
+    type: module
   - url: /local/sumi-house/cards/sumi-meal-planner.js?v=1
     type: module

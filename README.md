@@ -24,14 +24,24 @@ ha-sumi-house/
 │  ├─ sumi-fonts.js              @font-face injector, registered via frontend.extra_module_url (generated)
 │  ├─ fonts/                     38 self-hosted WOFF2 subsets + OFL licences + manifest (generated)
 │  └─ cards/                     the house's custom Lovelace cards (dashboard resources)
+│     ├─ sumi-vessel-shared.js   gauge geometry, drag/debounce, light-swatch matching — shared by the cards below
+│     ├─ sumi-sauna-card.js      one card for the whole sauna — spec in docs/cards/sauna.md
+│     └─ sumi-hot-tub-card.js    one card for the whole hot tub — spec in docs/cards/hot-tub.md
+├─ packages/                     HA packages the cards depend on — helpers, automations, derived sensors
+│  ├─ sumi_common.yaml           house-wide values every package reads (currently: the shared energy tariff)
+│  ├─ sumi_sauna.yaml            helpers, sensors and automations the sauna card needs
+│  └─ sumi_hot_tub.yaml          helpers, sensors and automations the hot tub card needs
 ├─ docs/
 │  ├─ INSTALL.md                 fresh HA → themed dashboard, HACS or sync script, troubleshooting
 │  ├─ PROTOTYPE_DISCREPANCIES.md where the spec and the prototype disagree, and what the theme does
-│  └─ tokens.md                  token reference with contrast measurements (generated)
+│  ├─ tokens.md                  token reference with contrast measurements (generated)
+│  └─ cards/                     one specification per custom card (entity contract, YAML schema, behaviour)
 ├─ examples/
-│  ├─ configuration.yaml         the frontend: block
+│  ├─ configuration.yaml         the frontend: + homeassistant: packages: blocks
 │  ├─ seam-tile-card.yaml        how a card ignites its kintsugi seam
 │  ├─ views-kanji.yaml           view paths → tab kanji
+│  ├─ sauna-card.yaml            full sumi-sauna-card configuration
+│  ├─ hot-tub-card.yaml          full sumi-hot-tub-card configuration
 │  └─ resources.yaml             registering the custom cards
 ├─ scripts/
 │  ├─ install.sh                 rsync themes/ and www/sumi-house/ into a HA config dir (local or ssh)
@@ -82,6 +92,14 @@ the top switches dark/light, turns the card-mod layer off (what the theme looks 
 without card-mod), and runs the seam audit ("All off"). Edit the YAML and refresh — the
 CSS is rebuilt on every request. URL flags for screenshots: `?mode=light`, `&all=on`,
 `&cardmod=off`.
+
+`preview/sauna.html` and `preview/hot-tub.html` are the same idea for the two vessel
+cards: a fake `hass` whose actions mutate its own state and are logged on the page, so
+each card round-trips like it would in HA. The hot tub page mounts both cards side by
+side, matching how they sit together in the Wellness view. Useful flags:
+`?heat=1` starts a simulated heat-up on either page; on the hot tub page, `?bubbles=1`,
+`?manual=1` (nudges the target off-schedule) and `?overdue=1` (ages the filter counter)
+exercise the seam, the manual-override note and the service states.
 
 It is an approximation of HA's chrome, not HA: the real frontend has more components and
 nested shadow roots, so a pass here is necessary, not sufficient — finish on a live instance.
@@ -163,6 +181,12 @@ cards, along an edge). Every place the spec and the prototype disagreed, and wha
 theme does about it, is in [docs/PROTOTYPE_DISCREPANCIES.md](docs/PROTOTYPE_DISCREPANCIES.md).
 
 Still open: light mode has no prototype precedent and needs a visual review.
+
+Two wellness cards are built on top of the theme: `sumi-sauna-card` and
+`sumi-hot-tub-card`, specified in [docs/cards/](docs/cards/) and sharing their gauge,
+drag and light-swatch code via `sumi-vessel-shared.js` rather than duplicating it.
+Both are verified against a fake `hass` in `preview/` but not yet run on a live
+instance — see [docs/INSTALL.md](docs/INSTALL.md#custom-cards-in-this-repository).
 
 Out of scope here, next up: button-card templates and view YAML, re-checking the meal
 planner card against the final tokens, the room-by-room views.

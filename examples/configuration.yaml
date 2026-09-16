@@ -1,4 +1,10 @@
-# The frontend: block Sumi House needs. Merge into your configuration.yaml.
+# What Sumi House needs in configuration.yaml. Merge into your existing blocks.
+
+# Packages carry the helpers, sensors and automations the cards rely on
+# (packages/sumi_sauna.yaml → session timer, heating detection, cost model).
+homeassistant:
+  packages: !include_dir_named packages/
+
 frontend:
   # Every *.yaml in /config/themes/ becomes a theme — sumi_house.yaml among them.
   themes: !include_dir_merge_named themes/

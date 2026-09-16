@@ -10,6 +10,7 @@
 # What it copies                              → where
 #   themes/sumi_house.yaml                    → <config>/themes/sumi_house.yaml
 #   www/sumi-house/  (fonts, loader, cards)   → <config>/www/sumi-house/   (mirrored; stale files removed)
+#   packages/sumi_*.yaml                      → <config>/packages/         (helpers, sensors, automations the cards need)
 #
 # Nothing else in <config> is touched. Afterwards: Developer Tools → YAML → Reload Themes,
 # then hard-refresh the browser. See docs/INSTALL.md.
@@ -35,9 +36,9 @@ if [[ "$TARGET" != *:* && ! -d "$TARGET" ]]; then
 fi
 
 if [[ "$TARGET" != *:* ]]; then
-  mkdir -p "$TARGET/themes" "$TARGET/www/sumi-house"
+  mkdir -p "$TARGET/themes" "$TARGET/www/sumi-house" "$TARGET/packages"
 else
-  ssh "${TARGET%%:*}" "mkdir -p '${TARGET#*:}/themes' '${TARGET#*:}/www/sumi-house'"
+  ssh "${TARGET%%:*}" "mkdir -p '${TARGET#*:}/themes' '${TARGET#*:}/www/sumi-house' '${TARGET#*:}/packages'"
 fi
 
 echo "→ theme"
@@ -48,10 +49,15 @@ rsync -a $DRY --itemize-changes --delete \
   --exclude 'README.md' --exclude '.DS_Store' \
   "$REPO/www/sumi-house/" "$TARGET/www/sumi-house/"
 
+echo "→ packages (sumi_*.yaml)"
+rsync -a $DRY --itemize-changes "$REPO"/packages/sumi_*.yaml "$TARGET/packages/"
+
 cat <<MSG
 
 Done${DRY:+ (dry run)}. Next:
   1. configuration.yaml needs (once):
+       homeassistant:
+         packages: !include_dir_named packages/
        frontend:
          themes: !include_dir_merge_named themes/
          extra_module_url:

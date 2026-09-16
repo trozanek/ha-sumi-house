@@ -37,8 +37,9 @@ scripts/install.sh root@homeassistant.local:/config
 scripts/install.sh --dry-run /Volumes/config
 ```
 
-The script copies `themes/sumi_house.yaml` and mirrors `www/sumi-house/`; nothing else
-in `/config` is touched. Re-run it after every `git pull`.
+The script copies `themes/sumi_house.yaml`, mirrors `www/sumi-house/` and copies the
+`packages/sumi_*.yaml` files; nothing else in `/config` is touched. Re-run it after every
+`git pull`.
 
 ## Option B — HACS (theme only)
 
@@ -52,14 +53,20 @@ fonts or cards, so you still do the `www/` half by hand.
 
 ## configuration.yaml
 
-Add, or merge into an existing `frontend:` block:
+Add, or merge into existing `homeassistant:` and `frontend:` blocks:
 
 ```yaml
+homeassistant:
+  packages: !include_dir_named packages/     # helpers, sensors, automations for the cards
+
 frontend:
   themes: !include_dir_merge_named themes/
   extra_module_url:
     - /local/sumi-house/sumi-fonts.js
 ```
+
+If you already use packages from another directory, copy `packages/sumi_sauna.yaml` there
+instead. The sauna card needs it (session timer, heating detection, cost sensors).
 
 `/local/` is how Home Assistant serves `/config/www/`. `themes: !include_dir_merge_named`
 merges every file in `/config/themes/`, so other themes keep working.
@@ -102,9 +109,21 @@ Cards live in `www/sumi-house/cards/`. Register each one as a dashboard resource
 
 ```yaml
 resources:
-  - url: /local/sumi-house/cards/sumi-meal-planner.js?v=1
+  - url: /local/sumi-house/cards/sumi-sauna-card.js?v=2
+    type: module
+  - url: /local/sumi-house/cards/sumi-hot-tub-card.js?v=1
     type: module
 ```
+
+Then add a card to a view with the config in [`examples/sauna-card.yaml`](../examples/sauna-card.yaml)
+or [`examples/hot-tub-card.yaml`](../examples/hot-tub-card.yaml); `entity:` is the only
+required line in either. Set the sauna package's two `input_number` helpers (heater
+power 9 kW, energy price 0.98 PLN/kWh) and, for the hot tub, `input_number.energy_price`
+in `packages/sumi_common.yaml` (shared between both) — all from Settings → Devices → Helpers.
+
+Both cards share their gauge, drag and light-swatch code from
+`www/sumi-house/cards/sumi-vessel-shared.js`, fetched automatically as part of loading
+either card's module — it needs no resource entry of its own.
 
 Bump `?v=` whenever a card changes so browsers fetch the new file. See
 [`examples/resources.yaml`](../examples/resources.yaml) and `www/sumi-house/cards/README.md`.

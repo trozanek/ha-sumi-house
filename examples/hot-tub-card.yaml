@@ -1,0 +1,63 @@
+# sumi-hot-tub-card — full configuration (docs/cards/hot-tub.md §4).
+# Requires packages/sumi_hot_tub.yaml + packages/sumi_common.yaml (shared tariff) and
+# the resource /local/sumi-house/cards/sumi-hot-tub-card.js.
+# `entity` is the only required key; every other block hides itself when its
+# entities are absent. Every entity id below is a placeholder — substitute your
+# controller's real ids (see the package file's header for where they're used).
+type: custom:sumi-hot-tub-card
+entity: climate.hot_tub
+
+name: Hot tub
+kanji: 湯
+accent: mizu                         # oak | mizu | moss | copper
+gauge: ring                          # ring | arc
+
+temperature:
+  min: 20
+  max: 40                            # narrower than most devices on purpose — see spec §5.1
+  step: 0.5
+  step_button: 0.5
+  commit_delay: 400
+  optimistic_hold: 2000
+
+switches:
+  heater:  { entity: switch.hot_tub_heater,  name: Heater }
+  pump:    { entity: switch.hot_tub_pump,    name: Pump }
+  bubbles: { entity: switch.hot_tub_bubbles, name: Bubbles }
+
+light:
+  entity: light.hot_tub
+  name: Light
+  colors:
+    - { name: Mizu,  rgb: [126, 147, 160] }   # leads with the tub's own accent, not Ember
+    - { name: Ember, rgb: [192, 117,  74] }
+    - { name: Oak,   rgb: [200, 159, 110] }
+    - { name: Washi, rgb: [239, 231, 215] }
+    - { name: Moss,  rgb: [139, 150, 120] }
+    - { name: Deep,  rgb: [ 74,  58, 107] }
+    - { name: Fade,  effect: "Slow Fade", gradient: ["#7E93A0", "#4A3A6B"] }
+
+schedule:
+  enable: input_boolean.tub_schedule_enabled
+  scheduled_temperature: sensor.hot_tub_scheduled_temperature
+  slots:
+    - { time: input_datetime.tub_slot_1_time, temp: input_number.tub_slot_1_temp }
+    - { time: input_datetime.tub_slot_2_time, temp: input_number.tub_slot_2_temp }
+    - { time: input_datetime.tub_slot_3_time, temp: input_number.tub_slot_3_temp }
+    - { time: input_datetime.tub_slot_4_time, temp: input_number.tub_slot_4_temp }
+
+service:
+  confirm: true                      # tap arms, second tap resets — see spec §9.3
+  confirm_seconds: 3
+  items:
+    # `sensor` counts UP (days since); `reset` is whatever entity your controller
+    # exposes for that job — button, switch, input_boolean, script or scene all work.
+    - { key: chloride, label: Chloride, sensor: sensor.hot_tub_chloride_days, reset: switch.hot_tub_chloride_reset, every: 14d }
+    - { key: filter,   label: Filter,   sensor: sensor.hot_tub_filter_days,   reset: switch.hot_tub_filter_reset,   every: 14d }
+    - { key: rinse,    label: Rinse,    sensor: sensor.hot_tub_rinse_days,    reset: switch.hot_tub_rinse_reset,    every: 14d }
+    - { key: water,    label: Water,    sensor: sensor.hot_tub_water_days,    reset: switch.hot_tub_water_reset,    every: 2mo }
+
+cost:
+  monthly: sensor.hot_tub_cost_monthly
+  yearly: sensor.hot_tub_cost_yearly
+  currency: "zł"

@@ -1,0 +1,59 @@
+# sumi-sauna-card — full configuration (docs/cards/sauna.md §3).
+# Requires packages/sumi_sauna.yaml and the resource /local/sumi-house/cards/sumi-sauna-card.js.
+# `entity` is the only required key; every other block hides itself when its entities are absent.
+type: custom:sumi-sauna-card
+entity: climate.sauna
+
+name: Sauna
+kanji: 蒸
+accent: oak                          # oak | mizu | moss | copper
+gauge: arc                           # arc | ring
+
+temperature:
+  min: 40
+  max: 100                           # narrower than the device on purpose — nobody dials 110 by accident
+  step_button: 5
+  commit_delay: 400
+  optimistic_hold: 2000
+
+session:
+  select: input_select.sauna_session_length
+  timer: timer.sauna_session
+
+lights:
+  vestibule:
+    entity: light.sauna_vestibule
+    name: Vestibule light
+  bench:
+    entity: light.sauna_bench_led
+    name: Bench LED
+    colors:
+      - { name: Ember, rgb: [192, 117,  74] }
+      - { name: Oak,   rgb: [200, 159, 110] }
+      - { name: Washi, rgb: [239, 231, 215] }
+      - { name: Moss,  rgb: [139, 150, 120] }
+      - { name: Mizu,  rgb: [126, 147, 160] }
+      - { name: Deep,  rgb: [ 74,  58, 107] }
+      - { name: Fade,  effect: "Slow Fade", gradient: ["#C0754A", "#4A3A6B"] }
+
+media:
+  default_speaker: media_player.sauna
+  speakers:
+    - { entity: media_player.sauna,       name: Sauna }
+    - { entity: media_player.terrace,     name: Terrace }
+    - { entity: media_player.onsen_group, name: Onsen group }
+  playlists:
+    - { name: Onsen,        path: "media-source://media_source/local/Music/Onsen" }
+    - { name: Shakuhachi,   path: "media-source://media_source/local/Music/Shakuhachi" }
+    - { name: Rain,         path: "media-source://media_source/local/Music/Rain" }
+    - { name: Koto,         path: "media-source://media_source/local/Music/Koto" }
+    - { name: Ambient jazz, path: "media-source://media_source/local/Music/Ambient jazz" }
+  shuffle: true
+  queue_window: 20
+  queue_refill_at: 5
+
+cost:
+  monthly: sensor.sauna_cost_monthly
+  yearly: sensor.sauna_cost_yearly
+  currency: "zł"
+  hours_monthly: sensor.sauna_hours_monthly
