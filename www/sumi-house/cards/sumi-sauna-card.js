@@ -20,7 +20,7 @@ import {
   COLOR_MODES, swatchButtonsHtml, paintSwatches,
 } from "./sumi-vessel-shared.js";
 
-const VERSION = "0.2.0";
+const VERSION = "0.2.1";
 const CARD = "sumi-sauna-card";
 
 const DEFAULTS = {
@@ -522,14 +522,37 @@ class SumiSaunaCard extends HTMLElement {
     const n = Math.max(1, this._config.media.queue_window);
     const batch = q.items.slice(q.pushed, q.pushed + (replace ? n : Math.max(1, n - this._config.media.queue_refill_at)));
     for (let i = 0; i < batch.length; i++) {
+      const opening = replace && i === 0;
       await this._call("media_player", "play_media", {
         entity_id: q.speaker,
         media_content_id: batch[i].media_content_id,
         media_content_type: "music",
-        enqueue: replace && i === 0 ? "replace" : "add",
+        enqueue: opening ? "replace" : "add",
       });
       q.pushed++;
+      // Cast has no queue to insert into until the receiver has actually loaded the
+      // track that opened it — `callService` only resolves once HA has accepted the
+      // call, well before that. Firing every "add" right behind "replace" races the
+      // receiver, the inserts are dropped, and only the opening track ever plays.
+      if (opening) await this._waitForTrack(q.speaker, batch[i].title);
     }
+  }
+
+  _waitForTrack(speaker, title, timeoutMs = 6000) {
+    return new Promise((resolve) => {
+      const start = Date.now();
+      const check = () => {
+        const st = this._hass?.states?.[speaker];
+        if (st?.attributes?.media_title === title) { resolve(); return; }
+        if (Date.now() - start > timeoutMs) {
+          console.warn(`${CARD}: speaker never confirmed "${title}" started; queueing the rest anyway`);
+          resolve();
+          return;
+        }
+        setTimeout(check, 150);
+      };
+      check();
+    });
   }
 
   _maybeRefillQueue(player) {
