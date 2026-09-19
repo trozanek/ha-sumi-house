@@ -1,0 +1,93 @@
+/* ============================================================
+   HOME — state of the house. Every element maps to a live entity;
+   nothing here is a sensor the instance does not have.
+   ============================================================ */
+
+/* people — person.* with the fixed identity colours */
+.people{display:flex;gap:8px;padding:16px 26px 0;flex-wrap:wrap}
+.per{
+  display:flex;align-items:center;gap:9px;border:1px solid var(--seam);
+  border-radius:var(--r-chip);padding:7px 13px;background:none;
+}
+.per > i{width:6px;height:6px;border-radius:50%;background:var(--accent);flex:none;box-shadow:0 0 7px -1px var(--accent)}
+.per.away > i{background:none;border:1px solid var(--faint);box-shadow:none}
+.per .n{font-size:13px;font-weight:400}
+.per.away .n{color:var(--stone)}
+.per .s{font-family:var(--font-data);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--stone)}
+.per.ghost{cursor:pointer;transition:border-color .2s}
+.per.ghost:hover{border-color:var(--stone)}
+
+/* running now — the kintsugi list. A row earns copper only while its device runs. */
+.runlist{margin-top:6px}
+.runrow{
+  display:flex;align-items:center;gap:12px;padding:8px 0;width:100%;text-align:left;
+  border-top:1px solid var(--seam);transition:opacity .3s ease;
+}
+.runrow:first-child{border-top:none}
+.runrow .rk{font-family:var(--font-display);font-size:13px;letter-spacing:.2em;color:var(--faint);width:24px;flex:none;transition:color .4s var(--ease,ease)}
+.runrow.on .rk{color:var(--copper)}
+.runrow .rn{flex:1;min-width:0;font-size:13px;font-weight:400}
+.runrow .rn em{
+  display:block;font-style:normal;font-family:var(--font-data);font-size:10px;
+  letter-spacing:.03em;color:var(--stone);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.runrow .rv{font-family:var(--font-data);font-size:13px;color:var(--stone);flex:none}
+.runrow.on .rv{color:var(--washi)}
+.runrow.idle{opacity:.45}
+.runrow:hover{opacity:1}
+.runempty{font-family:var(--font-display);font-size:14px;color:var(--stone);padding:16px 0 8px;text-align:center;letter-spacing:.1em}
+
+/* solar — inverter now + Forecast.Solar curve */
+.enow{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:10px}
+.enow .big{font-family:var(--font-data);font-size:36px;font-weight:300;line-height:1;color:var(--copper-hi)}
+.enow .big small{font-size:13px;color:var(--stone);margin-left:4px}
+.estack{text-align:right;min-width:0}
+.estack .l{font-family:var(--font-data);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+.estack .d{font-family:var(--font-data);font-size:11px;color:var(--stone);margin-top:3px}
+.ecurve{height:54px;margin-top:10px}
+.ecurve svg{width:100%;height:100%;display:block}
+.ecurve .band{fill:rgba(192,117,74,.10)}
+.ecurve .line{fill:none;stroke:var(--copper-lo);stroke-width:1.2}
+.ecurve .nowline{stroke:var(--copper-hi);stroke-width:1;stroke-dasharray:2 3;opacity:.8}
+.estat{display:flex;gap:22px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--seam)}
+.estat .e .l{font-family:var(--font-data);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+.estat .e .v{font-family:var(--font-data);font-size:15px;font-weight:300;margin-top:3px}
+.estat .e .v span{font-size:10px;color:var(--stone);margin-left:3px}
+
+/* room tiles — one real fact each, no invented temperatures */
+.rtile{display:flex;align-items:center;gap:11px;padding:12px 14px;text-align:left;width:100%;cursor:pointer}
+.rtile:hover{transform:translateY(-1px)}
+.rtile .k{font-family:var(--font-display);font-size:11px;letter-spacing:.22em;color:var(--seam);width:36px;flex:none;transition:color .25s}
+.rtile:hover .k{color:var(--copper-lo)}
+.rtile .b{flex:1;min-width:0;display:block}
+.rtile .nm{display:block;font-size:13px;font-weight:400}
+.rtile .st{
+  display:block;font-family:var(--font-data);font-size:10px;letter-spacing:.02em;color:var(--stone);
+  margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.rtile .st b{color:var(--oak);font-weight:400}
+
+/* openings and motion */
+.wgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;margin-top:6px}
+.wrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--seam)}
+.wcol .wrow:first-child{border-top:none}
+.wrow .nm{flex:1;min-width:0;font-size:13px;font-weight:400}
+.wrow .nm em{display:block;font-style:normal;font-family:var(--font-data);font-size:10px;color:var(--stone);margin-top:2px}
+.wrow .v{font-family:var(--font-data);font-size:12px;color:var(--washi);flex:none}
+.wrow .v.warn{color:var(--caution)}
+
+/* the two cameras this house actually has */
+.camstack{display:flex;flex-direction:column;gap:10px}
+.camstack .cam{aspect-ratio:16/10}
+
+@media(max-width:760px){
+  .people{padding-left:14px;padding-right:14px}
+  .wgrid{grid-template-columns:1fr;gap:0}
+  .wcol:nth-child(2) .wrow:first-child{border-top:1px solid var(--seam)}
+}
+@media(max-width:560px){
+  .enow .big{font-size:30px}
+  .estat{gap:14px}
+  .rtile .k{width:30px;font-size:10px}
+}

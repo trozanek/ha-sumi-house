@@ -492,16 +492,17 @@ Tokens, spacing and seam behaviour come from the theme. The card consumes
       debounce and swatch implementations with the sauna card rather than forking them
       (`sumi-vessel-shared.js`)
 - [ ] `packages/sumi_common.yaml` installed, `input_number.energy_price` set to `0.98`
-- [ ] `packages/sumi_hot_tub.yaml` installed, controller entity ids substituted
+- [x] `packages/sumi_hot_tub.yaml` installed, controller entity ids substituted — bound
+      to the live Bestway/Lay-Z-Spa MQTT integration (see the package's own header)
 - [ ] Schedule starting values set from the UI — 06:00/36.0, 14:00/37.5, 17:30/38.5,
       22:30/35.0. No `initial:` is set on the helpers by design, so HA restores your
       edits across restarts instead of stamping on them
 - [ ] Confirm what each of the four device counters actually tracks, and set `every:`
       to match (§9.1)
 - [ ] Confirm the reset entities fire cleanly — press one and watch its counter go to 0
-- [ ] Confirm the controller's energy sensors reset on the calendar month and year —
+- [x] Confirm the controller's energy sensors reset on the calendar month and year —
       if they are lifetime totals instead, wrap them in `utility_meter` the way the
-      sauna package does
+      sauna package does — `sensor.layzspa_energia` is lifetime-only, now wrapped
 - [x] Resource registered in `examples/resources.yaml`; full config in
       `examples/hot-tub-card.yaml`
 

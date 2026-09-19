@@ -1,0 +1,153 @@
+  <!-- ============ VIEW: LIVING ROOM + KITCHEN ============ -->
+  <!-- Dimmable rows = GLEDOPTO LED controllers. Everything else on this floor is a
+       wall-switch circuit (TS0002/TS0003), so it toggles — it does not dim. -->
+  <section class="view" id="v-living">
+    <div class="dash-head planks">
+      <div class="dh-row">
+        <div>
+          <div class="dh-kanji">居 間 · 台 所</div>
+          <div class="dh-title">Living room</div>
+          <div class="dh-sub" id="lr-sub">Open to kitchen and dining · presence detected</div>
+        </div>
+        <div class="dh-clock">
+          <div class="dh-time">22.4°</div>
+          <div class="dh-wx">Humidity <b>44%</b> · Light <b>62 lx</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">灯</span><span class="label">Lights</span></div>
+          <span class="pill" id="lr-count">3 on</span>
+        </div>
+        <div class="light-row" id="lr-lights">
+          <div class="light"><span class="nm">Top LED</span>
+            <input type="range" min="0" max="100" value="35" data-light="0"><span class="pct">35%</span></div>
+          <div class="light"><span class="nm">Beam LED</span>
+            <input type="range" min="0" max="100" value="60" data-light="1"><span class="pct">60%</span></div>
+          <div class="light"><span class="nm">Cabinet LED<em>shared with kitchen</em></span>
+            <input type="range" min="0" max="100" value="20" data-light="2"><span class="pct">20%</span></div>
+        </div>
+        <div id="lr-switched">
+          <div class="vrow" style="margin-top:10px"><div class="nm">Ceiling circuit<em>living room light · gang 1</em></div><button class="toggle"><i></i></button></div>
+          <div class="vrow"><div class="nm">Wall circuit<em>living room light · gang 2</em></div><button class="toggle"><i></i></button></div>
+          <div class="vrow"><div class="nm">LED switch<em>Living room Leds · third gang</em></div><button class="toggle"><i></i></button></div>
+          <div class="vrow"><div class="nm">Christmas tree<em>seasonal socket · 0 W</em></div><button class="toggle"><i></i></button></div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card" id="media-card">
+          <div class="vhead">
+            <div class="ttl"><span class="k">音</span><span class="label">Media</span></div>
+            <span class="pill" id="media-pill">Idle</span>
+          </div>
+          <div class="media">
+            <div class="art"></div>
+            <div style="min-width:0">
+              <div class="tt">Ryuichi Sakamoto — async</div>
+              <div class="ar" id="media-state">Living room speakers · paused</div>
+              <div class="transport">
+                <button data-med="prev">◁</button>
+                <button data-med="play" id="playbtn">▷</button>
+                <button data-med="next">▷|</button>
+                <span>3:12 / 5:46</span>
+              </div>
+            </div>
+          </div>
+          <div class="selrow">
+            <select class="sel" id="lr-src">
+              <option>Spotify — Tomasz</option><option>Jellyfin</option><option>VLC</option><option>Radio</option>
+            </select>
+            <select class="sel" id="lr-spk">
+              <option>Living Room</option><option>Living room speakers</option><option>Living room and garden</option><option>Living room and outside</option><option>All speakers</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="vhead">
+            <div class="ttl"><span class="k">在</span><span class="label">Room</span></div>
+          </div>
+          <div class="vrow" style="margin-top:2px"><div class="nm">Presence<em>mmWave · iHseno</em></div><div class="val">Occupied</div></div>
+          <div class="vrow"><div class="nm">Temperature<em>LR sensor · battery 84%</em></div><div class="val">22.4 °C</div></div>
+          <div class="vrow"><div class="nm">Humidity</div><div class="val">44 %</div></div>
+          <div class="vrow"><div class="nm">Heating<em>one heat pump for the house</em></div><button class="act ghost" data-goto="home" style="margin-top:0">Heat pump</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g3">
+      <div class="card" id="cinema-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">映</span><span class="label">Projector &amp; screen</span></div>
+          <span class="pill" id="proj-pill">Off</span>
+        </div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Projector<em>entertainment switch · gang 1</em></div><button class="toggle" id="proj-tog"><i></i></button></div>
+        <div class="vrow"><div class="nm">Screen<em>entertainment switch · gang 2</em></div><button class="toggle" id="screen-tog"><i></i></button></div>
+        <div class="vrow"><div class="nm">Chromecast<em>projector · standby</em></div><div class="val">Idle</div></div>
+        <div class="chiprow" style="margin-top:10px">
+          <button class="mchip" data-toast="scene.fall_projection_screen">Screen down</button>
+          <button class="mchip" data-toast="scene.raise_screen">Screen up</button>
+          <button class="mchip" data-toast="input_boolean.cinema">Cinema</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">扇</span><span class="label">Fan</span></div>
+          <span class="pill" id="fan-pill">Off</span>
+        </div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Fan<em>Tuya · fan.fan</em></div><button class="toggle" id="fan-tog"><i></i></button></div>
+        <div class="vrow"><div class="nm">Fan light</div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Beep on change<em>fan_sound</em></div><button class="toggle"><i></i></button></div>
+      </div>
+
+      <div class="card" id="vac-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">掃</span><span class="label">Deebot T9+</span></div>
+          <span class="pill" id="vac-pill">Docked</span>
+        </div>
+        <div class="vrow" style="margin-top:2px"><div class="nm" id="vac-state">Docked · charged</div><div class="val">98 %</div></div>
+        <div class="vrow"><div class="nm" id="vac-sub">Last clean 14:10 · mop attached</div></div>
+        <button class="act" id="vac-btn" style="width:100%">Clean living room</button>
+      </div>
+    </div>
+
+    <div class="sect"><h3>Kitchen</h3><span class="k">台所</span></div>
+    <div class="grid g2">
+      <div class="card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">灯</span><span class="label">Kitchen circuits</span></div>
+          <span class="pill">1 on</span>
+        </div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Island<em>island switch · gang 1</em></div><button class="toggle on"><i></i></button></div>
+        <div class="vrow"><div class="nm">Island spots<em>island switch · gang 2</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Island and sofa<em>two gangs, dining side</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Gable wall<em>the high barn wall</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Cabinet switch<em>under-cabinet circuit</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Outside light<em>kitchen door, terrace side</em></div><button class="toggle"><i></i></button></div>
+      </div>
+
+      <div class="card" id="oven-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">竈</span><span class="label">Piekarnik</span></div>
+          <span class="pill" id="oven-pill">Ready</span>
+        </div>
+        <div class="readings" style="grid-template-columns:repeat(2,1fr)">
+          <div class="rd"><div class="l">Main cavity</div><div class="n">—<small>°C</small></div><div class="note">Machine off</div></div>
+          <div class="rd"><div class="l">Second cavity</div><div class="n">—<small>°C</small></div><div class="note">Machine off</div></div>
+        </div>
+        <div class="vrow" style="margin-top:14px"><div class="nm">Job state<em>Samsung SmartThings</em></div><div class="val">None</div></div>
+        <div class="vrow"><div class="nm">Door</div><div class="val">Closed</div></div>
+        <div class="vrow"><div class="nm">Oven light</div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Drawer socket<em>SP111 · worktop</em></div><button class="toggle"><i></i></button></div>
+        <div class="svcline">
+          <div class="s"><span class="l">Drawer</span><span class="d">closed</span></div>
+          <div class="s"><span class="l">Child lock</span><span class="d">off</span></div>
+        </div>
+      </div>
+    </div>
+  </section>

@@ -21,6 +21,8 @@
   --moss:      #8B9678;
   --mizu:      #7E93A0;
   --faint:     #6B655A;
+  --caution:   #D4A23F;  /* spec §3 — attention, never copper */
+  --alert:     #CF7B6B;
   --r-card: 6px;
   --r-chip: 4px;
   --font-display:"Zen Old Mincho",serif;
@@ -150,6 +152,19 @@ button{font-family:inherit;color:inherit;background:none;border:none;cursor:poin
 .dot{width:5px;height:5px;border-radius:50%;display:inline-block;background:var(--seam);vertical-align:middle}
 .dot.on{background:var(--moss);box-shadow:0 0 6px rgba(139,150,120,.6)}
 .dot.warm{background:var(--copper);box-shadow:0 0 6px rgba(192,117,74,.55)}
+.dot.caution{background:var(--caution);box-shadow:0 0 6px rgba(212,162,63,.5)}
+.dot.alert{background:var(--alert);box-shadow:0 0 6px rgba(207,123,107,.5)}
+/* ---------- attention strip — things that need a hand; caution/alert tones, no copper ---------- */
+.attn{display:flex;gap:8px;padding:16px 26px 0;flex-wrap:wrap;align-items:center}
+.attn .label{margin-right:6px}
+.attn .note{
+  display:flex;align-items:center;gap:9px;text-align:left;
+  border:1px solid var(--seam);border-radius:var(--r-chip);padding:8px 14px;
+  font-size:12px;font-weight:400;color:var(--washi);letter-spacing:.02em;transition:all .2s ease;
+}
+.attn .note:hover{border-color:var(--stone);color:var(--washi)}
+.attn .note .t{font-family:var(--font-data);color:var(--stone);font-size:11px}
+.attn .note.alert{border-color:rgba(207,123,107,.35)}
 /* ---------- cameras ---------- */
 .cams{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px 26px 0}
 .cam{
@@ -161,7 +176,7 @@ button{font-family:inherit;color:inherit;background:none;border:none;cursor:poin
 .cam .rec{position:absolute;top:8px;right:10px;font-family:var(--font-data);font-size:9px;letter-spacing:.2em;color:var(--moss)}
 .cam .rec::before{content:"●";margin-right:5px;font-size:7px}
 .cam svg{position:absolute;inset:0;width:100%;height:100%;opacity:.5}
-/* ---------- wellness tiles ---------- */
+/* ---------- onsen tiles (Home) ---------- */
 .well .v{font-family:var(--font-data);font-size:20px;margin-top:8px}
 .well .v small{font-size:11px;color:var(--stone)}
 .well .state{font-size:11px;color:var(--stone);margin-top:4px}
@@ -246,11 +261,220 @@ input[type=range]::-moz-range-thumb{
 }
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .toast .k{font-family:var(--font-display);color:var(--copper);margin-right:8px}
+/* ---------- camera lightbox ---------- */
+.cam{cursor:pointer}
+.cam:hover::after{content:"";position:absolute;inset:0;background:rgba(239,231,215,.04)}
+.cam:focus-visible{outline:2px solid var(--copper-hi);outline-offset:2px}
+.camlb{
+  position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;
+  background:rgba(10,8,6,.78);opacity:0;pointer-events:none;transition:opacity .25s ease;padding:26px;
+}
+.camlb.show{opacity:1;pointer-events:auto}
+.camlb-panel{
+  width:100%;max-width:640px;max-height:88vh;overflow:auto;
+  background:
+    url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='160'%20height='160'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.8'%20numOctaves='2'%20stitchTiles='stitch'/%3E%3Crect%20width='160'%20height='160'%20filter='url(%23n)'%20opacity='0.035'/%3E%3C/filter%3E%3C/svg%3E"),
+    radial-gradient(140% 120% at 12% -10%, #282520 0%, rgba(40,37,32,0) 55%), var(--char-2);
+  border:1px solid var(--seam);border-radius:var(--r-card);padding:18px;
+  transform:translateY(10px);transition:transform .25s ease;box-shadow:0 30px 80px rgba(0,0,0,.55);
+}
+.camlb.show .camlb-panel{transform:translateY(0)}
+.camlb-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px}
+.camlb-head .ttl{display:flex;align-items:baseline;gap:9px}
+.camlb-close{color:var(--stone);font-size:12px;letter-spacing:.1em;border:1px solid var(--seam);border-radius:var(--r-chip);padding:5px 10px;flex:none}
+.camlb-close:hover{color:var(--washi);border-color:var(--stone)}
+.camlb .cam{aspect-ratio:16/9;cursor:default}
+.camlb-ctrls{margin-top:4px}
+@media(prefers-reduced-motion:reduce){.camlb,.camlb-panel{transition:none}}
+@media(max-width:480px){.camlb{padding:14px}.camlb-panel{padding:14px}}
+/* ---------- to-do ---------- */
+.tdlist{margin-top:12px;display:flex;flex-direction:column}
+.tditem{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--seam)}
+.tditem:last-child{border-bottom:none}
+.tditem .tdchk{width:16px;height:16px;border-radius:50%;border:1px solid var(--stone);flex:none;position:relative;transition:all .2s;background:none}
+.tditem.done .tdchk{background:var(--moss);border-color:var(--moss)}
+.tditem.done .tdchk::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--char)}
+.tditem .tt{flex:1;font-size:13px;min-width:0;text-align:left}
+.tditem.done .tt{color:var(--stone);text-decoration:line-through}
+.tditem .tm{font-family:var(--font-data);font-size:10px;letter-spacing:.05em;color:var(--stone);flex:none}
+.tdempty{padding:14px 0;color:var(--stone);font-size:12px;font-style:italic;display:none}
+.tdadd{display:flex;gap:8px;margin-top:12px}
+.tdadd input{flex:1;background:transparent;border:1px solid var(--seam);border-radius:var(--r-chip);padding:8px 10px;color:var(--washi);font-size:13px;font-family:inherit}
+.tdadd input::placeholder{color:var(--faint)}
+.tdadd button{border:1px solid var(--seam);border-radius:var(--r-chip);padding:0 14px;color:var(--stone);font-size:12px;flex:none}
+.tdadd button:hover{color:var(--washi);border-color:var(--stone)}
+/* ---------- morning brief ---------- */
+.brief .brieftext{
+  font-family:var(--font-display);font-size:15px;line-height:1.72;color:var(--washi);
+  margin-top:10px;max-width:74ch;
+}
+.brief .fmeta{margin-top:12px}
+/* ---------- alarm bar ---------- */
+.alarmbar{
+  margin:16px 26px 0;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;
+  gap:16px;flex-wrap:wrap;border:1px solid var(--seam);border-radius:var(--r-card);
+  background:var(--char-2);transition:border-color .3s ease, background .3s ease;
+}
+.alarmbar .ab-left{display:flex;align-items:center;gap:12px;min-width:0}
+.alarmbar .ab-left .k{font-family:var(--font-display);font-size:15px;color:var(--faint);transition:color .3s}
+.alarmbar .ab-dot{width:7px;height:7px;border-radius:50%;background:var(--faint);flex:none}
+.alarmbar .ab-txt b{font-weight:400;font-size:14px;display:block;letter-spacing:.02em}
+.alarmbar .ab-txt em{font-style:normal;font-family:var(--font-data);font-size:10px;letter-spacing:.06em;color:var(--stone);display:block;margin-top:2px}
+.alarmbar .ab-right{display:flex;gap:8px;flex:none}
+.alarmbar .act{margin-top:0}
+.act.alert{border-color:rgba(207,123,107,.5);color:var(--alert)}
+.act.alert:hover{background:rgba(207,123,107,.12)}
+/* armed — the one high-visibility state on the page. Alert tone, never copper:
+   an armed house is a mode demanding attention, not a device that is running. */
+.alarmbar.armed{
+  border-color:rgba(207,123,107,.55);
+  background:linear-gradient(90deg, rgba(207,123,107,.14) 0%, rgba(207,123,107,.05) 40%, rgba(40,37,32,0) 100%), var(--char-2);
+  box-shadow:inset 3px 0 0 var(--alert);
+}
+.alarmbar.armed .ab-dot{background:var(--alert);animation:abpulse 2.4s ease-in-out infinite}
+.alarmbar.armed .ab-left .k{color:var(--alert)}
+.alarmbar.armed .ab-txt b{color:var(--alert);font-family:var(--font-data);letter-spacing:.24em;text-transform:uppercase;font-size:13px}
+@keyframes abpulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(207,123,107,.5)}50%{opacity:.55;box-shadow:0 0 0 6px rgba(207,123,107,0)}}
+@media(prefers-reduced-motion:reduce){.alarmbar.armed .ab-dot{animation:none}}
+/* ---------- keypad ---------- */
+.keypad-wrap{
+  position:fixed;inset:0;z-index:130;display:flex;align-items:center;justify-content:center;
+  background:rgba(10,8,6,.8);opacity:0;pointer-events:none;transition:opacity .25s ease;padding:26px;
+}
+.keypad-wrap.show{opacity:1;pointer-events:auto}
+.keypad{
+  width:100%;max-width:300px;background:var(--char-2);border:1px solid var(--seam);
+  border-radius:var(--r-card);padding:20px;text-align:center;
+  transform:translateY(10px);transition:transform .25s ease;box-shadow:0 30px 80px rgba(0,0,0,.55);
+}
+.keypad-wrap.show .keypad{transform:translateY(0)}
+.keypad .kp-ttl{font-family:var(--font-display);font-size:16px;margin-bottom:4px}
+.keypad .kp-sub{font-family:var(--font-data);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone)}
+.kp-dots{display:flex;gap:12px;justify-content:center;margin:18px 0 16px}
+.kp-dots i{width:10px;height:10px;border-radius:50%;border:1px solid var(--stone);transition:all .15s}
+.kp-dots i.on{background:var(--copper);border-color:var(--copper)}
+.kp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kp-grid button{
+  border:1px solid var(--seam);border-radius:var(--r-chip);padding:12px 0;
+  font-family:var(--font-data);font-size:17px;color:var(--washi);transition:all .15s;
+}
+.kp-grid button:hover{border-color:var(--stone);background:rgba(239,231,215,.04)}
+.kp-grid button.wide{grid-column:span 1;font-size:11px;letter-spacing:.1em;color:var(--stone)}
+.keypad.bad{animation:kpshake .4s}
+@keyframes kpshake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@media(prefers-reduced-motion:reduce){.keypad.bad{animation:none}}
+/* ---------- energy "used" row ---------- */
+.usedrow{display:flex;align-items:center;gap:14px;margin-top:12px;padding-top:12px;border-top:1px solid var(--seam)}
+.usedrow .ur-l{flex:none}
+.usedrow .ur-g{display:grid;grid-template-columns:repeat(3,1fr);gap:0;flex:1;min-width:0}
+.usedrow .u{border-left:1px solid var(--seam);padding:0 12px}
+.usedrow .u:first-child{border-left:none;padding-left:0}
+.usedrow .u .l{display:block;font-family:var(--font-data);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--stone)}
+.usedrow .u .v{display:block;font-family:var(--font-data);font-size:14px;margin-top:3px}
+.gap,.usedrow .u .v.gap{color:var(--faint)}
+/* ---------- quick-light "all off" ---------- */
+#quick-lights .act em{display:none}
+.acts{display:flex;gap:8px;margin-top:14px}
+.acts .act{margin-top:0}
+/* ---------- temperature strip ---------- */
+.tstrip-card{padding:12px 16px}
+.tstrip{display:grid;grid-template-columns:repeat(15,1fr);gap:0}
+.tcell{
+  padding:4px 2px;border-left:1px solid var(--seam);text-align:center;transition:background .2s;
+  display:flex;flex-direction:column;gap:3px;align-items:center;
+}
+.tcell:first-child{border-left:none}
+.tcell:hover{background:rgba(239,231,215,.04)}
+.tcell .tk{font-family:var(--font-display);font-size:10px;letter-spacing:.06em;color:var(--stone);white-space:nowrap}
+.tcell .tv{font-family:var(--font-data);font-size:13px;color:var(--washi)}
+.tcell .tv.none{color:var(--faint)}
+.tstrip-card .fmeta{margin-top:10px}
+@media(max-width:900px){.tstrip{grid-template-columns:repeat(7,1fr);gap:8px 0}.tcell:nth-child(8){border-left:none}}
+@media(max-width:520px){.tstrip{grid-template-columns:repeat(4,1fr)}.tcell:nth-child(n){border-left:1px solid var(--seam)}.tcell:nth-child(4n+1){border-left:none}}
+/* ---------- agenda rows ---------- */
+.arow .ae em{display:block;font-style:normal;font-family:var(--font-data);font-size:10px;letter-spacing:.03em;color:var(--stone);margin-top:2px}
+.arow .ae{min-width:0}
+.arow.now .at{color:var(--oak)}
+.arow.next{opacity:.62}
+.arow.next .at{letter-spacing:.1em;text-transform:uppercase;font-size:10px}
+/* ---------- bins ---------- */
+.binrow{margin-top:10px}
+.bnext{padding-bottom:10px;border-bottom:1px solid var(--seam)}
+.bnext .bwhen{font-family:var(--font-data);font-size:19px;line-height:1}
+.bnext .bwhat{font-size:12px;color:var(--stone);margin-top:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.bnext .bsep{color:var(--faint)}
+.blist{margin-top:8px}
+.bl{display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:11px}
+.bl .bd{font-family:var(--font-data);color:var(--stone)}
+.bl .bt{display:flex;align-items:center;gap:6px;color:var(--stone)}
+.bdot{width:7px;height:7px;border-radius:2px;flex:none;display:inline-block}
+.bdot.mixed{background:#6E675B}
+.bdot.bio{background:var(--moss)}
+.bdot.plastic{background:var(--caution)}
+.bdot.paper{background:var(--mizu)}
+.bdot.glass{background:var(--oak)}
+.pill.caution{color:var(--caution);border-color:rgba(212,162,63,.45)}
+/* ---------- school card extras ---------- */
+.kidcol .kn{display:flex;align-items:baseline;gap:7px}
+.kidcol .kc{font-family:var(--font-data);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.kidcol .kl{font-family:var(--font-data);font-size:10px;color:var(--stone);margin-top:6px}
+.vhead .ttl .pill{margin-left:4px}
+.weekgrid .wg-c.has{color:var(--washi)}
+.weekgrid .wg-c.pe{color:var(--moss)}
+.weekgrid .wg-t{font-family:var(--font-data);font-size:8px;color:var(--faint);display:block}
+/* ---------- door chips ---------- */
+.dchips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.dchip{
+  display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border:1px solid var(--seam);
+  border-radius:var(--r-chip);font-size:12px;color:var(--stone);
+}
+.dchip i{width:5px;height:5px;border-radius:50%;background:var(--moss);flex:none}
+.dchip.open{color:var(--caution);border-color:rgba(212,162,63,.4)}
+.dchip.open i{background:var(--caution)}
+/* ---------- stepper ---------- */
+.stepper{display:flex;align-items:center;gap:2px;flex:none}
+.st-b{
+  width:28px;height:26px;border:1px solid var(--seam);border-radius:var(--r-chip);
+  color:var(--stone);font-size:14px;line-height:1;transition:all .15s;
+}
+.st-b:hover{color:var(--washi);border-color:var(--stone)}
+.st-v{font-family:var(--font-data);font-size:15px;min-width:34px;text-align:center}
+.st-v.up{color:var(--copper-hi)}
+.st-v.down{color:var(--mizu)}
+/* ---------- honest gaps ---------- */
+.gapcard{border-style:dashed;border-color:#2C2822}
+.gapcard .pill{color:var(--faint);border-color:#2C2822}
+.gapnote{
+  margin-top:12px;font-size:11px;line-height:1.6;color:var(--faint);
+  border-top:1px solid var(--seam);padding-top:10px;
+}
+.rd .n.gap{color:var(--faint)}
+.rd .note.dim{color:var(--faint)}
+.val.gap{color:var(--faint)}
+.agenda{margin-top:10px}
+.arow{display:flex;gap:12px;padding:7px 0;border-bottom:1px solid var(--seam);font-size:12px}
+.arow:last-child{border-bottom:none}
+.arow .at{font-family:var(--font-data);font-size:11px;color:var(--stone);width:44px;flex:none}
+.arow.empty .at,.arow.empty .ae{color:var(--faint)}
+.arow.empty{min-height:28px}
+/* ---------- kids' school ---------- */
+.kidsrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.kidcol{border-left:2px solid var(--seam);padding-left:10px}
+.kidcol.a-moss{border-left-color:var(--moss)}
+.kidcol.a-mizu{border-left-color:var(--mizu)}
+.kidcol .kn{font-size:12px}
+.kidcol .kv{font-family:var(--font-data);font-size:18px;margin-top:4px}
+.kidcol .ks{font-family:var(--font-data);font-size:10px;letter-spacing:.05em;color:var(--faint);margin-top:2px}
+.weekgrid{display:grid;grid-template-columns:44px repeat(5,1fr);gap:1px;background:var(--seam);border:1px solid var(--seam);border-radius:4px;overflow:hidden;margin-top:12px}
+.weekgrid > div{background:var(--char-2);padding:7px 6px;font-size:11px;min-height:30px}
+.weekgrid .wg-h{font-family:var(--font-data);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone);text-align:center}
+.weekgrid .wg-p{font-family:var(--font-data);font-size:10px;color:var(--faint);text-align:center}
+.weekgrid .wg-c{color:var(--faint)}
 @media(max-width:760px){
   .g4{grid-template-columns:repeat(2,1fr)}
   .g3{grid-template-columns:repeat(2,1fr)}
   .cams{grid-template-columns:repeat(2,1fr)}
-  .grid,.sect,.scenes,.cams{padding-left:14px;padding-right:14px}
+  .grid,.sect,.scenes,.cams,.attn{padding-left:14px;padding-right:14px}
   .dash-head{padding:20px 14px 18px}
   .dh-time{font-size:25px}
   .appbar{padding:12px 14px 8px}
@@ -552,6 +776,107 @@ select.sel option{background:var(--char-2);color:var(--washi)}
 .tog-ind i{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:2px;background:var(--stone);transition:all .2s}
 .zone.on .tog-ind{border-color:var(--copper-lo);background:rgba(192,117,74,.14)}
 .zone.on .tog-ind i{left:21px;background:var(--copper)}
+/* ============================================================
+   HOME — state of the house. Every element maps to a live entity;
+   nothing here is a sensor the instance does not have.
+   ============================================================ */
+
+/* people — person.* with the fixed identity colours */
+.people{display:flex;gap:8px;padding:16px 26px 0;flex-wrap:wrap}
+.per{
+  display:flex;align-items:center;gap:9px;border:1px solid var(--seam);
+  border-radius:var(--r-chip);padding:7px 13px;background:none;
+}
+.per > i{width:6px;height:6px;border-radius:50%;background:var(--accent);flex:none;box-shadow:0 0 7px -1px var(--accent)}
+.per.away > i{background:none;border:1px solid var(--faint);box-shadow:none}
+.per .n{font-size:13px;font-weight:400}
+.per.away .n{color:var(--stone)}
+.per .s{font-family:var(--font-data);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--stone)}
+.per.ghost{cursor:pointer;transition:border-color .2s}
+.per.ghost:hover{border-color:var(--stone)}
+
+/* running now — the kintsugi list. A row earns copper only while its device runs. */
+.runlist{margin-top:6px}
+.runrow{
+  display:flex;align-items:center;gap:12px;padding:8px 0;width:100%;text-align:left;
+  border-top:1px solid var(--seam);transition:opacity .3s ease;
+}
+.runrow:first-child{border-top:none}
+.runrow .rk{font-family:var(--font-display);font-size:13px;letter-spacing:.2em;color:var(--faint);width:24px;flex:none;transition:color .4s var(--ease,ease)}
+.runrow.on .rk{color:var(--copper)}
+.runrow .rn{flex:1;min-width:0;font-size:13px;font-weight:400}
+.runrow .rn em{
+  display:block;font-style:normal;font-family:var(--font-data);font-size:10px;
+  letter-spacing:.03em;color:var(--stone);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.runrow .rv{font-family:var(--font-data);font-size:13px;color:var(--stone);flex:none}
+.runrow.on .rv{color:var(--washi)}
+.runrow.idle{opacity:.45}
+.runrow:hover{opacity:1}
+.runempty{font-family:var(--font-display);font-size:14px;color:var(--stone);padding:16px 0 8px;text-align:center;letter-spacing:.1em}
+
+/* solar — inverter now + Forecast.Solar curve */
+.enow{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:10px}
+.enow .big{font-family:var(--font-data);font-size:36px;font-weight:300;line-height:1;color:var(--copper-hi)}
+.enow .big small{font-size:13px;color:var(--stone);margin-left:4px}
+.estack{text-align:right;min-width:0}
+.estack .l{font-family:var(--font-data);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+.estack .d{font-family:var(--font-data);font-size:11px;color:var(--stone);margin-top:3px}
+#solar-card{display:flex;flex-direction:column}
+.ecurve{flex:0 0 auto;height:92px;margin-top:10px}
+.ecurve svg{width:100%;height:100%;display:block}
+.ecurve .band{fill:rgba(192,117,74,.10)}
+.ecurve .line{fill:none;stroke:var(--copper-lo);stroke-width:1.2}
+.ecurve .nowline{stroke:var(--copper-hi);stroke-width:1;stroke-dasharray:2 3;opacity:.8}
+.estat{display:flex;gap:22px;flex-wrap:wrap;margin-top:auto;padding-top:11px;border-top:1px solid var(--seam)}
+.estat .e .l{font-family:var(--font-data);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+.estat .e .v{font-family:var(--font-data);font-size:15px;font-weight:300;margin-top:3px}
+.estat .e .v span{font-size:10px;color:var(--stone);margin-left:3px}
+
+/* room tiles — one real fact each, no invented temperatures */
+.rtile{display:flex;align-items:center;gap:11px;padding:12px 14px;text-align:left;width:100%;cursor:pointer}
+.rtile:hover{transform:translateY(-1px)}
+.rtile .k{font-family:var(--font-display);font-size:11px;letter-spacing:.22em;color:var(--seam);width:36px;flex:none;transition:color .25s}
+.rtile:hover .k{color:var(--copper-lo)}
+.rtile .b{flex:1;min-width:0;display:block}
+.rtile .nm{display:block;font-size:13px;font-weight:400}
+.rtile .st{
+  display:block;font-family:var(--font-data);font-size:10px;letter-spacing:.02em;color:var(--stone);
+  margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.rtile .st b{color:var(--oak);font-weight:400}
+
+/* a sub-label inside a slider row reads like the ones in .vrow */
+.light .nm em{
+  display:block;font-style:normal;font-family:var(--font-data);font-size:10px;
+  letter-spacing:.03em;color:var(--stone);margin-top:2px;
+}
+
+/* openings and motion */
+.wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:0 24px;margin-top:6px;flex:1;align-content:space-between}
+.wrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--seam)}
+.wcol .wrow:first-child{border-top:none}
+.wrow .nm{flex:1;min-width:0;font-size:13px;font-weight:400}
+.wrow .nm em{display:block;font-style:normal;font-family:var(--font-data);font-size:10px;color:var(--stone);margin-top:2px}
+.wrow .v{font-family:var(--font-data);font-size:12px;color:var(--washi);flex:none}
+.wrow .v.warn{color:var(--caution)}
+
+/* the two cameras this house actually has */
+#watch-card{display:flex;flex-direction:column}
+#dbl-cam-card .cam{aspect-ratio:2/1}
+
+@media(max-width:1000px){ .wgrid{grid-template-columns:1fr 1fr} }
+@media(max-width:760px){
+  .people{padding-left:14px;padding-right:14px}
+  .wgrid{grid-template-columns:1fr;gap:0}
+  .wcol:nth-child(2) .wrow:first-child{border-top:1px solid var(--seam)}
+}
+@media(max-width:560px){
+  .enow .big{font-size:30px}
+  .estat{gap:14px}
+  .rtile .k{width:30px;font-size:10px}
+}
 </style>
 </head>
 <body>
@@ -563,169 +888,611 @@ select.sel option{background:var(--char-2);color:var(--washi)}
   </div>
   <nav class="tabs planks">
     <button class="tab active" data-view="home"><span class="k">家</span>Home</button>
-    <button class="tab" data-view="living"><span class="k">居</span>Living room</button>
+    <button class="tab" data-view="living"><span class="k">居</span>Living</button>
     <button class="tab" data-view="master"><span class="k">寝</span>Bedroom</button>
     <button class="tab" data-view="kids"><span class="k">子</span>Kids' rooms</button>
-    <button class="tab" data-view="wellness"><span class="k">湯</span>Wellness</button>
+    <button class="tab" data-view="mezzanine"><span class="k">階</span>Mezzanine</button>
+    <button class="tab" data-view="onsen"><span class="k">温</span>Onsen</button>
     <button class="tab" data-view="garden"><span class="k">庭</span>Garden</button>
+    <button class="tab" data-view="utility"><span class="k">屋</span>Utility &amp; guest</button>
   </nav>
 
   <!-- ============ VIEW: HOME ============ -->
+  <!-- Every control below maps to an entity in docs/migration/entities.csv. Five cards have no
+       data source on this instance yet — water meters, waste collection, the school timetable,
+       a family calendar, and weekly/monthly consumption. Those carry representative sample
+       data so the layout can be judged, and each says so in its footer line. Nothing else on
+       this page is invented: if a reading has no footer caveat, a real entity publishes it. -->
   <section class="view on" id="v-home">
     <div class="dash-head planks">
       <div class="dh-row">
         <div>
           <div class="dh-kanji">墨 の 家</div>
           <div class="dh-title" id="greet">Good evening</div>
-          <div class="dh-sub" id="home-sub">Everyone home · <span id="lights-count">4</span> lights on · <span id="sauna-note">Sauna idle</span></div>
+          <div class="dh-sub"><span id="home-who">Tomek, Olaf and Zoja home</span> · <span id="lights-count">5</span> lights on · <span id="sauna-note">Sauna idle</span></div>
         </div>
         <div class="dh-clock">
           <div class="dh-time" id="clock2">--:--</div>
-          <div class="dh-wx"><b id="solar-hdr">6.2 kW</b> solar · Clear, 21°C · Sunset 20:14</div>
+          <div class="dh-wx"><b id="out-temp">18.9°</b> outside · 71% · Sunset 20:14</div>
         </div>
       </div>
     </div>
 
+    <!-- the morning write-up — generated by ai_task.google_ai_task, the same engine the
+         sprinkler forecast uses. The text is illustrative of the format, not a reading. -->
     <div class="grid">
-      <div class="card energy">
-        <div class="label">Energy · now</div>
-        <div class="en-row" style="margin-top:10px">
-          <div class="en-node solar"><div class="label">Solar</div><div class="v"><span id="en-solar">6.2</span><small> kW</small></div></div>
-          <div class="en-node"><div class="label">House</div><div class="v"><span id="en-house">2.8</span><small> kW</small></div></div>
-          <div class="en-node grid"><div class="label">To grid</div><div class="v"><span id="en-grid">3.4</span><small> kW</small></div></div>
+      <div class="card brief" id="brief-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">記</span><span class="label">Today</span></div>
+          <div class="chiprow">
+            <span class="pill" id="brief-time">Written 06:45</span>
+            <button class="act ghost" id="brief-refresh" style="margin-top:0">Rewrite</button>
+          </div>
         </div>
-        <div class="en-flow">
-          <svg viewBox="0 0 600 46" preserveAspectRatio="none">
-            <defs><linearGradient id="cu" x1="0" x2="1"><stop offset="0" stop-color="#8C4E2E"/><stop offset=".5" stop-color="#E8A56F"/><stop offset="1" stop-color="#8C4E2E"/></linearGradient></defs>
-            <path class="flowline" d="M10 22 C 160 17, 340 27, 590 22"/>
-            <path class="flowline" d="M250 24 C 285 34, 315 33, 350 36"/>
-            <path class="flowlive" d="M10 22 C 160 17, 340 27, 590 22"/>
-            <path class="flowlive" style="animation-duration:3.4s" d="M250 24 C 285 34, 315 33, 350 36"/>
+        <p class="brieftext" id="brief-text">Quiet night — the house held 21.4° on eleven degree minutes and the compressor only ran twice.
+          Ania is still in Poznań and back around six. The front mower threw a blade jam at 14:20 and is sitting
+          in the grass by the birches; everything else did its job. Rain is coming in overnight, fourteen
+          millimetres between midnight and four, so tomorrow's sprinkler cycle will mostly stand down and the
+          terrace furniture is worth covering. Olaf has PE first period, so the kit needs to be by the door.
+          Hot water is at 48° and charging — if you want the sauna tonight, start it by nine to keep both on
+          cheap-rate hours.</p>
+        <div class="fmeta">ai_task.google_ai_task · reads presence, heat pump, weather, mowers and the to-do lists — the automation still needs writing</div>
+      </div>
+    </div>
+
+    <!-- alarm — input_boolean.alarm_armed drives three real automations. Disarming asks for a
+         code in the mock; real code validation needs Alarmo's alarm_control_panel entity. -->
+    <div class="alarmbar" id="alarm-bar">
+      <div class="ab-left">
+        <span class="ab-dot"></span>
+        <span class="k">守</span>
+        <div class="ab-txt">
+          <b id="ab-state">Alarm off</b>
+          <em id="ab-sub">Nobody out · doors all closed</em>
+        </div>
+      </div>
+      <div class="ab-right" id="ab-actions">
+        <button class="act ghost" id="ab-arm-night">Arm night</button>
+        <button class="act" id="ab-arm">Arm away</button>
+        <button class="act alert" id="ab-disarm" hidden>Disarm</button>
+      </div>
+    </div>
+
+    <!-- people — person.tomasz / ania / olaf / zoja, coloured by the fixed identity system -->
+    <div class="people" id="people">
+      <div class="per a-copper"><i></i><span class="n">Tomek</span><span class="s">Home</span></div>
+      <div class="per a-oak away"><i></i><span class="n">Ania</span><span class="s">Poznań · 25 min</span></div>
+      <div class="per a-moss"><i></i><span class="n">Olaf</span><span class="s">Home</span></div>
+      <div class="per a-mizu"><i></i><span class="n">Zoja</span><span class="s">Home</span></div>
+      <button class="per ghost" data-goto="utility"><i class="dot alert"></i><span class="n">Doorbell</span><span class="s">Visitor 17:42</span></button>
+    </div>
+
+    <!-- everything in the house that wants a person — the one place attention collects -->
+    <div class="attn" id="attn">
+      <span class="label">Needs a hand</span>
+      <button class="note alert" data-goto="garden"><i class="dot alert"></i>Front mower<span class="t">E1 · blade jam</span></button>
+      <button class="note" data-goto="onsen"><i class="dot caution"></i>Hot tub filter<span class="t">14 d · rinse due</span></button>
+      <button class="note" data-goto="utility"><i class="dot caution"></i>Dryer<span class="t" data-dryer>0:34 left</span></button>
+      <button class="note" data-goto="mezzanine"><i class="dot caution"></i>Printer toner<span class="t">42% · order at 15%</span></button>
+      <button class="note" data-goto="living"><i class="dot caution"></i>Deebot dustbin<span class="t">full · empty it</span></button>
+      <button class="note"><i class="dot caution"></i>Batteries<span class="t">3 below 20%</span></button>
+    </div>
+
+    <div class="sect"><h3>Running now</h3><span class="k">動</span></div>
+    <div class="grid g2" style="align-items:start">
+      <div class="card" id="run-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">動</span><span class="label">Running now</span></div>
+          <span class="pill live" id="run-count">4 running</span>
+        </div>
+        <div class="runlist" id="runlist">
+          <button class="runrow idle" id="run-sauna" data-goto="onsen">
+            <span class="rk">蒸</span>
+            <span class="rn">Sauna<em id="run-sauna-sub">climate.sauna · off</em></span>
+            <span class="rv" id="run-sauna-v">64°</span>
+          </button>
+          <button class="runrow on" id="run-tub" data-goto="onsen">
+            <span class="rk">湯</span>
+            <span class="rn">Hot tub<em id="run-tub-sub">heating to 38.5° · 2.1 kW</em></span>
+            <span class="rv" id="run-tub-v">37.4°</span>
+          </button>
+          <button class="runrow on" id="run-pool" data-goto="onsen">
+            <span class="rk">泳</span>
+            <span class="rn">Pool filter<em>schedule · until 21:00</em></span>
+            <span class="rv">0.31 kW</span>
+          </button>
+          <button class="runrow on" id="run-dryer" data-goto="utility">
+            <span class="rk">洗</span>
+            <span class="rn">Suszarka<em>cupboard dry · wrinkle prevent</em></span>
+            <span class="rv" data-dryer>0:34</span>
+          </button>
+          <button class="runrow on" id="run-heat" data-goto="utility">
+            <span class="rk">熱</span>
+            <span class="rn">Heat pump<em>compressor 42 Hz · hot water 48°</em></span>
+            <span class="rv">on</span>
+          </button>
+          <button class="runrow idle" id="run-media" data-goto="living">
+            <span class="rk">音</span>
+            <span class="rn">Music<em>all speakers · idle</em></span>
+            <span class="rv">—</span>
+          </button>
+          <button class="runrow idle" id="run-mow" data-goto="garden">
+            <span class="rk">刈</span>
+            <span class="rn">Mowers<em>Tyl docked · M1 held on fault</em></span>
+            <span class="rv">100 · 66%</span>
+          </button>
+          <button class="runrow idle" id="run-spr" data-goto="garden">
+            <span class="rk">撒</span>
+            <span class="rn">Sprinklers<em>next cycle 05:30 · 4 zones</em></span>
+            <span class="rv">idle</span>
+          </button>
+          <button class="runrow idle" id="run-vac" data-goto="living">
+            <span class="rk">掃</span>
+            <span class="rn">Deebot<em>docked · charged</em></span>
+            <span class="rv">idle</span>
+          </button>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+      <!-- energy — FusionSolar publishes production by day/month/year and consumption by
+           year only; weekly and monthly consumption need utility_meter helpers. -->
+      <div class="card veined a-copper" id="solar-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">陽</span><span class="label">Solar</span></div>
+          <span class="pill live" id="solar-pill">Producing</span>
+        </div>
+        <div class="enow">
+          <div class="big"><span id="en-solar">6.2</span><small>kW</small></div>
+          <div class="estack">
+            <div class="l">Inverter</div>
+            <div class="d">Huawei · 22 strings · 97.4%</div>
+          </div>
+        </div>
+        <div class="ecurve">
+          <svg viewBox="0 0 600 54" preserveAspectRatio="none">
+            <path class="band" d="M0 54 C 90 54, 120 30, 180 18 C 250 4, 330 2, 400 14 C 470 26, 520 46, 600 54 Z"/>
+            <path class="line" d="M0 54 C 90 54, 120 30, 180 18 C 250 4, 330 2, 400 14 C 470 26, 520 46, 600 54"/>
+            <line class="nowline" x1="330" y1="0" x2="330" y2="54"/>
+            <circle cx="330" cy="6" r="3" fill="#DE9163"/>
           </svg>
         </div>
-        <div class="en-meta">
-          <span>Today <b>31.4 kWh</b> produced</span>
-          <span><b>12.9 kWh</b> used</span>
-          <span>Self-sufficiency <b>84%</b></span>
+        <div class="estat">
+          <div class="e"><div class="l">Today</div><div class="v">31.4<span>kWh</span></div></div>
+          <div class="e"><div class="l">This month</div><div class="v">742<span>kWh</span></div></div>
+          <div class="e"><div class="l">Year to date</div><div class="v">7.9<span>MWh</span></div></div>
+          <div class="e"><div class="l">Fed in · year</div><div class="v">4.1<span>MWh</span></div></div>
+        </div>
+        <div class="usedrow">
+          <div class="ur-l"><span class="label">Used</span></div>
+          <div class="ur-g">
+            <div class="u"><span class="l">This week</span><span class="v">119 kWh</span></div>
+            <div class="u"><span class="l">This month</span><span class="v">342 kWh</span></div>
+            <div class="u"><span class="l">Year to date</span><span class="v">4.6 MWh</span></div>
+          </div>
+        </div>
+        <div class="fmeta">Sample figures — week and month need <b>utility_meter</b> helpers; FusionSolar publishes consumption for the current year only</div>
+      </div>
+
+      <!-- weather — OpenWeatherMap + Polleninformation -->
+      <div class="card a-mizu" id="wx-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">天</span><span class="label">Outside</span></div>
+          <span class="pill cool" id="wx-cond">Partly cloudy</span>
+        </div>
+        <div class="enow" style="margin-top:4px">
+          <div class="big" style="color:var(--mizu)"><span id="wx-temp">18.9</span><small>°C</small></div>
+          <div class="estack">
+            <div class="l">Feels like <b id="wx-feels" style="color:var(--washi);font-weight:400">18.1°</b></div>
+            <div class="d">SwitchBot by the tub · Sunset 20:14</div>
+          </div>
+        </div>
+        <div class="readings" style="grid-template-columns:repeat(2,1fr);margin-top:12px">
+          <div class="rd"><div class="l">UV index</div><div class="n">1<small>low</small></div></div>
+          <div class="rd"><div class="l">Wind gust</div><div class="n">14<small>km/h</small></div></div>
+          <div class="rd"><div class="l">Cloud cover</div><div class="n">62<small>%</small></div></div>
+          <div class="rd"><div class="l">Precipitation</div><div class="n">None</div></div>
+        </div>
+        <div class="vrow" style="margin-top:14px"><div class="nm">Pollen<em>Polleninformation · allergy risk</em></div><span class="pill ok" id="pollen-risk">Low</span></div>
+        <div class="chiprow" style="flex-wrap:wrap;gap:6px;margin-top:8px">
+          <span class="mchip">Trawy · 2</span><span class="mchip">Brzoza · 1</span><span class="mchip">Bylica · 0</span><span class="mchip">Olsza · 0</span><span class="mchip">Ambrozja · 0</span>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <div class="sect"><h3>Quick controls</h3><span class="k">灯</span></div>
+    <div class="grid g3" style="align-items:start">
+      <!-- the lights actually reached for: garden, porch, entrance -->
+      <div class="card" id="quick-lights">
+        <div class="vhead">
+          <div class="ttl"><span class="k">灯</span><span class="label">Lights</span></div>
+          <span class="pill" id="ql-count">4 on</span>
+        </div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Garden lamps<em>8 bollards · Garden back</em></div><button class="toggle on ql"><i></i></button></div>
+        <div class="vrow"><div class="nm">Border uplights<em>Lamp switch · birches</em></div><button class="toggle ql"><i></i></button></div>
+        <div class="vrow"><div class="nm">Porch bulbs<em>Zigbee group</em></div><button class="toggle on ql"><i></i></button></div>
+        <div class="vrow"><div class="nm">Porch LEDs<em>light.porch_leds · 5 strips</em></div><button class="toggle on ql"><i></i></button></div>
+        <div class="vrow"><div class="nm">Entrance<em>Zha entrance · main</em></div><button class="toggle on ql"><i></i></button></div>
+        <div class="vrow"><div class="nm">Entrance outside<em>over the door</em></div><button class="toggle ql"><i></i></button></div>
+        <div class="vrow"><div class="nm">Driveway<em>garage side</em></div><button class="toggle ql"><i></i></button></div>
+        <button class="act ghost" id="ql-all" style="width:100%">All lights off<em></em></button>
+      </div>
+
+      <!-- whole-home audio — defaults to the All speakers group -->
+      <div class="card" id="home-media">
+        <div class="vhead">
+          <div class="ttl"><span class="k">音</span><span class="label">Music</span></div>
+          <span class="pill" id="hm-pill">Idle</span>
+        </div>
+        <div class="media" style="margin-top:8px">
+          <div class="art"></div>
+          <div style="min-width:0">
+            <div class="tt" id="hm-title">Nothing playing</div>
+            <div class="ar" id="hm-artist">All speakers · 12 zones grouped</div>
+            <div class="transport">
+              <button id="hm-prev">◁</button><button id="hm-play">▷</button><button id="hm-next">▷|</button>
+            </div>
+          </div>
+        </div>
+        <div class="selrow" style="margin-top:10px">
+          <select class="sel" id="hm-zone">
+            <option>All speakers</option>
+            <option>All speakers no kids</option>
+            <option>Living room speakers</option>
+            <option>Living room and garden</option>
+            <option>Living room and outside</option>
+            <option>Garden</option>
+            <option>Atrium speaker</option>
+            <option>Hall</option>
+            <option>Bathroom</option>
+            <option>Kids' speakers</option>
+            <option>Olaf's speaker</option>
+            <option>Tivik przy Łożu</option>
+          </select>
+          <select class="sel" id="hm-src">
+            <option>Spotify — Tomasz</option>
+            <option>Music Assistant</option>
+            <option>Jellyfin</option>
+            <option>Radio</option>
+          </select>
+        </div>
+        <div class="light-row" style="margin-top:10px">
+          <div class="light"><span class="nm">Volume<em>group volume</em></span>
+            <input type="range" min="0" max="100" value="24" id="hm-vol"><span class="pct">24%</span></div>
+        </div>
+      </div>
+
+      <!-- vacuum -->
+      <div class="card" id="home-vac">
+        <div class="vhead">
+          <div class="ttl"><span class="k">掃</span><span class="label">Deebot T9+</span></div>
+          <span class="pill ok" id="hv-pill">Docked</span>
+        </div>
+        <div class="readings" style="grid-template-columns:repeat(2,1fr);margin-top:10px">
+          <div class="rd"><div class="l">Battery</div><div class="n">98<small>%</small></div><div class="note">Charged</div></div>
+          <div class="rd"><div class="l">Last clean</div><div class="n">14:10</div><div class="note">Living room · 42 m²</div></div>
+        </div>
+        <div class="vrow" style="margin-top:14px"><div class="nm">Water flow<em>select · mop attached</em></div>
+          <div class="chiprow excl"><span class="mchip">Low</span><span class="mchip on">Medium</span><span class="mchip">High</span></div>
+        </div>
+        <div class="vrow"><div class="nm">Dustbin<em>full · needs emptying</em></div><div class="val warn">Full</div></div>
+        <div class="acts">
+          <button class="act" id="hv-clean" style="flex:1">Clean</button>
+          <button class="act ghost" id="hv-dock" style="flex:1">Send home</button>
         </div>
       </div>
     </div>
 
+    <div class="sect"><h3>House at a glance</h3><span class="k">戸</span></div>
+    <!-- every room, so the blanks read as a list of where a sensor still needs to go.
+         Real sensors: Living Room, Guest suite (SwitchBot 4C23), NSPanel, outdoors (73EA). -->
+    <div class="grid">
+      <div class="card tstrip-card" id="temp-strip">
+        <div class="tstrip">
+          <button class="tcell" data-goto="living"><span class="tk">居間</span><span class="tv">22.4°</span></button>
+          <button class="tcell" data-goto="living"><span class="tk">台所</span><span class="tv none">—</span></button>
+          <button class="tcell" data-goto="master"><span class="tk">寝室</span><span class="tv none">—</span></button>
+          <button class="tcell" data-goto="kids"><span class="tk">息子</span><span class="tv none">—</span></button>
+          <button class="tcell" data-goto="kids"><span class="tk">娘</span><span class="tv none">—</span></button>
+          <button class="tcell" data-goto="mezzanine"><span class="tk">中二階</span><span class="tv none">—</span></button>
+          <button class="tcell" data-goto="utility"><span class="tk">風呂</span><span class="tv none">—</span></button>
+          <button class="tcell" data-goto="utility"><span class="tk">玄関</span><span class="tv none">—</span></button>
+          <button class="tcell" data-goto="utility"><span class="tk">廊下</span><span class="tv none">—</span></button>
+          <button class="tcell" data-goto="utility"><span class="tk">蔵</span><span class="tv none">—</span></button>
+          <button class="tcell" data-goto="utility"><span class="tk">洗濯</span><span class="tv none">—</span></button>
+          <button class="tcell" data-goto="utility"><span class="tk">車庫</span><span class="tv none">—</span></button>
+          <button class="tcell" data-goto="utility"><span class="tk">客間</span><span class="tv">19.8°</span></button>
+          <button class="tcell"><span class="tk">パネル</span><span class="tv">21.8°</span></button>
+          <button class="tcell" data-goto="garden"><span class="tk">庭</span><span class="tv">18.9°</span></button>
+        </div>
+        <div class="fmeta">Only four things report a temperature: the living room, the guest suite, the NSPanel (no area set on it, so it is listed on its own) and outdoors by the tub. The eleven dashes are the rooms where a sensor still needs to go.</div>
+      </div>
+    </div>
+
+    <div class="grid g3" style="align-items:start">
+      <div class="span2" style="display:flex;flex-direction:column;gap:10px;min-width:0">
+      <!-- doors, minimal: a chip per contact, colour only when something is open -->
+      <div class="card" id="doors-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">戸</span><span class="label">Doors &amp; gate</span></div>
+          <span class="pill ok" id="doors-pill">All closed</span>
+        </div>
+        <div class="dchips" id="dchips">
+          <span class="dchip"><i></i>Garage gate</span>
+          <span class="dchip open"><i></i>Bathroom</span>
+          <span class="dchip"><i></i>Closet left</span>
+          <span class="dchip"><i></i>Closet right</span>
+          <span class="dchip"><i></i>Kitchen drawer</span>
+        </div>
+        <div class="svcline">
+          <div class="s"><span class="l">Motion</span><span class="d">all clear</span></div>
+          <div class="s"><span class="l">Last event</span><span class="d">hall · 3 min</span></div>
+        </div>
+      </div>
+
+      <!-- waste collection — sample schedule; no source connected yet -->
+      <div class="card" id="waste-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">塵</span><span class="label">Bins</span></div>
+          <span class="pill caution" id="waste-pill">Out tomorrow night</span>
+        </div>
+        <div class="binrow">
+          <div class="bnext">
+            <div class="bwhen">Mon 21.9</div>
+            <div class="bwhat"><span class="bdot mixed"></span>Zmieszane <span class="bsep">+</span> <span class="bdot bio"></span>Bio</div>
+          </div>
+          <div class="blist">
+            <div class="bl"><span class="bd">Thu 24.9</span><span class="bt"><span class="bdot plastic"></span>Plastik i metal</span></div>
+            <div class="bl"><span class="bd">Mon 5.10</span><span class="bt"><span class="bdot paper"></span>Papier</span></div>
+            <div class="bl"><span class="bd">Mon 5.10</span><span class="bt"><span class="bdot glass"></span>Szkło</span></div>
+          </div>
+        </div>
+        <div class="fmeta">Sample schedule — needs the commune's collection calendar as an ICS feed, or a waste-collection integration</div>
+      </div>
+      </div>
+
+      <!-- doorbell -->
+      <div class="card" id="dbl-cam-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">呼</span><span class="label">Doorbell</span></div>
+          <span class="pill" id="home-dbl-pill">Visitor 17:42</span>
+        </div>
+        <div class="cam" data-cam="doorbell" tabindex="0" role="button" aria-label="Open doorbell camera" style="margin-top:8px">
+          <svg viewBox="0 0 160 100" preserveAspectRatio="none"><path d="M0 78 L60 40 L100 62 L160 30 L160 100 L0 100 Z" fill="#1E1811"/><path d="M60 40 L60 100" stroke="#2A2219" stroke-width="1"/></svg>
+          <span class="rec">LIVE</span><span class="label">Front door</span>
+        </div>
+        <div class="vrow" style="margin-top:10px"><div class="nm">Record<em>switch.main_entrance_doorbell_record</em></div><button class="toggle on" id="dbl-rec-home"><i></i></button></div>
+        <div class="vrow"><div class="nm">Privacy mode<em>switch.main_entrance_doorbell_privacy_mode</em></div><button class="toggle" id="dbl-priv-home"><i></i></button></div>
+      </div>
+    </div>
+
+    <div class="sect"><h3>Heating &amp; water</h3><span class="k">熱</span></div>
+    <div class="grid g3">
+      <!-- heating — compact. Offset (47011) is the one control: the heat curve shifted ±3°. -->
+      <div class="card veined a-oak" id="heat-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">熱</span><span class="label">Heating</span></div>
+          <span class="pill live" id="heat-pill">Compressor on</span>
+        </div>
+        <div class="readings" style="grid-template-columns:repeat(3,1fr);margin-top:10px">
+          <div class="rd"><div class="l">Outside</div><div class="n">18.9<small>°C</small></div></div>
+          <div class="rd"><div class="l">Target</div><div class="n">34.0<small>°C</small></div></div>
+          <div class="rd"><div class="l">Flow</div><div class="n">33.2<small>°C</small></div></div>
+        </div>
+        <div class="vrow" style="margin-top:14px">
+          <div class="nm">Curve offset<em>Offset (47011) · −3 to +3</em></div>
+          <div class="stepper">
+            <button class="st-b" id="ofs-down">−</button>
+            <span class="st-v" id="ofs-val">0</span>
+            <button class="st-b" id="ofs-up">+</button>
+          </div>
+        </div>
+        <div class="svcline">
+          <div class="s"><span class="l">Compressor</span><span class="d" id="heat-comp">42 Hz</span></div>
+          <div class="s"><span class="l">Degree minutes</span><span class="d">−118</span></div>
+        </div>
+      </div>
+
+      <!-- hot water -->
+      <div class="card" id="hw-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">湯</span><span class="label">Hot water</span></div>
+          <span class="pill live">Charging</span>
+        </div>
+        <div class="readings" style="grid-template-columns:repeat(2,1fr);margin-top:10px">
+          <div class="rd"><div class="l">Temperature</div><div class="n">48.2<small>°C</small></div><div class="note">Top 51.0°</div></div>
+          <div class="rd"><div class="l">Mode</div><div class="n">Eco</div><div class="note">Hot water amount</div></div>
+        </div>
+        <div class="vrow" style="margin-top:14px"><div class="nm">Temporary lux<em>one-off boost · Temporary lux (50004)</em></div><button class="toggle" id="hw-lux"><i></i></button></div>
+        <div class="svcline">
+          <div class="s"><span class="l">Charging</span><span class="d">BT6 · 46.8°</span></div>
+        </div>
+      </div>
+
+      <!-- water usage — no meter of any kind exists on this instance -->
+      <div class="card" id="wateruse-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">水</span><span class="label">Water used</span></div>
+          <span class="pill">September</span>
+        </div>
+        <div class="readings" style="grid-template-columns:repeat(2,1fr);margin-top:10px">
+          <div class="rd"><div class="l">Main gauge</div><div class="n">9.4<small>m³</small></div><div class="note">0.49 m³ a day</div></div>
+          <div class="rd"><div class="l">Garden gauge</div><div class="n">21.6<small>m³</small></div><div class="note">sprinklers + pool top-up</div></div>
+        </div>
+        <div class="svcline">
+          <div class="s"><span class="l">Today</span><span class="d">0.62 m³</span></div>
+          <div class="s"><span class="l">Year</span><span class="d">214 m³</span></div>
+          <div class="s"><span class="l">Peak day</span><span class="d">3.1 m³ · 12 Jul</span></div>
+        </div>
+        <div class="fmeta">Sample figures — both gauges need a pulse reader (ESPHome or a Zigbee counter); nothing measures water on this instance yet</div>
+      </div>
+    </div>
+
+    <div class="sect"><h3>The day ahead</h3><span class="k">暦</span></div>
+    <div class="grid g3" style="align-items:start">
+      <!-- calendar agenda — the only calendars on the instance mirror the to-do lists -->
+      <div class="card" id="agenda-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">暦</span><span class="label">Agenda</span></div>
+          <span class="pill" id="agenda-pill">Today · 5</span>
+        </div>
+        <div class="agenda" id="agenda-list">
+          <div class="arow"><span class="at">09:30</span><span class="ae">Olaf — football, Zaniemyśl<em>2 h · Tomek driving</em></span></div>
+          <div class="arow"><span class="at">11:00</span><span class="ae">Firewood delivery<em>3 m³ · stack by the sauna</em></span></div>
+          <div class="arow"><span class="at">14:00</span><span class="ae">Zoja — piano, Środa<em>45 min</em></span></div>
+          <div class="arow now"><span class="at">18:00</span><span class="ae">Ania back from Poznań<em>train 17:24</em></span></div>
+          <div class="arow"><span class="at">20:30</span><span class="ae">Sauna<em>heat from 21:00 · cheap rate</em></span></div>
+          <div class="arow next"><span class="at">Sun</span><span class="ae">Nowakowie for dinner<em>17:00 · at ours</em></span></div>
+        </div>
+        <div class="fmeta">Sample events — needs a family calendar (Google, CalDAV or a local ICS); the only calendar entities here mirror the to-do lists</div>
+      </div>
+
+      <!-- kids' school — no timetable source exists -->
+      <div class="card" id="school-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">学</span><span class="label">School</span><span class="pill" id="school-when">Monday</span></div>
+          <button class="act ghost" id="school-open" style="margin-top:0">Week</button>
+        </div>
+        <div class="kidsrow">
+          <div class="kidcol a-moss">
+            <div class="kn">Olaf<span class="kc">klasa 6</span></div>
+            <div class="kv">08:00</div>
+            <div class="ks">WF first · kit by the door</div>
+            <div class="kl">6 lessons · ends 12:45</div>
+          </div>
+          <div class="kidcol a-mizu">
+            <div class="kn">Zoja<span class="kc">klasa 4</span></div>
+            <div class="kv">08:55</div>
+            <div class="ks">Matematyka first</div>
+            <div class="kl">5 lessons · ends 12:45</div>
+          </div>
+        </div>
+        <div class="fmeta">Sample timetable — needs a Vulcan or Librus integration, or an ICS export per child</div>
+      </div>
+
+      <!-- Garmin coach — real sensors, except the planned workout -->
+      <div class="card" id="coach-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">走</span><span class="label">Coach</span></div>
+          <span class="pill ok" id="coach-pill">Productive</span>
+        </div>
+        <div class="readings" style="grid-template-columns:repeat(2,1fr);margin-top:10px">
+          <div class="rd"><div class="l">Readiness</div><div class="n">74<small>/100</small></div><div class="note">Morning score</div></div>
+          <div class="rd"><div class="l">Recovery</div><div class="n">11<small>h</small></div><div class="note">VO₂ max 51</div></div>
+        </div>
+        <div class="vrow" style="margin-top:12px"><div class="nm">Last activity<em>Run · 8.4 km · 43:12</em></div><div class="val">Yesterday</div></div>
+        <div class="vrow"><div class="nm">Next workout<em>Base run · 50 min easy</em></div><div class="val">Tomorrow</div></div>
+        <div class="fmeta">Everything here is real except the planned workout — the Garmin Connect integration does not expose the coach plan</div>
+      </div>
+    </div>
+
+    <!-- the house's real scenes, scripts and mode helpers -->
     <div class="scenes" id="scenebar">
-      <button class="scene active" data-scene="evening"><span class="k">夕</span>Evening</button>
       <button class="scene" data-scene="cinema"><span class="k">映</span>Cinema</button>
-      <button class="scene" data-scene="sauna"><span class="k">湯</span>Sauna night</button>
-      <button class="scene" data-scene="away"><span class="k">留</span>Away</button>
-      <button class="scene" data-scene="goodnight"><span class="k">眠</span>Goodnight</button>
+      <button class="scene" data-scene="screen"><span class="k">幕</span>Screen down</button>
+      <button class="scene" data-scene="sleep"><span class="k">寝</span>Time to sleep</button>
+      <button class="scene" data-scene="dobranoc"><span class="k">眠</span>Dobranoc</button>
+      <button class="scene" data-scene="outside"><span class="k">消</span>Outside lights off</button>
     </div>
 
-    <div class="sect"><h3>Living</h3><span class="k">居</span></div>
-    <div class="grid g4">
-      <button class="card room" data-goto="living"><span class="k">居間</span><h4>Living room</h4>
-        <div class="stat"><span class="t">22.5<small>°C</small></span><span class="devs" id="lr-devs"><i class="dot warm"></i> 3 lights · TV on</span></div></button>
-      <button class="card room" data-goto="none"><span class="k">台所</span><h4>Kitchen</h4>
-        <div class="stat"><span class="t">23.1<small>°C</small></span><span class="devs"><i class="dot on"></i> Bench light</span></div></button>
-      <button class="card room" data-goto="none"><span class="k">食</span><h4>Dining</h4>
-        <div class="stat"><span class="t">22.5<small>°C</small></span><span class="devs"><i class="dot"></i> All off</span></div></button>
-      <button class="card room" data-goto="none"><span class="k">縁側</span><h4>Terrace</h4>
-        <div class="stat"><span class="t">18.9<small>°C</small></span><span class="devs"><i class="dot warm"></i> String lights</span></div></button>
-    </div>
+    <!-- to-do — real todo.* lists: inbox (tasks), regular_tasks, lista_zakupow (groceries) -->
+    <div class="sect"><h3>To-do</h3><span class="k">用</span></div>
+    <div class="grid">
+      <div class="card" id="todo-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">用</span><span class="label">Lists</span></div>
+          <div class="chiprow" id="todo-tabs">
+            <span class="mchip on" data-tdtab="tasks">Tasks</span>
+            <span class="mchip" data-tdtab="regular">Regular tasks</span>
+            <span class="mchip" data-tdtab="groceries">Groceries</span>
+          </div>
+        </div>
 
-    <div class="sect"><h3>Upstairs &amp; rooms</h3><span class="k">上</span></div>
-    <div class="grid g4">
-      <button class="card room" data-goto="none"><span class="k">中二階</span><h4>Mezzanine</h4>
-        <div class="stat"><span class="t">22.8<small>°C</small></span><span class="devs"><i class="dot on"></i> Work desk</span></div></button>
-      <button class="card room" data-goto="master"><span class="k">主寝室</span><h4>Master bedroom</h4>
-        <div class="stat"><span class="t">20.4<small>°C</small></span><span class="devs"><i class="dot"></i> All off</span></div></button>
-      <button class="card room" data-goto="kids"><span class="k">部屋</span><h4>Olaf's room</h4>
-        <div class="stat"><span class="t">21.2<small>°C</small></span><span class="devs"><i class="dot warm"></i> Desk lamp</span></div></button>
-      <button class="card room" data-goto="kids"><span class="k">部屋</span><h4>Zoja's room</h4>
-        <div class="stat"><span class="t">21.0<small>°C</small></span><span class="devs"><i class="dot"></i> All off</span></div></button>
-    </div>
+        <div class="tdlist" data-tdpanel="tasks">
+          <div class="tditem"><button class="tdchk" aria-label="Mark done"></button><span class="tt">Book Zoja's dentist check-up</span></div>
+          <div class="tditem"><button class="tdchk" aria-label="Mark done"></button><span class="tt">Order Brother HL-1210W toner</span></div>
+          <div class="tditem done"><button class="tdchk" aria-label="Mark done"></button><span class="tt">Reply to guest suite booking</span></div>
+          <div class="tditem"><button class="tdchk" aria-label="Mark done"></button><span class="tt">Call about hot tub filter</span></div>
+        </div>
 
-    <div class="sect"><h3>Service &amp; guest</h3><span class="k">奥</span></div>
-    <div class="grid g4">
-      <button class="card room" data-goto="none"><span class="k">客間</span><h4>Guest suite</h4>
-        <div class="stat"><span class="t">19.8<small>°C</small></span><span class="devs"><i class="dot"></i> Door locked</span></div></button>
-      <button class="card room" data-goto="none"><span class="k">洗濯</span><h4>Laundry</h4>
-        <div class="stat"><span class="t">—</span><span class="devs"><i class="dot on"></i> Dryer · <span id="dryer-left">0:34</span> left</span></div></button>
-      <button class="card room" data-goto="none"><span class="k">車庫</span><h4>Garage</h4>
-        <div class="stat"><span class="t">16.2<small>°C</small></span><span class="devs"><i class="dot"></i> Closed</span></div></button>
-      <button class="card room" data-goto="none"><span class="k">屋根裏</span><h4>Attic</h4>
-        <div class="stat"><span class="t">24.6<small>°C</small></span><span class="devs"><i class="dot"></i> Quiet</span></div></button>
-    </div>
+        <div class="tdlist" data-tdpanel="regular" style="display:none">
+          <div class="tditem"><button class="tdchk" aria-label="Mark done"></button><span class="tt">Water the atrium plants</span><span class="tm">weekly</span></div>
+          <div class="tditem"><button class="tdchk" aria-label="Mark done"></button><span class="tt">Check pool filter cartridge</span><span class="tm">weekly</span></div>
+          <div class="tditem done"><button class="tdchk" aria-label="Mark done"></button><span class="tt">Clean gutters</span><span class="tm">monthly</span></div>
+          <div class="tditem"><button class="tdchk" aria-label="Mark done"></button><span class="tt">Top up hot tub chemicals</span><span class="tm">bi-weekly</span></div>
+        </div>
 
-    <div class="sect"><h3>Garden &amp; wellness</h3><span class="k">庭</span></div>
-    <div class="grid g4">
-      <button class="card well hot" data-goto="wellness" id="home-sauna">
-        <div class="label">Sauna</div><div class="v" id="home-sauna-v">64<small>°C · idle</small></div>
-        <div class="state" id="home-sauna-s">Tap to open controls</div>
-        <div class="bar"><i id="home-sauna-bar" style="width:0%"></i></div></button>
-      <button class="card well hot" data-goto="wellness"><div class="label">Hot tub</div><div class="v">38.5<small>°C</small></div>
-        <div class="state">Holding temperature</div><div class="bar"><i style="width:100%"></i></div></button>
-      <button class="card well water" data-goto="wellness"><div class="label">Pool</div><div class="v">26.1<small>°C</small></div>
-        <div class="state">Filtration until 21:00</div><div class="bar w"><i style="width:55%"></i></div></button>
-      <button class="card well water" data-goto="garden"><div class="label">Sprinklers</div><div class="v">05:30</div>
-        <div class="state">Next cycle · soil 41%</div><div class="bar w"><i style="width:41%"></i></div></button>
-    </div>
+        <div class="tdlist" data-tdpanel="groceries" style="display:none">
+          <div class="tditem"><button class="tdchk" aria-label="Mark done"></button><span class="tt">Milk</span></div>
+          <div class="tditem"><button class="tdchk" aria-label="Mark done"></button><span class="tt">Eggs</span></div>
+          <div class="tditem"><button class="tdchk" aria-label="Mark done"></button><span class="tt">Coffee beans</span></div>
+          <div class="tditem done"><button class="tdchk" aria-label="Mark done"></button><span class="tt">Dish soap</span></div>
+          <div class="tditem"><button class="tdchk" aria-label="Mark done"></button><span class="tt">Firewood for the pit</span></div>
+        </div>
 
-    <div class="sect"><h3>Cameras</h3><span class="k">目</span></div>
-    <div class="cams">
-      <div class="cam"><svg viewBox="0 0 160 100" preserveAspectRatio="none"><path d="M0 78 L60 40 L100 62 L160 30 L160 100 L0 100 Z" fill="#1E1811"/><path d="M60 40 L60 100" stroke="#2A2219" stroke-width="1"/></svg><span class="rec">LIVE</span><span class="label">Entrance</span></div>
-      <div class="cam"><svg viewBox="0 0 160 100" preserveAspectRatio="none"><path d="M0 60 Q80 30 160 66 L160 100 L0 100 Z" fill="#1B1710"/></svg><span class="rec">LIVE</span><span class="label">Driveway</span></div>
-      <div class="cam"><svg viewBox="0 0 160 100" preserveAspectRatio="none"><rect x="20" y="30" width="50" height="70" fill="#1E1811"/><rect x="90" y="50" width="70" height="50" fill="#191510"/></svg><span class="rec">LIVE</span><span class="label">Back garden</span></div>
-      <div class="cam"><svg viewBox="0 0 160 100" preserveAspectRatio="none"><ellipse cx="80" cy="86" rx="70" ry="20" fill="#17222A" opacity=".8"/></svg><span class="rec">LIVE</span><span class="label">Pool</span></div>
+        <div class="tdadd">
+          <input type="text" id="todo-input" placeholder="Add to Tasks…">
+          <button class="act ghost" id="todo-add" style="margin-top:0">Add</button>
+        </div>
+        <div class="svcline" style="margin-top:12px">
+          <div class="s"><span class="l">Tasks</span><span class="d">todo.inbox</span></div>
+          <div class="s"><span class="l">Regular</span><span class="d">todo.regular_tasks</span></div>
+          <div class="s"><span class="l">Groceries</span><span class="d">todo.lista_zakupow</span></div>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- ============ VIEW: LIVING ROOM ============ -->
+  <!-- ============ VIEW: LIVING ROOM + KITCHEN ============ -->
+  <!-- Dimmable rows = GLEDOPTO LED controllers. Everything else on this floor is a
+       wall-switch circuit (TS0002/TS0003), so it toggles — it does not dim. -->
   <section class="view" id="v-living">
     <div class="dash-head planks">
       <div class="dh-row">
         <div>
-          <div class="dh-kanji">居 間</div>
+          <div class="dh-kanji">居 間 · 台 所</div>
           <div class="dh-title">Living room</div>
-          <div class="dh-sub" id="lr-sub">Evening scene · Terrace door closed</div>
+          <div class="dh-sub" id="lr-sub">Open to kitchen and dining · presence detected</div>
         </div>
         <div class="dh-clock">
-          <div class="dh-time">22.5°</div>
-          <div class="dh-wx">Humidity <b>44%</b> · CO₂ <b>560 ppm</b></div>
+          <div class="dh-time">22.4°</div>
+          <div class="dh-wx">Humidity <b>44%</b> · Light <b>62 lx</b></div>
         </div>
       </div>
     </div>
 
     <div class="grid g2">
       <div class="card">
-        <div class="label">Lights</div>
+        <div class="vhead">
+          <div class="ttl"><span class="k">灯</span><span class="label">Lights</span></div>
+          <span class="pill" id="lr-count">3 on</span>
+        </div>
         <div class="light-row" id="lr-lights">
-          <div class="light"><span class="nm">Ceiling wash</span>
+          <div class="light"><span class="nm">Top LED</span>
             <input type="range" min="0" max="100" value="35" data-light="0"><span class="pct">35%</span></div>
-          <div class="light"><span class="nm">Copper pendant</span>
+          <div class="light"><span class="nm">Beam LED</span>
             <input type="range" min="0" max="100" value="60" data-light="1"><span class="pct">60%</span></div>
-          <div class="light"><span class="nm">Shelf strip</span>
+          <div class="light"><span class="nm">Cabinet LED<em>shared with kitchen</em></span>
             <input type="range" min="0" max="100" value="20" data-light="2"><span class="pct">20%</span></div>
-          <div class="light"><span class="nm">Reading lamp</span>
-            <input type="range" min="0" max="100" value="0" data-light="3"><span class="pct">off</span></div>
+        </div>
+        <div id="lr-switched">
+          <div class="vrow" style="margin-top:10px"><div class="nm">Ceiling circuit<em>living room light · gang 1</em></div><button class="toggle"><i></i></button></div>
+          <div class="vrow"><div class="nm">Wall circuit<em>living room light · gang 2</em></div><button class="toggle"><i></i></button></div>
+          <div class="vrow"><div class="nm">LED switch<em>Living room Leds · third gang</em></div><button class="toggle"><i></i></button></div>
+          <div class="vrow"><div class="nm">Christmas tree<em>seasonal socket · 0 W</em></div><button class="toggle"><i></i></button></div>
         </div>
       </div>
 
       <div style="display:flex;flex-direction:column;gap:10px">
-        <div class="card climate">
-          <div class="label">Climate</div>
-          <div class="big">22.5<small>°C</small></div>
-          <div class="tgt">Target <b id="lr-target">22.0°</b> · floor heating</div>
-          <div class="steppers">
-            <button class="step" data-clim="-0.5">−</button>
-            <button class="step" data-clim="0.5">+</button>
-            <span style="width:10px"></span>
-            <button class="mchip on">Auto</button><button class="mchip">Heat</button><button class="mchip">Eco</button><button class="mchip">Off</button>
-          </div>
-        </div>
         <div class="card" id="media-card">
-          <div class="label">Media</div>
+          <div class="vhead">
+            <div class="ttl"><span class="k">音</span><span class="label">Media</span></div>
+            <span class="pill" id="media-pill">Idle</span>
+          </div>
           <div class="media">
             <div class="art"></div>
-            <div>
+            <div style="min-width:0">
               <div class="tt">Ryuichi Sakamoto — async</div>
               <div class="ar" id="media-state">Living room speakers · paused</div>
               <div class="transport">
@@ -736,162 +1503,344 @@ select.sel option{background:var(--char-2);color:var(--washi)}
               </div>
             </div>
           </div>
+          <div class="selrow">
+            <select class="sel" id="lr-src">
+              <option>Spotify — Tomasz</option><option>Jellyfin</option><option>VLC</option><option>Radio</option>
+            </select>
+            <select class="sel" id="lr-spk">
+              <option>Living Room</option><option>Living room speakers</option><option>Living room and garden</option><option>Living room and outside</option><option>All speakers</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="vhead">
+            <div class="ttl"><span class="k">在</span><span class="label">Room</span></div>
+          </div>
+          <div class="vrow" style="margin-top:2px"><div class="nm">Presence<em>mmWave · iHseno</em></div><div class="val">Occupied</div></div>
+          <div class="vrow"><div class="nm">Temperature<em>LR sensor · battery 84%</em></div><div class="val">22.4 °C</div></div>
+          <div class="vrow"><div class="nm">Humidity</div><div class="val">44 %</div></div>
+          <div class="vrow"><div class="nm">Heating<em>one heat pump for the house</em></div><button class="act ghost" data-goto="home" style="margin-top:0">Heat pump</button></div>
         </div>
       </div>
     </div>
 
     <div class="grid g3">
+      <div class="card" id="cinema-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">映</span><span class="label">Projector &amp; screen</span></div>
+          <span class="pill" id="proj-pill">Off</span>
+        </div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Projector<em>entertainment switch · gang 1</em></div><button class="toggle" id="proj-tog"><i></i></button></div>
+        <div class="vrow"><div class="nm">Screen<em>entertainment switch · gang 2</em></div><button class="toggle" id="screen-tog"><i></i></button></div>
+        <div class="vrow"><div class="nm">Chromecast<em>projector · standby</em></div><div class="val">Idle</div></div>
+        <div class="chiprow" style="margin-top:10px">
+          <button class="mchip" data-toast="scene.fall_projection_screen">Screen down</button>
+          <button class="mchip" data-toast="scene.raise_screen">Screen up</button>
+          <button class="mchip" data-toast="input_boolean.cinema">Cinema</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">扇</span><span class="label">Fan</span></div>
+          <span class="pill" id="fan-pill">Off</span>
+        </div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Fan<em>Tuya · fan.fan</em></div><button class="toggle" id="fan-tog"><i></i></button></div>
+        <div class="vrow"><div class="nm">Fan light</div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Beep on change<em>fan_sound</em></div><button class="toggle"><i></i></button></div>
+      </div>
+
       <div class="card" id="vac-card">
-        <div class="label">Vacuum</div>
-        <div class="rowline">
-          <div><div class="st" id="vac-state">Docked · charged</div>
-          <div class="sub" id="vac-sub">Last clean 14:10 · 42 m²</div></div>
+        <div class="vhead">
+          <div class="ttl"><span class="k">掃</span><span class="label">Deebot T9+</span></div>
+          <span class="pill" id="vac-pill">Docked</span>
         </div>
-        <button class="act" id="vac-btn">Clean living room</button>
+        <div class="vrow" style="margin-top:2px"><div class="nm" id="vac-state">Docked · charged</div><div class="val">98 %</div></div>
+        <div class="vrow"><div class="nm" id="vac-sub">Last clean 14:10 · mop attached</div></div>
+        <button class="act" id="vac-btn" style="width:100%">Clean living room</button>
       </div>
+    </div>
+
+    <div class="sect"><h3>Kitchen</h3><span class="k">台所</span></div>
+    <div class="grid g2">
       <div class="card">
-        <div class="label">Terrace door</div>
-        <div class="rowline">
-          <div><div class="st"><i class="dot on"></i>&nbsp; Closed</div>
-          <div class="sub">Since 18:52</div></div>
+        <div class="vhead">
+          <div class="ttl"><span class="k">灯</span><span class="label">Kitchen circuits</span></div>
+          <span class="pill">1 on</span>
         </div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Island<em>island switch · gang 1</em></div><button class="toggle on"><i></i></button></div>
+        <div class="vrow"><div class="nm">Island spots<em>island switch · gang 2</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Island and sofa<em>two gangs, dining side</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Gable wall<em>the high barn wall</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Cabinet switch<em>under-cabinet circuit</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Outside light<em>kitchen door, terrace side</em></div><button class="toggle"><i></i></button></div>
       </div>
-      <div class="card">
-        <div class="label">Blinds</div>
-        <div class="rowline">
-          <div><div class="st" id="blind-state">Lowered 80%</div>
-          <div class="sub">Sunset automation</div></div>
-          <button class="toggle on" id="blind-tog"><i></i></button>
+
+      <div class="card" id="oven-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">竈</span><span class="label">Piekarnik</span></div>
+          <span class="pill" id="oven-pill">Ready</span>
+        </div>
+        <div class="readings" style="grid-template-columns:repeat(2,1fr)">
+          <div class="rd"><div class="l">Main cavity</div><div class="n">—<small>°C</small></div><div class="note">Machine off</div></div>
+          <div class="rd"><div class="l">Second cavity</div><div class="n">—<small>°C</small></div><div class="note">Machine off</div></div>
+        </div>
+        <div class="vrow" style="margin-top:14px"><div class="nm">Job state<em>Samsung SmartThings</em></div><div class="val">None</div></div>
+        <div class="vrow"><div class="nm">Door</div><div class="val">Closed</div></div>
+        <div class="vrow"><div class="nm">Oven light</div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Drawer socket<em>SP111 · worktop</em></div><button class="toggle"><i></i></button></div>
+        <div class="svcline">
+          <div class="s"><span class="l">Drawer</span><span class="d">closed</span></div>
+          <div class="s"><span class="l">Child lock</span><span class="d">off</span></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ============ VIEW: MASTER BEDROOM ============ -->
+  <!-- ============ VIEW: BEDROOM ============ -->
+  <!-- The bedroom has two dimmable strips, two wall-switch banks and a rotary knob.
+       It has no temperature sensor and no blinds on this instance — nothing is shown for them. -->
   <section class="view" id="v-master">
     <div class="dash-head planks">
       <div class="dh-row">
         <div>
-          <div class="dh-kanji">主 寝 室</div>
-          <div class="dh-title">Master bedroom</div>
-          <div class="dh-sub">All quiet · Wake at 06:45</div>
+          <div class="dh-kanji">寝 室</div>
+          <div class="dh-title">Bedroom</div>
+          <div class="dh-sub">Neon on at 8% · room marked occupied</div>
         </div>
         <div class="dh-clock">
-          <div class="dh-time">20.4°</div>
-          <div class="dh-wx">Humidity <b>48%</b> · Window <b>closed</b></div>
+          <div class="dh-time" id="clock6">--:--</div>
+          <div class="dh-wx">Sleep <b>7 h 12 m</b> · Body battery <b>74</b></div>
         </div>
       </div>
     </div>
 
     <div class="grid g2">
       <div class="card">
-        <div class="label">Lights</div>
+        <div class="vhead">
+          <div class="ttl"><span class="k">灯</span><span class="label">Lights</span></div>
+          <span class="pill">1 on</span>
+        </div>
         <div class="light-row">
-          <div class="light"><span class="nm">Ceiling</span>
+          <div class="light"><span class="nm">Ceiling LED<em>GLEDOPTO controller</em></span>
             <input type="range" min="0" max="100" value="0"><span class="pct">off</span></div>
-          <div class="light"><span class="nm">Bedside · his</span>
-            <input type="range" min="0" max="100" value="0"><span class="pct">off</span></div>
-          <div class="light"><span class="nm">Bedside · hers</span>
-            <input type="range" min="0" max="100" value="0"><span class="pct">off</span></div>
+          <div class="light"><span class="nm">Neon<em>behind the bed</em></span>
+            <input type="range" min="0" max="100" value="8"><span class="pct">8%</span></div>
         </div>
+        <div class="vrow" style="margin-top:10px"><div class="nm">Main switch<em>3-gang wall switch</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Atrium switch<em>2-gang · terrace side</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Knob<em>rotary dimmer · battery 78%</em></div><div class="val">Bound to Neon</div></div>
       </div>
+
       <div style="display:flex;flex-direction:column;gap:10px">
-        <div class="card climate">
-          <div class="label">Climate · night setback</div>
-          <div class="big">20.4<small>°C</small></div>
-          <div class="tgt">Target <b id="mb-target">19.5°</b> from 22:00</div>
-          <div class="steppers">
-            <button class="step" data-mbclim="-0.5">−</button>
-            <button class="step" data-mbclim="0.5">+</button>
+        <div class="card">
+          <div class="vhead">
+            <div class="ttl"><span class="k">眠</span><span class="label">Night</span></div>
+            <span class="pill" id="occ-pill">Occupied</span>
+          </div>
+          <div class="vrow" style="margin-top:2px"><div class="nm">Room occupied<em>input_boolean · drives the night rules</em></div><button class="toggle on" id="occ-tog"><i></i></button></div>
+          <div class="chiprow" style="margin-top:10px;flex-wrap:wrap;gap:6px">
+            <button class="mchip" data-toast="scene.time_to_sleep">Time to sleep</button>
+            <button class="mchip" data-toast="scene.dobranoc">Dobranoc</button>
+            <button class="mchip" data-toast="scene.bedrooms_lights_off">All bedrooms off</button>
           </div>
         </div>
+
         <div class="card">
-          <div class="label">En-suite bathroom</div>
-          <div class="rowline">
-            <div><div class="st">Floor heating · comfort</div>
-            <div class="sub">Towel rail warms 06:15–07:30</div></div>
-            <button class="toggle on"><i></i></button>
+          <div class="vhead">
+            <div class="ttl"><span class="k">音</span><span class="label">Bedside</span></div>
           </div>
+          <div class="vrow" style="margin-top:2px"><div class="nm">Nest Mini<em>Bedroom speaker</em></div><div class="val">Idle</div></div>
+          <div class="vrow"><div class="nm">Tivik przy Łożu<em>Jellyfin client</em></div><div class="val">Off</div></div>
         </div>
       </div>
     </div>
 
-    <div class="grid g3">
-      <div class="card">
-        <div class="label">Blinds</div>
-        <div class="rowline">
-          <div><div class="st">Closed</div><div class="sub">Opens with wake routine</div></div>
-          <button class="toggle on"><i></i></button>
-        </div>
+    <div class="sect"><h3>Last night</h3><span class="k">記</span></div>
+    <div class="grid g4">
+      <div class="card a-copper person">
+        <div class="label">Sleep</div><div class="climate"><div class="big">7:12<small></small></div></div>
+        <div class="tgt">Bedtime <b>23:04</b> · woke 06:16</div>
       </div>
       <div class="card">
-        <div class="label">Wake routine</div>
-        <div class="rowline">
-          <div><div class="st">06:45 weekdays</div><div class="sub">Light fade-in · 20 min</div></div>
-          <button class="toggle on"><i></i></button>
-        </div>
+        <div class="label">Body battery</div><div class="climate"><div class="big">74</div></div>
+        <div class="tgt">Charged <b>61</b> · drained 38</div>
       </div>
       <div class="card">
-        <div class="label">Do not disturb</div>
-        <div class="rowline">
-          <div><div class="st" id="dnd-state">Off</div><div class="sub">Silences doorbell &amp; announcements</div></div>
-          <button class="toggle" id="dnd-tog"><i></i></button>
-        </div>
+        <div class="label">Training readiness</div><div class="climate"><div class="big">68</div></div>
+        <div class="tgt">Recovery <b>14 h</b></div>
+      </div>
+      <div class="card">
+        <div class="label">HRV status</div><div class="climate"><div class="big">Bal.</div></div>
+        <div class="tgt">Garmin Connect · Tomek</div>
       </div>
     </div>
   </section>
 
-  <!-- ============ VIEW: KIDS ROOMS ============ -->
+  <!-- ============ VIEW: KIDS' ROOMS ============ -->
+  <!-- Neither room has a climate or temperature entity. What exists: a main light switch
+       with dim/brighten gangs, a GLEDOPTO strip, a bed light belt and a Nest Mini each. -->
   <section class="view" id="v-kids">
     <div class="dash-head planks">
       <div class="dh-row">
         <div>
           <div class="dh-kanji">子 供 部 屋</div>
           <div class="dh-title">Kids' rooms</div>
-          <div class="dh-sub">Both windows closed · quiet hours from 20:30</div>
+          <div class="dh-sub">Olaf and Zoja home · bedrooms-off scene at 20:30</div>
         </div>
         <div class="dh-clock">
           <div class="dh-time" id="clock4">--:--</div>
-          <div class="dh-wx">Bedtime <b>20:30</b> · lights fade 15 min</div>
+          <div class="dh-wx">Kids' speakers <b>idle</b></div>
         </div>
       </div>
     </div>
+
     <div class="grid g2">
-      <div class="card person a-moss climate">
-        <div class="vhead"><div class="ttl"><span class="k">森</span><span class="label">Olaf</span></div><span class="pill">Awake</span></div>
-        <div class="big">20.4<small>°C</small></div>
-        <div class="tgt">Target <b id="ol-target">20.0°</b> · humidity 46%</div>
-        <div class="steppers">
-          <button class="step" data-kid="olaf" data-d="-0.5">−</button>
-          <button class="step" data-kid="olaf" data-d="0.5">+</button>
+      <div class="card person a-moss">
+        <div class="vhead"><div class="ttl"><span class="k">森</span><span class="label">Olaf</span></div><span class="pill ok">Home</span></div>
+        <div class="light-row" style="margin-top:10px">
+          <div class="light"><span class="nm">Strip<em>Olaf LED controller</em></span>
+            <input type="range" min="0" max="100" value="0"><span class="pct">off</span></div>
         </div>
-        <div class="vrow" style="margin-top:14px"><div class="nm">Ceiling light<em>Warm 2700K</em></div><button class="toggle" id="ol-ceil"><i></i></button></div>
-        <div class="vrow"><div class="nm">Night light<em>Moss · 8%, off at 06:30</em></div><button class="toggle on" id="ol-night"><i></i></button></div>
-        <div class="vrow"><div class="nm">Desk lamp<em>Off</em></div><button class="toggle" id="ol-desk"><i></i></button></div>
+        <div class="vrow" style="margin-top:10px"><div class="nm">Main light<em>wall switch · gang 1</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Bed lights<em>light belt above the bed</em></div><button class="toggle on"><i></i></button></div>
+        <div class="vrow"><div class="nm">Speaker<em>Olaf's Nest Mini</em></div><div class="val">Idle</div></div>
+        <div class="svcline">
+          <div class="s"><span class="l">Dim / brighten</span><span class="d">wall buttons</span></div>
+          <div class="s"><span class="l">PlayStation</span><span class="d">offline</span></div>
+        </div>
       </div>
-      <div class="card person a-mizu climate">
-        <div class="vhead"><div class="ttl"><span class="k">水</span><span class="label">Zoja</span></div><span class="pill">Awake</span></div>
-        <div class="big">20.1<small>°C</small></div>
-        <div class="tgt">Target <b id="zo-target">20.0°</b> · humidity 44%</div>
-        <div class="steppers">
-          <button class="step" data-kid="zoja" data-d="-0.5">−</button>
-          <button class="step" data-kid="zoja" data-d="0.5">+</button>
+
+      <div class="card person a-mizu">
+        <div class="vhead"><div class="ttl"><span class="k">水</span><span class="label">Zoja</span></div><span class="pill ok">Home</span></div>
+        <div class="light-row" style="margin-top:10px">
+          <div class="light"><span class="nm">Strip<em>Zoe's LED controller</em></span>
+            <input type="range" min="0" max="100" value="0"><span class="pct">off</span></div>
+          <div class="light"><span class="nm">Dimmer<em>Zoe's lights</em></span>
+            <input type="range" min="0" max="100" value="0"><span class="pct">off</span></div>
         </div>
-        <div class="vrow" style="margin-top:14px"><div class="nm">Ceiling light<em>Warm 2700K</em></div><button class="toggle" id="zo-ceil"><i></i></button></div>
-        <div class="vrow"><div class="nm">Night light<em>Mizu · 8%, off at 06:30</em></div><button class="toggle on" id="zo-night"><i></i></button></div>
-        <div class="vrow"><div class="nm">Reading lamp<em>Off</em></div><button class="toggle" id="zo-desk"><i></i></button></div>
+        <div class="vrow" style="margin-top:10px"><div class="nm">Main light<em>wall switch · gang 1</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Bed lights<em>light belt above the bed</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Outside light<em>her window, garden side</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Speaker<em>Zoe's Nest Mini</em></div><div class="val">Idle</div></div>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card">
+        <div class="vhead"><div class="ttl"><span class="k">風呂</span><span class="label">Kids' bathroom</span></div></div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">LED<em>GLEDOPTO controller</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Mirror switch</div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Speaker<em>Kids bathroom · cast</em></div><div class="val">Idle</div></div>
+      </div>
+      <div class="card">
+        <div class="vhead"><div class="ttl"><span class="k">眠</span><span class="label">Bedtime</span></div></div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Both rooms off<em>scene.bedrooms_lights_off</em></div><button class="act ghost" data-toast="scene.bedrooms_lights_off" style="margin-top:0">Run</button></div>
+        <div class="vrow"><div class="nm">Kids' speakers<em>cast group · pause all</em></div><button class="act ghost" data-toast="media_player.kids_speakers · pause" style="margin-top:0">Pause</button></div>
       </div>
     </div>
   </section>
 
-  <!-- ============ VIEW: WELLNESS ============ -->
-  <section class="view" id="v-wellness">
+  <!-- ============ VIEW: MEZZANINE ============ -->
+  <!-- Multimedia corner and work corner. Real entities only: a 3-gang light switch, the
+       stairs LED switch, the TCL TV (two integrations), the PS5, and the Brother printer. -->
+  <section class="view" id="v-mezzanine">
+    <div class="dash-head planks">
+      <div class="dh-row">
+        <div>
+          <div class="dh-kanji">中 二 階</div>
+          <div class="dh-title">Mezzanine</div>
+          <div class="dh-sub">TV on · printer idle</div>
+        </div>
+        <div class="dh-clock">
+          <div class="dh-time" id="clock7">--:--</div>
+          <div class="dh-wx">PlayStation <b>offline</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card" id="mz-tv">
+        <div class="vhead">
+          <div class="ttl"><span class="k">映</span><span class="label">Smart TV Pro</span></div>
+          <span class="pill live">Playing</span>
+        </div>
+        <div class="media">
+          <div class="art"></div>
+          <div style="min-width:0">
+            <div class="tt">Jellyfin — Shogun, s01e04</div>
+            <div class="ar">TCL P7K · Android TV remote</div>
+            <div class="transport">
+              <button>◁</button><button id="mz-play">❚❚</button><button>▷|</button><span>24:18 / 58:02</span>
+            </div>
+          </div>
+        </div>
+        <div class="selrow">
+          <select class="sel"><option>Jellyfin</option><option>Chromecast</option><option>HomeKit input</option></select>
+          <select class="sel"><option>TV speakers</option><option>GoogleTV9526</option><option>All speakers no kids</option></select>
+        </div>
+        <div class="vrow" style="margin-top:8px"><div class="nm">Mute<em>homekit_controller</em></div><button class="toggle"><i></i></button></div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card">
+          <div class="vhead">
+            <div class="ttl"><span class="k">遊</span><span class="label">PlayStation 5</span></div>
+            <span class="pill">Offline</span>
+          </div>
+          <div class="vrow" style="margin-top:2px"><div class="nm">Console<em>herunohazumi · PSN</em></div><div class="val">Standby</div></div>
+          <div class="vrow"><div class="nm">PlayStation Plus</div><div class="val">Active</div></div>
+        </div>
+
+        <div class="card">
+          <div class="vhead">
+            <div class="ttl"><span class="k">灯</span><span class="label">Lights</span></div>
+          </div>
+          <div class="vrow" style="margin-top:2px"><div class="nm">Main light<em>3-gang · gang 1</em></div><button class="toggle"><i></i></button></div>
+          <div class="vrow"><div class="nm">Work corner<em>3-gang · gang 2</em></div><button class="toggle"><i></i></button></div>
+          <div class="vrow"><div class="nm">Stairs LED<em>main switch stairs</em></div><button class="toggle on"><i></i></button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sect"><h3>Work corner</h3><span class="k">仕事</span></div>
+    <div class="grid g3">
+      <div class="card span2">
+        <div class="vhead">
+          <div class="ttl"><span class="k">印</span><span class="label">Brother HL-1210W</span></div>
+          <span class="pill ok" id="prn-pill">Sleep</span>
+        </div>
+        <div class="readings" style="grid-template-columns:repeat(3,1fr)">
+          <div class="rd"><div class="l">Black toner</div><div class="n">42<small>%</small></div>
+            <div class="band"><span class="safe" style="left:25%;right:0"></span><span class="pin" style="left:42%"></span></div>
+            <div class="note">Order at 15%</div></div>
+          <div class="rd"><div class="l">Drum life</div><div class="n">71<small>%</small></div>
+            <div class="band"><span class="safe" style="left:20%;right:0"></span><span class="pin" style="left:71%"></span></div>
+            <div class="note">8 400 pages left</div></div>
+          <div class="rd"><div class="l">Status</div><div class="n">Idle</div><div class="note">Ready to print</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="vhead"><div class="ttl"><span class="k">机</span><span class="label">Desk</span></div></div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Desk lighting<em>no dedicated entity yet</em></div><div class="val">—</div></div>
+        <div class="vrow"><div class="nm">Speaker<em>nearest: Hall Nest Mini</em></div><div class="val">Idle</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ VIEW: ONSEN ============ -->
+  <!-- Sauna = BleBox saunaBox, one climate entity (no lights of its own).
+       Hot tub = Lay-Z-Spa MQTT bridge, 67 entities, all of the rows below exist.
+       Pool = one power-monitored filter socket. There is no pH, chlorine or pressure
+       probe on this instance, so the pool card reports the filter, not the water. -->
+  <section class="view" id="v-onsen">
     <div class="dash-head planks">
       <div class="dh-row">
         <div>
           <div class="dh-kanji">湯 の 間</div>
-          <div class="dh-title">Wellness</div>
-          <div class="dh-sub">Sauna idle · Hot tub 38.5° · Pool 26.1°</div>
+          <div class="dh-title">Onsen</div>
+          <div class="dh-sub">Sauna idle · Hot tub heating to 38.5° · Pool filtering</div>
         </div>
         <div class="dh-clock">
           <div class="dh-time" id="clock3">--:--</div>
@@ -900,10 +1849,9 @@ select.sel option{background:var(--char-2);color:var(--washi)}
       </div>
     </div>
 
-
     <div class="grid g2">
 
-      <!-- ── SAUNA · open arc · heat, light and sound in one box ── -->
+      <!-- ── SAUNA · open arc ── -->
       <div class="card vessel a-oak" id="sauna-card">
         <div class="vhead">
           <div class="ttl"><span class="k">蒸</span><span class="label">Sauna</span></div>
@@ -934,7 +1882,7 @@ select.sel option{background:var(--char-2);color:var(--washi)}
               <button class="toggle" id="sauna-tog"><i></i></button>
             </div>
             <div class="vrow">
-              <div class="nm">Session</div>
+              <div class="nm">Session<em>input_select + timer</em></div>
               <div class="chiprow">
                 <span class="mchip" data-slen="60">60m</span>
                 <span class="mchip on" data-slen="90">90m</span>
@@ -942,27 +1890,22 @@ select.sel option{background:var(--char-2);color:var(--washi)}
               </div>
             </div>
             <div class="vrow">
-              <div class="nm">Vestibule light</div>
-              <button class="toggle on" id="sa-vest"><i></i></button>
+              <div class="nm">Session timer</div>
+              <div class="val">Idle</div>
             </div>
             <div class="vrow">
-              <div class="nm">Bench LED<em id="sa-led-st">Ember · solid</em></div>
-              <button class="toggle on" id="sa-led"><i></i></button>
+              <div class="nm">Heater<em>9 kW element · modelled, not metered</em></div>
+              <div class="val">0.0 kW</div>
             </div>
-            <div class="swrow" id="sa-sw">
-              <button class="sw on" data-col="Ember" style="background:#C0754A;color:#C0754A"></button>
-              <button class="sw" data-col="Oak" style="background:#C89F6E;color:#C89F6E"></button>
-              <button class="sw" data-col="Washi" style="background:#EFE7D7;color:#EFE7D7"></button>
-              <button class="sw" data-col="Moss" style="background:#8B9678;color:#8B9678"></button>
-              <button class="sw" data-col="Mizu" style="background:#7E93A0;color:#7E93A0"></button>
-              <button class="sw" data-col="Deep" style="background:#4A3A6B;color:#4A3A6B"></button>
-              <button class="sw" data-col="Fade" style="background:linear-gradient(135deg,#C0754A,#4A3A6B)"></button>
+            <div class="vrow">
+              <div class="nm">Nearest speaker<em>no speaker in the cabin</em></div>
+              <div class="val">Atrium</div>
             </div>
           </div>
         </div>
         <div class="strip">
           <div class="art sm"></div>
-          <div class="mtitle"><span id="sa-track">Shakuhachi — Evening Rain</span><em id="sa-src">Media server</em></div>
+          <div class="mtitle"><span id="sa-track">Shakuhachi — Evening Rain</span><em id="sa-src">Music Assistant</em></div>
           <div class="transport">
             <button id="sa-prev">◁◁</button><button id="sa-play">▷</button><button id="sa-next">▷▷</button>
             <span id="sa-vol">28%</span>
@@ -973,7 +1916,7 @@ select.sel option{background:var(--char-2);color:var(--washi)}
             <option>Onsen</option><option>Shakuhachi</option><option>Rain</option><option>Koto</option><option>Ambient jazz</option>
           </select>
           <select class="sel" id="sa-spk">
-            <option>Sauna speaker</option><option>Terrace</option><option>Pool</option><option>Onsen group</option>
+            <option>Atrium Speaker</option><option>Garden</option><option>Living room and garden</option><option>All speakers no kids</option>
           </select>
         </div>
         <div class="cost">
@@ -982,11 +1925,11 @@ select.sel option{background:var(--char-2);color:var(--washi)}
         </div>
       </div>
 
-      <!-- ── HOT TUB · closed ring · water and schedule in one box ── -->
+      <!-- ── HOT TUB · closed ring ── -->
       <div class="card vessel a-mizu veined" id="tub-card">
         <div class="vhead">
           <div class="ttl"><span class="k">湯</span><span class="label">Hot tub</span></div>
-          <span class="pill live" id="tub-pill">Holding</span>
+          <span class="pill live" id="tub-pill">Heating</span>
         </div>
         <div class="vbody">
           <div class="vleft">
@@ -997,7 +1940,7 @@ select.sel option{background:var(--char-2);color:var(--washi)}
                 <circle class="ghandle" id="tub-handle" cx="150" cy="80" r="5"/>
               </svg>
               <div class="gcenter">
-                <div class="gnum"><span id="tub-temp">38.5</span><small>°C</small></div>
+                <div class="gnum"><span id="tub-temp">37.4</span><small>°C</small></div>
                 <div class="gtgt">→ <b id="tub-target">38.5</b>°</div>
               </div>
             </div>
@@ -1005,11 +1948,11 @@ select.sel option{background:var(--char-2);color:var(--washi)}
               <button class="gbtn" data-tub="-0.5">−</button>
               <button class="gbtn" data-tub="0.5">+</button>
             </div>
-            <div class="geta" id="tub-eta">At temperature</div>
+            <div class="geta" id="tub-eta">~24 min to 38.5°</div>
           </div>
           <div class="vright">
             <div class="vrow">
-              <div class="nm">Heater<em id="tub-heat-st">Holding 38.5° · 0.4 kW</em></div>
+              <div class="nm">Heater<em id="tub-heat-st">Heating · 2.1 kW</em></div>
               <button class="toggle on" id="tub-heat"><i></i></button>
             </div>
             <div class="vrow">
@@ -1017,28 +1960,35 @@ select.sel option{background:var(--char-2);color:var(--washi)}
               <div class="chiprow">
                 <span class="mchip on" id="tub-pump">Pump</span>
                 <span class="mchip" id="tub-bub">Bubbles</span>
+                <span class="mchip" id="tub-hydro">Jets</span>
               </div>
+            </div>
+            <div class="vrow">
+              <div class="nm">In the tub<em>input_boolean · pauses notifications</em></div>
+              <button class="toggle" id="tub-inuse"><i></i></button>
             </div>
             <div class="vrow">
               <div class="nm">Schedule<em id="tub-auto-pill">Auto on</em></div>
               <button class="toggle on" id="tub-auto"><i></i></button>
             </div>
             <div class="stripline" id="tub-sched-list">
-              <div class="s"><span class="l">Mon–Fri</span><span class="d">17:30 · 38.5°</span></div>
-              <div class="s"><span class="l">Sat</span><span class="d">14:00 · 39.0°</span></div>
-              <div class="s"><span class="l">Sun</span><span class="d">14:00 · 38.0°</span></div>
+              <div class="s"><span class="l">Slot 1</span><span class="d">06:30 · 36.0°</span></div>
+              <div class="s"><span class="l">Slot 2</span><span class="d">12:00 · 37.0°</span></div>
+              <div class="s"><span class="l">Slot 3</span><span class="d">17:30 · 38.5°</span></div>
+              <div class="s"><span class="l">Slot 4</span><span class="d">22:30 · 36.0°</span></div>
             </div>
           </div>
         </div>
         <div class="svcline">
-          <div class="s"><span class="l">Chloride</span><span class="d">9 d</span></div>
-          <div class="s due"><span class="l">Filter</span><span class="d">2 d</span></div>
-          <div class="s"><span class="l">Rinse</span><span class="d">4 d</span></div>
-          <div class="s"><span class="l">Water</span><span class="d">6 wk</span></div>
+          <div class="s"><span class="l">Chlorine age</span><span class="d">9 d</span></div>
+          <div class="s due"><span class="l">Filter age</span><span class="d">14 d</span></div>
+          <div class="s"><span class="l">Rinse</span><span class="d">4 d ago</span></div>
+          <div class="s"><span class="l">Error</span><span class="d">none</span></div>
         </div>
         <div class="cost">
+          <div class="c"><div class="l">Now</div><div class="n" id="tub-pw">2.1<span>kW</span></div></div>
+          <div class="c"><div class="l">Today</div><div class="n">6.4<span>kWh</span></div></div>
           <div class="c"><div class="l">September</div><div class="n" id="tub-cm">386<span>zł</span></div></div>
-          <div class="c"><div class="l">Year to date</div><div class="n" id="tub-cy">4 120<span>zł</span></div></div>
         </div>
       </div>
     </div>
@@ -1053,72 +2003,90 @@ select.sel option{background:var(--char-2);color:var(--washi)}
             <button class="toggle on" id="pool-auto"><i></i></button>
           </div>
         </div>
-        <div class="readings">
-          <div class="rd">
-            <div class="l">Water</div>
-            <div class="n">26.1<small>°C</small></div>
-            <div class="band"><span class="safe" style="left:40%;right:15%"></span><span class="pin" style="left:57%"></span></div>
-            <div class="note">In band · 24–28°</div>
-          </div>
-          <div class="rd">
-            <div class="l">pH</div>
-            <div class="n">7.2</div>
-            <div class="band"><span class="safe" style="left:35%;right:30%"></span><span class="pin" style="left:48%"></span></div>
-            <div class="note">In band · 7.0–7.4</div>
-          </div>
-          <div class="rd">
-            <div class="l">Free chlorine</div>
-            <div class="n">0.8<small>ppm</small></div>
-            <div class="band"><span class="safe" style="left:30%;right:22%"></span><span class="pin" style="left:26%"></span></div>
-            <div class="note warn">Low · dose 1–3 ppm</div>
-          </div>
-          <div class="rd">
-            <div class="l">Filter pressure</div>
-            <div class="n">0.9<small>bar</small></div>
-            <div class="band"><span class="safe" style="left:20%;right:35%"></span><span class="pin" style="left:44%"></span></div>
-            <div class="note">Normal · max 1.4</div>
-          </div>
+        <div class="readings" style="grid-template-columns:repeat(3,1fr)">
+          <div class="rd"><div class="l">Filter draw</div><div class="n" id="pool-pw">0.31<small>kW</small></div><div class="note">Power-monitored socket</div></div>
+          <div class="rd"><div class="l">Today</div><div class="n">1.8<small>kWh</small></div><div class="note">≈ 1.30 zł at current tariff</div></div>
+          <div class="rd"><div class="l">Chlorine timer</div><div class="n">2<small>d</small></div><div class="note warn">timer.chlor · dose then reset</div></div>
         </div>
         <div class="vrow" style="margin-top:16px">
           <div class="nm">Filtration<em id="pool-filt-st">09:00–13:00, 18:00–21:00</em></div>
           <button class="toggle on" id="pool-filt"><i></i></button>
         </div>
         <div class="vrow">
-          <div class="nm">Cleaning robot<em id="pool-bot-st">Docked · last run yesterday</em></div>
-          <button class="act ghost" id="pool-bot-btn" style="margin-top:0">Clean now</button>
+          <div class="nm">Schedule<em>input_boolean.pool_filter_schedule_active</em></div>
+          <div class="val">Active</div>
+        </div>
+        <div class="vrow">
+          <div class="nm">Chlorine dosed<em>restarts timer.chlor · last Tue</em></div>
+          <button class="act ghost" data-toast="timer.chlor restarted" style="margin-top:0">Reset</button>
         </div>
         <div class="svcline">
-          <div class="s"><span class="l">Chloride</span><span class="d">tomorrow</span></div>
-          <div class="s"><span class="l">Sand filter</span><span class="d">5 wk</span></div>
-          <div class="s due"><span class="l">Brushes</span><span class="d">overdue 3 d</span></div>
+          <div class="s"><span class="l">Water probes</span><span class="d">none connected</span></div>
+          <div class="s"><span class="l">Robot</span><span class="d">manual, not in HA</span></div>
         </div>
       </div>
 
       <div class="card a-oak" id="onsen-lights">
         <div class="vhead">
-          <div class="ttl"><span class="k">行灯</span><span class="label">Onsen lighting</span></div>
+          <div class="ttl"><span class="k">行灯</span><span class="label">Porch &amp; onsen lights</span></div>
         </div>
         <div class="vrow" style="margin-top:4px">
-          <div class="nm">Path lanterns<em>Dusk → 23:00</em></div>
-          <button class="toggle on" id="ol-path"><i></i></button>
+          <div class="nm">Corner<em>Porch Led 1</em></div>
+          <button class="toggle on" id="ol-1"><i></i></button>
         </div>
         <div class="vrow">
-          <div class="nm">Deck wash<em>Grazing light, 25%</em></div>
-          <button class="toggle" id="ol-deck"><i></i></button>
+          <div class="nm">Hot side<em>Porch Led 2 · hs</em></div>
+          <button class="toggle" id="ol-2"><i></i></button>
         </div>
         <div class="vrow">
-          <div class="nm">Pool underwater<em>Mizu · static</em></div>
-          <button class="toggle" id="ol-pool"><i></i></button>
+          <div class="nm">Swing<em>Porch Led 3</em></div>
+          <button class="toggle" id="ol-3"><i></i></button>
         </div>
         <div class="vrow">
-          <div class="nm">Hot tub rim<em>Ember · 15%</em></div>
-          <button class="toggle on" id="ol-rim"><i></i></button>
+          <div class="nm">Atrium<em>Porch Led 4</em></div>
+          <button class="toggle on" id="ol-4"><i></i></button>
         </div>
         <div class="vrow">
-          <div class="nm">Sauna exterior<em>Door and step</em></div>
-          <button class="toggle" id="ol-sauna"><i></i></button>
+          <div class="nm">Hot tub<em>Porch Led 5 + tub bulb</em></div>
+          <button class="toggle on" id="ol-5"><i></i></button>
         </div>
-        <button class="act ghost" id="ol-all" style="width:100%">All onsen lights off</button>
+        <div class="vrow">
+          <div class="nm">Atrium socket<em>ceiling socket · 0 W</em></div>
+          <button class="toggle" id="ol-socket"><i></i></button>
+        </div>
+        <div class="vrow">
+          <div class="nm">Keep porch on<em>holds the dusk rule</em></div>
+          <button class="toggle" id="ol-keep"><i></i></button>
+        </div>
+        <button class="act ghost" id="ol-all" style="width:100%">All porch lights off</button>
+      </div>
+    </div>
+
+    <!-- ── onsen exterior: fire pit, atrium camera, weather at the tub ── -->
+    <div class="sect"><h3>Onsen exterior</h3><span class="k">外</span></div>
+    <div class="grid g2">
+      <div class="card a-oak" id="fire-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">焚</span><span class="label">Fire pit</span></div>
+          <span class="pill" id="fire-pill">Off</span>
+        </div>
+        <div class="vrow" style="margin-top:4px">
+          <div class="nm">Lampa ognisko<em id="fire-st">Tuya breaker · no auto-off yet</em></div>
+          <button class="toggle" id="fire-tog"><i></i></button>
+        </div>
+        <div class="vrow">
+          <div class="nm">On terrace<em>input_boolean.on_terrace</em></div>
+          <button class="toggle" id="fire-terrace"><i></i></button>
+        </div>
+      </div>
+
+      <div class="card a-mizu">
+        <div class="vhead">
+          <div class="ttl"><span class="k">天</span><span class="label">By the tub</span></div>
+        </div>
+        <div class="vrow" style="margin-top:4px"><div class="nm">Temperature<em>SwitchBot 73EA</em></div><div class="val">18.9 °C</div></div>
+        <div class="vrow"><div class="nm">Humidity</div><div class="val">71 %</div></div>
+        <div class="vrow"><div class="nm">Atrium camera<em>moved to Garden</em></div><button class="act ghost" data-goto="garden" style="margin-top:0">Open</button></div>
       </div>
     </div>
   </section>
@@ -1130,11 +2098,11 @@ select.sel option{background:var(--char-2);color:var(--washi)}
         <div>
           <div class="dh-kanji">庭 の 手入れ</div>
           <div class="dh-title">Garden</div>
-          <div class="dh-sub">Soil 41% · Wind 6 km/h · 4 mm rain last 7 days</div>
+          <div class="dh-sub">4 mm rain last 7 days · Wind 6 km/h · Pollen low</div>
         </div>
         <div class="dh-clock">
           <div class="dh-time" id="clock5">--:--</div>
-          <div class="dh-wx">Rain <b>14 mm</b> overnight</div>
+          <div class="dh-wx">Forecast <b>14 mm</b> overnight</div>
         </div>
       </div>
     </div>
@@ -1155,9 +2123,15 @@ select.sel option{background:var(--char-2);color:var(--washi)}
             <div class="vv" id="spr-verdict-t">Mostly skipping</div>
           </div>
           <div style="flex:1;min-width:0">
-            <div class="ftext" id="spr-forecast">Tomorrow's 05:30 cycle will largely stand down. Fourteen millimetres of rain is forecast between midnight and four, and soil sits at 41% — above the 35% threshold for Forest, Border and Terrace. Bamboo bed reads 28% under the eaves where the rain will not reach it, so that zone alone will run, for six minutes.</div>
-            <div class="fmeta" id="spr-fmeta">AI task · evaluated 06:12 · next evaluation 04:00</div>
+            <div class="ftext" id="spr-forecast">Tomorrow's 05:30 cycle will largely stand down. Fourteen millimetres of rain is forecast between midnight and four, on top of four in the last seven days, so Forest, Border and Terrace can wait. Bamboo sits under the eaves where that rain will not reach it — that zone alone runs, for six minutes.</div>
+            <div class="fmeta" id="spr-fmeta">ai_task.google_ai_task · reads OpenWeatherMap history and forecast — the automation still needs writing</div>
           </div>
+        </div>
+        <div class="svcline">
+          <div class="s"><span class="l">Run minutes</span><span class="d">6 per zone</span></div>
+          <div class="s"><span class="l">Timer</span><span class="d">idle</span></div>
+          <div class="s"><span class="l">Channel 4</span><span class="d">spare</span></div>
+          <div class="s"><span class="l">Watchdog</span><span class="d">4 notify rules</span></div>
         </div>
         <button class="act ghost" id="spr-run" style="width:100%">Override — run full cycle now · 25 min</button>
       </div>
@@ -1181,22 +2155,22 @@ select.sel option{background:var(--char-2);color:var(--washi)}
       <button class="card zone a-moss" data-zone="forest">
         <div class="ztop"><span class="zk">森</span><span class="tog-ind"><i></i></span></div>
         <div class="zname">Forest</div>
-        <div class="zmeta">Soil 44% · 8 min · Sun 05:30</div>
+        <div class="zmeta">8 min · last ran Sun 05:30</div>
       </button>
       <button class="card zone a-moss" data-zone="border">
         <div class="ztop"><span class="zk">縁</span><span class="tog-ind"><i></i></span></div>
         <div class="zname">Border</div>
-        <div class="zmeta">Soil 39% · 6 min · Sun 05:42</div>
+        <div class="zmeta">6 min · last ran Sun 05:42</div>
       </button>
       <button class="card zone a-moss" data-zone="terrace">
         <div class="ztop"><span class="zk">縁側</span><span class="tog-ind"><i></i></span></div>
         <div class="zname">Terrace</div>
-        <div class="zmeta">Soil 37% · 5 min · Sun 05:52</div>
+        <div class="zmeta">5 min · last ran Mon 05:52</div>
       </button>
       <button class="card zone a-moss" data-zone="bamboo">
         <div class="ztop"><span class="zk">竹</span><span class="tog-ind"><i></i></span></div>
         <div class="zname">Bamboo bed</div>
-        <div class="zmeta">Soil 28% · 6 min · Sun 06:00</div>
+        <div class="zmeta">6 min · last ran today 06:00</div>
       </button>
     </div>
 
@@ -1214,7 +2188,7 @@ select.sel option{background:var(--char-2);color:var(--washi)}
     <div class="grid g2">
       <div class="card a-moss" id="mow-b-card">
         <div class="vhead">
-          <div class="ttl"><span class="k">刈</span><span class="label">Landroid · back garden</span></div>
+          <div class="ttl"><span class="k">刈</span><span class="label">Vision Tyl · back garden</span></div>
           <span class="errchip clear" id="mb-err">No errors</span>
         </div>
         <div class="mow">
@@ -1236,7 +2210,7 @@ select.sel option{background:var(--char-2);color:var(--washi)}
 
       <div class="card a-moss" id="mow-f-card">
         <div class="vhead">
-          <div class="ttl"><span class="k">刈</span><span class="label">Landroid · front garden</span></div>
+          <div class="ttl"><span class="k">刈</span><span class="label">Vision M 1 · front garden</span></div>
           <span class="errchip err" id="mf-err">E1 · blade jam</span>
         </div>
         <div class="mow">
@@ -1256,9 +2230,256 @@ select.sel option{background:var(--char-2);color:var(--washi)}
         <button class="act" id="mow-f-btn" style="width:100%">Clear fault &amp; resume</button>
       </div>
     </div>
+
+    <!-- ── camera — atrium moved here from Home/Onsen; real Reolink-style switches ── -->
+    <div class="sect"><h3>Camera</h3><span class="k">目</span></div>
+    <div class="grid g3">
+      <div class="card span2" id="atrium-cam-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">庭</span><span class="label">Atrium</span></div>
+          <span class="pill">Day · clear</span>
+        </div>
+        <div class="cam" data-cam="atrium" tabindex="0" role="button" aria-label="Open atrium camera" style="margin-top:8px">
+          <svg viewBox="0 0 160 100" preserveAspectRatio="none"><ellipse cx="80" cy="86" rx="70" ry="20" fill="#17222A" opacity=".8"/><path d="M0 62 Q80 44 160 66 L160 100 L0 100 Z" fill="#1B1710" opacity=".85"/></svg>
+          <span class="rec">LIVE</span><span class="label">Atrium</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="vhead"><div class="ttl"><span class="k">見</span><span class="label">Detection</span></div></div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Person</div><div class="val">Clear</div></div>
+        <div class="vrow"><div class="nm">Vehicle</div><div class="val">Clear</div></div>
+        <div class="vrow"><div class="nm">Animal</div><div class="val">Clear</div></div>
+        <div class="vrow"><div class="nm">Day / night<em>camera state</em></div><div class="val">Day</div></div>
+      </div>
+    </div>
+
+    <!-- ── solar & garden lighting ── -->
+    <div class="sect"><h3>Solar &amp; lighting</h3><span class="k">陽</span></div>
+    <div class="grid g3">
+      <div class="card span2 a-moss" id="gl-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">灯</span><span class="label">Garden lighting</span></div>
+          <span class="pill">Dusk → 23:30</span>
+        </div>
+        <div class="vrow" style="margin-top:4px"><div class="nm">Perimeter lamps<em>Garden lamps · 8 bollards</em></div><button class="toggle on" id="gl-perim"><i></i></button></div>
+        <div class="vrow"><div class="nm">Driveway light<em>Front · motion after 23:30</em></div><button class="toggle on" id="gl-drive"><i></i></button></div>
+        <div class="vrow"><div class="nm">Border uplights<em>Birches and bamboo</em></div><button class="toggle" id="gl-border"><i></i></button></div>
+        <button class="act ghost" id="gl-all" style="width:100%">All garden lights off</button>
+      </div>
+
+      <div class="card a-copper veined climate" id="gs-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">陽</span><span class="label">Solar</span></div>
+          <span class="pill live">Producing</span>
+        </div>
+        <div class="big"><span id="gs-now">6.2</span><small> kW</small></div>
+        <div class="tgt">Forecast today <b>34 kWh</b> · tomorrow <b>27 kWh</b></div>
+        <div class="vrow" style="margin-top:10px"><div class="nm">Today</div><div class="val">31.4 kWh</div></div>
+        <div class="vrow"><div class="nm">Self-sufficiency</div><div class="val">84 %</div></div>
+        <button class="act ghost" data-goto="home" style="width:100%">View energy</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ VIEW: UTILITY & GUEST ============ -->
+  <!-- Low-traffic spaces, one compact card each. There is no attic device on this instance,
+       and the guest suite has only a bulb and a SwitchBot meter — no lock, no kitchenette. -->
+  <section class="view" id="v-utility">
+    <div class="dash-head planks">
+      <div class="dh-row">
+        <div>
+          <div class="dh-kanji">奥 の 間</div>
+          <div class="dh-title">Utility &amp; guest</div>
+          <div class="dh-sub">Garage closed · Suszarka <span data-dryer>0:34</span> left · guest suite empty</div>
+        </div>
+        <div class="dh-clock">
+          <div class="dh-time" id="clock8">--:--</div>
+          <div class="dh-wx">Hot water <b>48.2°</b> · Pralka done</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sect"><h3>Entrance &amp; halls</h3><span class="k">玄</span></div>
+    <div class="grid g3">
+      <div class="card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">玄</span><span class="label">Entrance</span></div>
+          <span class="pill" id="dbl-pill">Visitor 17:42</span>
+        </div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Main lights<em>Zha entrance · main</em></div><button class="toggle on"><i></i></button></div>
+        <div class="vrow"><div class="nm">Entrance LED</div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Closet light</div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Outside light<em>porch bulbs group</em></div><button class="toggle on"><i></i></button></div>
+        <div class="svcline">
+          <div class="s"><span class="l">Closets</span><span class="d">both closed</span></div>
+          <div class="s"><span class="l">Motion</span><span class="d">clear</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">呼</span><span class="label">Doorbell</span></div>
+          <span class="pill">Reolink PoE</span>
+        </div>
+        <div class="cam" data-cam="doorbell" tabindex="0" role="button" aria-label="Open doorbell camera" style="margin-top:8px">
+          <svg viewBox="0 0 160 100" preserveAspectRatio="none"><path d="M0 78 L60 40 L100 62 L160 30 L160 100 L0 100 Z" fill="#1E1811"/><path d="M60 40 L60 100" stroke="#2A2219" stroke-width="1"/></svg>
+          <span class="rec">LIVE</span><span class="label">Front door</span>
+        </div>
+        <div class="vrow" style="margin-top:10px"><div class="nm">Last visitor<em>person detected</em></div><div class="val">17:42</div></div>
+        <div class="vrow"><div class="nm">Chime<em>doorbell button sound</em></div><button class="toggle on"><i></i></button></div>
+        <div class="vrow"><div class="nm">Siren<em>manual trigger</em></div><button class="act ghost" data-toast="siren.main_entrance_doorbell_siren" style="margin-top:0">Sound</button></div>
+      </div>
+
+      <div class="card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">廊</span><span class="label">Hall</span></div>
+          <span class="pill">Quiet</span>
+        </div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Rooms light<em>hall main switch</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Entrance lights<em>hall main switch · gang 2</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Hall LED<em>night path</em></div><button class="toggle on"><i></i></button></div>
+        <div class="vrow"><div class="nm">Motion</div><div class="val">3 min ago</div></div>
+        <div class="svcline">
+          <div class="s"><span class="l">Link rules</span><span class="d">entrance + rooms</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sect"><h3>Bathroom</h3><span class="k">風呂</span></div>
+    <div class="grid g2">
+      <div class="card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">湯</span><span class="label">Main bathroom</span></div>
+          <span class="pill" id="bath-pill">Clear</span>
+        </div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">LED<em>GLEDOPTO controller</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Sink light<em>sink switch</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Main switch<em>2-gang, with backlight</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Presence<em>mmWave · iHseno</em></div><div class="val">Clear</div></div>
+        <div class="vrow"><div class="nm">Door<em>Sonoff contact</em></div><div class="val">Open</div></div>
+      </div>
+      <div class="card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">水</span><span class="label">Hot water</span></div>
+          <span class="pill live">Charging</span>
+        </div>
+        <div class="readings" style="grid-template-columns:repeat(2,1fr)">
+          <div class="rd"><div class="l">Hot water</div><div class="n">48.2<small>°C</small></div><div class="note">Top 51.0°</div></div>
+          <div class="rd"><div class="l">Mode</div><div class="n">Eco</div><div class="note">Hot water amount</div></div>
+        </div>
+        <div class="vrow" style="margin-top:14px"><div class="nm">Temporary lux<em>one-off boost</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Full heat pump<em>BA-SVM 10-200/12 E</em></div><button class="act ghost" data-goto="home" style="margin-top:0">Open</button></div>
+      </div>
+    </div>
+
+    <div class="sect"><h3>Laundry &amp; garage</h3><span class="k">洗</span></div>
+    <div class="grid g2">
+      <div class="card veined" id="laundry-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">洗</span><span class="label">Laundry</span></div>
+          <span class="pill live">Dryer running</span>
+        </div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Pralka<em>machine state · stopped</em></div><div class="val">Done</div></div>
+        <div class="vrow"><div class="nm">Suszarka<em>job state · drying</em></div><div class="val" data-dryer>0:34</div></div>
+        <div class="vrow"><div class="nm">Wrinkle prevent<em>active after the cycle</em></div><button class="toggle on"><i></i></button></div>
+        <div class="vrow"><div class="nm">Room light<em>storage main switch</em></div><button class="toggle"><i></i></button></div>
+        <div class="svcline">
+          <div class="s"><span class="l">Pralka energy</span><span class="d">0.62 kWh</span></div>
+          <div class="s"><span class="l">Suszarka</span><span class="d">1.10 kWh</span></div>
+          <div class="s"><span class="l">Motion</span><span class="d">clear</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">車</span><span class="label">Garage</span></div>
+          <span class="pill ok">Closed</span>
+        </div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Door<em>contact sensor · battery 61%</em></div><div class="val">Closed · 08:10</div></div>
+        <div class="vrow"><div class="nm">Garage light</div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Outside light<em>driveway side</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Motion</div><div class="val">Clear</div></div>
+      </div>
+    </div>
+
+    <div class="sect"><h3>Pantry &amp; guest suite</h3><span class="k">客</span></div>
+    <div class="grid g2">
+      <div class="card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">蔵</span><span class="label">Pantry</span></div>
+          <span class="pill">Clear</span>
+        </div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Light<em>2-gang Tuya switch</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Second gang</div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Motion<em>battery 88%</em></div><div class="val">Clear</div></div>
+      </div>
+
+      <div class="card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">客</span><span class="label">Guest suite</span></div>
+          <span class="pill">Empty</span>
+        </div>
+        <div class="readings" style="grid-template-columns:repeat(2,1fr)">
+          <div class="rd"><div class="l">Temperature</div><div class="n">19.8<small>°C</small></div><div class="note">SwitchBot 4C23</div></div>
+          <div class="rd"><div class="l">Humidity</div><div class="n">51<small>%</small></div><div class="note">Battery 92%</div></div>
+        </div>
+        <div class="vrow" style="margin-top:14px"><div class="nm">Lamp<em>Yeelight Color4</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Own entrance<em>no contact or lock connected</em></div><div class="val">—</div></div>
+        <div class="vrow"><div class="nm">Kitchenette<em>no smart socket connected</em></div><div class="val">—</div></div>
+      </div>
+    </div>
   </section>
 
   <div class="toast" id="toast"><span class="k">墨</span><span id="toast-msg"></span></div>
+
+  <!-- camera lightbox — populated by CAMS in the script, opened by any [data-cam] -->
+  <div class="camlb" id="camlb" aria-hidden="true">
+    <div class="camlb-panel" role="dialog" aria-modal="true" aria-labelledby="camlb-title">
+      <div class="camlb-head">
+        <div class="ttl"><span class="k" id="camlb-k">呼</span><span class="label" id="camlb-title">Camera</span></div>
+        <button class="camlb-close" id="camlb-close" aria-label="Close">Close ✕</button>
+      </div>
+      <div class="cam" id="camlb-feed">
+        <span class="rec">LIVE</span><span class="label" id="camlb-feedlabel">Feed</span>
+      </div>
+      <div class="vrow" style="margin-top:12px" id="camlb-sub"></div>
+      <div class="camlb-ctrls" id="camlb-ctrls"></div>
+    </div>
+  </div>
+
+  <!-- disarm keypad — the mock validates a demo code locally; a real install validates
+       against Alarmo's alarm_control_panel entity, which this instance doesn't expose yet -->
+  <div class="keypad-wrap" id="keypad-wrap" aria-hidden="true">
+    <div class="keypad" id="keypad" role="dialog" aria-modal="true" aria-label="Disarm the alarm">
+      <div class="kp-ttl">Disarm</div>
+      <div class="kp-sub" id="kp-sub">Enter the four-digit code</div>
+      <div class="kp-dots" id="kp-dots"><i></i><i></i><i></i><i></i></div>
+      <div class="kp-grid" id="kp-grid">
+        <button data-kp="1">1</button><button data-kp="2">2</button><button data-kp="3">3</button>
+        <button data-kp="4">4</button><button data-kp="5">5</button><button data-kp="6">6</button>
+        <button data-kp="7">7</button><button data-kp="8">8</button><button data-kp="9">9</button>
+        <button class="wide" data-kp="cancel">Cancel</button>
+        <button data-kp="0">0</button>
+        <button class="wide" data-kp="del">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- weekly school timetable — scaffold only; no timetable source is connected -->
+  <div class="camlb" id="school-lb" aria-hidden="true">
+    <div class="camlb-panel" role="dialog" aria-modal="true" aria-labelledby="school-lb-title">
+      <div class="camlb-head">
+        <div class="ttl"><span class="k">学</span><span class="label" id="school-lb-title">Weekly timetable</span></div>
+        <button class="camlb-close" id="school-close" aria-label="Close">Close ✕</button>
+      </div>
+      <div class="chiprow" id="school-tabs">
+        <span class="mchip on" data-kid="olaf">Olaf</span>
+        <span class="mchip" data-kid="zoja">Zoja</span>
+      </div>
+      <div class="weekgrid" id="school-grid"></div>
+      <div class="gapnote">Sample timetable. Each cell fills from one lesson of the child's school feed — a Vulcan or Librus integration, or an ICS export per child.</div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1271,7 +2492,7 @@ select.sel option{background:var(--char-2);color:var(--washi)}
   function tick(){
     var d=new Date();
     var t=pad(d.getHours())+":"+pad(d.getMinutes());
-    ["clock","clock2","clock3","clock4","clock5"].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=t});
+    $$('[id^="clock"]').forEach(function(el){el.textContent=t});
     var days=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
     $("#dateline").textContent=days[d.getDay()]+" "+d.getDate()+"."+(d.getMonth()+1)+".";
     var h=d.getHours();
@@ -1287,6 +2508,327 @@ select.sel option{background:var(--char-2);color:var(--washi)}
     clearTimeout(toastTimer);
     toastTimer=setTimeout(function(){$("#toast").classList.remove("show")},2200);
   }
+
+  /* ---------- camera lightbox — real switches per camera, opened by any [data-cam] ---------- */
+  var CAMS = {
+    doorbell: {
+      kanji:"呼", title:"Main entrance doorbell", feedLabel:"Front door",
+      svg:'<path d="M0 78 L60 40 L100 62 L160 30 L160 100 L0 100 Z" fill="#1E1811"/><path d="M60 40 L60 100" stroke="#2A2219" stroke-width="1"/>',
+      subLabel:"Last visitor", subValue:"17:42",
+      controls:[
+        {id:"cl-dbl-rec",   label:"Record",                    sub:"switch.main_entrance_doorbell_record",                 type:"toggle", on:true},
+        {id:"cl-dbl-priv",  label:"Privacy mode",               sub:"switch.main_entrance_doorbell_privacy_mode",           type:"toggle", on:false},
+        {id:"cl-dbl-push",  label:"Push notifications",         sub:"switch.main_entrance_doorbell_push_notifications",     type:"toggle", on:true},
+        {id:"cl-dbl-chime", label:"Doorbell button sound",      sub:"switch.main_entrance_doorbell_doorbell_button_sound",  type:"toggle", on:true},
+        {id:"cl-dbl-ftp",   label:"FTP upload",                 sub:"switch.main_entrance_doorbell_ftp_upload",             type:"toggle", on:false},
+        {id:"cl-dbl-siren", label:"Sound siren",                sub:"siren.main_entrance_doorbell_siren",                   type:"button", btnLabel:"Sound", toastMsg:"Siren sounded at the front door"}
+      ]
+    },
+    atrium: {
+      kanji:"庭", title:"Atrium", feedLabel:"Atrium",
+      svg:'<ellipse cx="80" cy="86" rx="70" ry="20" fill="#17222A" opacity=".8"/><path d="M0 62 Q80 44 160 66 L160 100 L0 100 Z" fill="#1B1710" opacity=".85"/>',
+      subLabel:"Day / night", subValue:"Day",
+      controls:[
+        {id:"cl-atr-rec",   label:"Record",                    sub:"switch.atrium_record",                                type:"toggle", on:true},
+        {id:"cl-atr-recau", label:"Record audio",               sub:"switch.atrium_record_audio",                          type:"toggle", on:false},
+        {id:"cl-atr-push",  label:"Push notifications",         sub:"switch.atrium_push_notifications",                    type:"toggle", on:true},
+        {id:"cl-atr-ir",    label:"Infrared in night mode",     sub:"switch.atrium_infra_red_lights_in_night_mode",        type:"toggle", on:true},
+        {id:"cl-atr-ftp",   label:"FTP upload",                 sub:"switch.atrium_ftp_upload",                            type:"toggle", on:false}
+      ]
+    }
+  };
+  function renderCamControl(c){
+    if(c.type==="toggle"){
+      return '<div class="vrow"><div class="nm">'+c.label+'<em>'+c.sub+'</em></div>'+
+             '<button class="toggle'+(c.on?' on':'')+'" data-clctrl="'+c.id+'"><i></i></button></div>';
+    }
+    return '<div class="vrow"><div class="nm">'+c.label+'<em>'+c.sub+'</em></div>'+
+           '<button class="act ghost" data-clbtn="'+c.id+'" style="margin-top:0">'+(c.btnLabel||"Trigger")+'</button></div>';
+  }
+  function openCam(key){
+    var cfg=CAMS[key]; if(!cfg) return;
+    $("#camlb-k").textContent=cfg.kanji;
+    $("#camlb-title").textContent=cfg.title;
+    $("#camlb-feed").innerHTML='<svg viewBox="0 0 160 100" preserveAspectRatio="none">'+cfg.svg+'</svg><span class="rec">LIVE</span><span class="label">'+cfg.feedLabel+'</span>';
+    $("#camlb-sub").innerHTML='<div class="nm">'+cfg.subLabel+'</div><div class="val">'+cfg.subValue+'</div>';
+    $("#camlb-ctrls").innerHTML=cfg.controls.map(renderCamControl).join("");
+    $$("#camlb-ctrls [data-clctrl]").forEach(function(b){
+      b.addEventListener("click",function(e){
+        e.stopPropagation();
+        b.classList.toggle("on");
+        var c=cfg.controls.filter(function(x){return x.id===b.dataset.clctrl})[0];
+        toast((c?c.label:"Control")+(b.classList.contains("on")?" on":" off"));
+      });
+    });
+    $$("#camlb-ctrls [data-clbtn]").forEach(function(b){
+      b.addEventListener("click",function(e){
+        e.stopPropagation();
+        var c=cfg.controls.filter(function(x){return x.id===b.dataset.clbtn})[0];
+        toast(c&&c.toastMsg?c.toastMsg:"Done");
+      });
+    });
+    $("#camlb").classList.add("show");
+    $("#camlb").setAttribute("aria-hidden","false");
+  }
+  function closeCam(){
+    $("#camlb").classList.remove("show");
+    $("#camlb").setAttribute("aria-hidden","true");
+  }
+  $$("[data-cam]").forEach(function(el){
+    el.addEventListener("click",function(){ openCam(el.dataset.cam); });
+    el.addEventListener("keydown",function(e){
+      if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openCam(el.dataset.cam); }
+    });
+  });
+  $("#camlb-close").addEventListener("click",closeCam);
+  $("#camlb").addEventListener("click",function(e){ if(e.target.id==="camlb") closeCam(); });
+  document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeCam(); });
+
+  /* ---------- alarm — input_boolean.alarm_armed; disarm asks for a code ---------- */
+  var DEMO_CODE="1234";
+  var armed=false, armMode="Away";
+  function paintAlarm(){
+    var bar=$("#alarm-bar");
+    bar.classList.toggle("armed",armed);
+    $("#ab-state").textContent = armed ? ("Armed — "+armMode) : "Alarm off";
+    $("#ab-sub").textContent = armed
+      ? (armMode==="Night" ? "Perimeter watched · motion ignored upstairs" : "Every sensor watched · disarm needs the code")
+      : "Nobody out · doors all closed";
+    $("#ab-arm").hidden=armed; $("#ab-arm-night").hidden=armed; $("#ab-disarm").hidden=!armed;
+  }
+  function setArmed(on,mode){
+    armed=on; if(mode) armMode=mode;
+    paintAlarm();
+    toast(on?("Alarm armed — "+armMode.toLowerCase()+" · input_boolean.alarm_armed on"):"Alarm disarmed");
+  }
+  $("#ab-arm").addEventListener("click",function(){ setArmed(true,"Away"); });
+  $("#ab-arm-night").addEventListener("click",function(){ setArmed(true,"Night"); });
+
+  var kpBuf="";
+  function kpPaint(){
+    $$("#kp-dots i").forEach(function(d,i){ d.classList.toggle("on", i<kpBuf.length); });
+  }
+  function kpOpen(){
+    kpBuf=""; kpPaint();
+    $("#kp-sub").textContent="Enter the four-digit code";
+    $("#keypad-wrap").classList.add("show");
+    $("#keypad-wrap").setAttribute("aria-hidden","false");
+  }
+  function kpClose(){
+    $("#keypad-wrap").classList.remove("show");
+    $("#keypad-wrap").setAttribute("aria-hidden","true");
+  }
+  function kpSubmit(){
+    if(kpBuf===DEMO_CODE){ kpClose(); setArmed(false); return; }
+    var pad=$("#keypad");
+    pad.classList.add("bad");
+    $("#kp-sub").textContent="Wrong code — try again";
+    setTimeout(function(){pad.classList.remove("bad")},420);
+    kpBuf=""; kpPaint();
+  }
+  $("#ab-disarm").addEventListener("click",kpOpen);
+  $$("#kp-grid button").forEach(function(b){
+    b.addEventListener("click",function(){
+      var k=b.dataset.kp;
+      if(k==="cancel"){ kpClose(); return; }
+      if(k==="del"){ kpBuf=kpBuf.slice(0,-1); kpPaint(); return; }
+      if(kpBuf.length>=4) return;
+      kpBuf+=k; kpPaint();
+      if(kpBuf.length===4) setTimeout(kpSubmit,180);
+    });
+  });
+  document.addEventListener("keydown",function(e){
+    if(!$("#keypad-wrap").classList.contains("show")) return;
+    if(e.key==="Escape"){ kpClose(); return; }
+    if(/^[0-9]$/.test(e.key)&&kpBuf.length<4){ kpBuf+=e.key; kpPaint(); if(kpBuf.length===4) setTimeout(kpSubmit,180); }
+    if(e.key==="Backspace"){ kpBuf=kpBuf.slice(0,-1); kpPaint(); }
+  });
+  $("#keypad-wrap").addEventListener("click",function(e){ if(e.target.id==="keypad-wrap") kpClose(); });
+  paintAlarm();
+
+  /* ---------- morning brief ---------- */
+  $("#brief-refresh").addEventListener("click",function(){
+    var t=$("#brief-text");
+    t.style.opacity=".35";
+    toast("ai_task.google_ai_task — rewriting the brief");
+    setTimeout(function(){ t.style.opacity="1"; $("#brief-time").textContent="Written "+new Date().toTimeString().slice(0,5); },900);
+  });
+
+  /* ---------- quick lights ---------- */
+  function paintQuickLights(){
+    var n=0; $$("#quick-lights .ql").forEach(function(t){ if(t.classList.contains("on")) n++ });
+    $("#ql-count").textContent=n+" on";
+  }
+  $$("#quick-lights .ql").forEach(function(t){ t.addEventListener("click",function(){ setTimeout(paintQuickLights,0) }); });
+  $("#ql-all").addEventListener("click",function(){
+    $$("#quick-lights .ql").forEach(function(t){ t.classList.remove("on") });
+    paintQuickLights();
+    toast("input_boolean.all_lights — everything off");
+  });
+  paintQuickLights();
+
+  /* ---------- whole-home media ---------- */
+  var hmPlaying=false;
+  $("#hm-play").addEventListener("click",function(){
+    hmPlaying=!hmPlaying;
+    this.textContent=hmPlaying?"❚❚":"▷";
+    $("#hm-pill").textContent=hmPlaying?"Playing":"Idle";
+    $("#hm-pill").classList.toggle("live",hmPlaying);
+    $("#hm-title").textContent=hmPlaying?"Ryuichi Sakamoto — async":"Nothing playing";
+    $("#home-media").classList.toggle("veined",hmPlaying);
+    runRow("#run-media",hmPlaying,$("#hm-zone").value.toLowerCase()+(hmPlaying?" · playing":" · idle"),hmPlaying?"24%":"—");
+  });
+  $("#hm-zone").addEventListener("change",function(){
+    $("#hm-artist").textContent=this.value+(this.value==="All speakers"?" · 12 zones grouped":" · grouped");
+    toast("Casting to "+this.value);
+  });
+
+  /* ---------- vacuum (Home card) ---------- */
+  var hvRunning=false;
+  $("#hv-clean").addEventListener("click",function(){
+    hvRunning=true;
+    $("#home-vac").classList.add("veined");
+    $("#hv-pill").textContent="Cleaning"; $("#hv-pill").classList.remove("ok"); $("#hv-pill").classList.add("live");
+    runRow("#run-vac",true,"cleaning · whole ground floor","in progress");
+    toast("Deebot T9+ — cleaning started");
+  });
+  $("#hv-dock").addEventListener("click",function(){
+    hvRunning=false;
+    $("#home-vac").classList.remove("veined");
+    $("#hv-pill").textContent="Docked"; $("#hv-pill").classList.add("ok"); $("#hv-pill").classList.remove("live");
+    runRow("#run-vac",false,"docked · charged","idle");
+    toast("Deebot returning to the dock");
+  });
+
+  /* ---------- heating offset: Offset (47011), clamped to the ±3 the house uses ---------- */
+  var ofs=0;
+  function paintOfs(){
+    var el=$("#ofs-val");
+    el.textContent=(ofs>0?"+":"")+ofs;
+    el.classList.toggle("up",ofs>0);
+    el.classList.toggle("down",ofs<0);
+  }
+  function bumpOfs(d){
+    var next=Math.max(-3,Math.min(3,ofs+d));
+    if(next===ofs){ toast("Offset is limited to ±3 degrees"); return; }
+    ofs=next; paintOfs();
+    toast("Heat curve offset "+(ofs>0?"+":"")+ofs+" — number.offset_47011");
+  }
+  $("#ofs-down").addEventListener("click",function(){bumpOfs(-1)});
+  $("#ofs-up").addEventListener("click",function(){bumpOfs(1)});
+  paintOfs();
+
+  /* ---------- kids' weekly timetable — sample; needs Vulcan/Librus or an ICS per child ---------- */
+  (function(){
+    var days=["Mon","Tue","Wed","Thu","Fri"];
+    var times=["8:00","8:55","9:50","10:55","11:50","12:45","13:40","14:35"];
+    /* rows are periods 1..8, columns Mon..Fri; "" = free */
+    var PLAN={
+      olaf:[
+        ["WF","Polski","Matematyka","Angielski","Polski"],
+        ["Matematyka","Matematyka","Polski","Matematyka","Matematyka"],
+        ["Polski","Biologia","Geografia","Polski","Historia"],
+        ["Angielski","Angielski","WF","Plastyka","Geografia"],
+        ["Historia","Informatyka","Muzyka","Biologia","Angielski"],
+        ["Technika","WF","Angielski","WF","Godz. wych."],
+        ["","Religia","Historia","",""],
+        ["","","","",""]
+      ],
+      zoja:[
+        ["","","","",""],
+        ["Matematyka","Polski","Matematyka","Polski","Angielski"],
+        ["Polski","Matematyka","Polski","Matematyka","Polski"],
+        ["Przyroda","Angielski","Historia","Przyroda","Matematyka"],
+        ["WF","Plastyka","Angielski","Informatyka","WF"],
+        ["Muzyka","WF","WF","","Godz. wych."],
+        ["","","Religia","",""],
+        ["","","","",""]
+      ]
+    };
+    var grid=$("#school-grid");
+    function render(kid){
+      var plan=PLAN[kid]||PLAN.olaf;
+      var html='<div class="wg-h"></div>';
+      days.forEach(function(d){ html+='<div class="wg-h">'+d+'</div>' });
+      for(var p=0;p<plan.length;p++){
+        html+='<div class="wg-p">'+(p+1)+'<span class="wg-t">'+times[p]+'</span></div>';
+        for(var d=0;d<days.length;d++){
+          var v=plan[p][d];
+          var cls="wg-c"+(v?" has":"")+(v==="WF"?" pe":"");
+          html+='<div class="'+cls+'">'+(v||"—")+'</div>';
+        }
+      }
+      grid.innerHTML=html;
+    }
+    render("olaf");
+    function openSchool(){ $("#school-lb").classList.add("show"); $("#school-lb").setAttribute("aria-hidden","false"); }
+    function closeSchool(){ $("#school-lb").classList.remove("show"); $("#school-lb").setAttribute("aria-hidden","true"); }
+    $("#school-open").addEventListener("click",openSchool);
+    $("#school-close").addEventListener("click",closeSchool);
+    $("#school-lb").addEventListener("click",function(e){ if(e.target.id==="school-lb") closeSchool(); });
+    document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeSchool(); });
+    $$("#school-tabs .mchip").forEach(function(c){
+      c.addEventListener("click",function(){
+        $$("#school-tabs .mchip").forEach(function(x){x.classList.remove("on")});
+        c.classList.add("on");
+        $("#school-lb-title").textContent="Weekly timetable — "+c.textContent;
+        render(c.dataset.kid);
+      });
+    });
+    /* the Home card says which school day it is showing — Saturday and Sunday roll to Monday */
+    (function(){
+      var d=new Date().getDay();          /* 0 Sun … 6 Sat */
+      var names=["Monday","Tuesday","Wednesday","Thursday","Friday"];
+      var label = (d===5||d===6||d===0) ? "Monday" : names[d];  /* Fri/Sat/Sun -> Monday */
+      var el=$("#school-when"); if(el) el.textContent=label;
+    })();
+  })();
+
+  /* ---------- doors: the pill follows the chips ---------- */
+  function paintDoors(){
+    var open=$$("#dchips .dchip.open").length;
+    var p=$("#doors-pill");
+    p.textContent = open===0 ? "All closed" : (open+(open===1?" open":" open"));
+    p.classList.toggle("ok",open===0);
+  }
+  $$("#dchips .dchip").forEach(function(c){
+    c.addEventListener("click",function(){ c.classList.toggle("open"); paintDoors(); });
+  });
+  paintDoors();
+
+  /* ---------- to-do — real todo.* lists (inbox, regular_tasks, lista_zakupow) ---------- */
+  (function(){
+    var tabs=$$("#todo-tabs .mchip");
+    var panels=$$("#todo-card .tdlist");
+    var labels={tasks:"Tasks",regular:"Regular tasks",groceries:"Groceries"};
+    function bindChk(b){
+      b.addEventListener("click",function(){ b.parentElement.classList.toggle("done"); });
+    }
+    $$("#todo-card .tdchk").forEach(bindChk);
+    function showPanel(key){
+      panels.forEach(function(p){p.style.display = p.dataset.tdpanel===key ? "" : "none"});
+      tabs.forEach(function(t){t.classList.toggle("on", t.dataset.tdtab===key)});
+      $("#todo-input").placeholder="Add to "+(labels[key]||"list")+"…";
+    }
+    tabs.forEach(function(t){ t.addEventListener("click",function(){ showPanel(t.dataset.tdtab); }); });
+    $("#todo-add").addEventListener("click",function(){
+      var input=$("#todo-input");
+      var val=input.value.trim();
+      if(!val) return;
+      var active=document.querySelector("#todo-tabs .mchip.on");
+      var key=active?active.dataset.tdtab:"tasks";
+      var panel=document.querySelector('.tdlist[data-tdpanel="'+key+'"]');
+      var row=document.createElement("div");
+      row.className="tditem";
+      row.innerHTML='<button class="tdchk" aria-label="Mark done"></button><span class="tt"></span>';
+      row.querySelector(".tt").textContent=val;
+      bindChk(row.querySelector(".tdchk"));
+      panel.appendChild(row);
+      input.value="";
+      toast("Added to "+(labels[key]||"Tasks"));
+    });
+    $("#todo-input").addEventListener("keydown",function(e){ if(e.key==="Enter") $("#todo-add").click(); });
+  })();
 
   /* ---------- view switching ---------- */
   function showView(name){
@@ -1304,6 +2846,10 @@ select.sel option{background:var(--char-2);color:var(--washi)}
       showView(g);
     });
   });
+  /* any control with data-toast just reports what it would do */
+  $$("[data-toast]").forEach(function(b){
+    b.addEventListener("click",function(e){e.stopPropagation();toast(b.dataset.toast)});
+  });
 
   /* ---------- sliders ---------- */
   function paintSlider(inp){
@@ -1312,50 +2858,52 @@ select.sel option{background:var(--char-2);color:var(--washi)}
     var pct=inp.parentElement.querySelector(".pct");
     if(pct)pct.textContent=(v>0)?(v+"%"):"off";
   }
+  /* Lights on = the dimmable living-room LED controllers plus the switched
+     circuits that are on elsewhere in the mocked state. */
   function countLights(){
     var n=0;
     $$("#lr-lights input").forEach(function(i){if(+i.value>0)n++});
-    var extra=2; /* kitchen bench + terrace strings, static in mock */
-    $("#lights-count").textContent=n+extra;
-    $("#lr-devs").innerHTML = n>0
-      ? '<i class="dot warm"></i> '+n+(n===1?' light':' lights')+' · TV on'
-      : '<i class="dot"></i> Lights off · TV on';
+    $$("#lr-switched .toggle").forEach(function(t){if(t.classList.contains("on"))n++});
+    var elsewhere=2; /* kitchen island + Olaf's bed light, static in the mock */
+    var el=$("#lights-count"); if(el) el.textContent=n+elsewhere;
   }
   $$("input[type=range]").forEach(function(inp){
     paintSlider(inp);
     inp.addEventListener("input",function(){paintSlider(inp);countLights()});
   });
 
-  /* ---------- scenes ---------- */
-  var sceneLevels={
-    evening:[35,60,20,0],
-    cinema:[5,0,12,0],
-    sauna:[20,40,10,0],
-    away:[0,0,0,0],
-    goodnight:[0,0,0,0]
+  /* ---------- scenes: the real scene/script/helper entities ---------- */
+  var SCENES={
+    cinema:{n:"Cinema",t:"input_boolean.cinema — projector on, screen down, LEDs to 8%",lv:[8,0,0]},
+    screen:{n:"Screen down",t:"scene.fall_projection_screen",lv:null},
+    sleep:{n:"Time to sleep",t:"scene.time_to_sleep",lv:[0,0,0]},
+    dobranoc:{n:"Dobranoc",t:"scene.dobranoc — everything off, porch keeps its dusk rule",lv:[0,0,0]},
+    outside:{n:"Outside lights off",t:"scene.turn_off_outside_lights_back",lv:null}
   };
-  var sceneNames={evening:"Evening",cinema:"Cinema",sauna:"Sauna night",away:"Away",goodnight:"Goodnight"};
   $$("#scenebar .scene").forEach(function(btn){
     btn.addEventListener("click",function(){
-      $$("#scenebar .scene").forEach(function(b){b.classList.remove("active")});
-      btn.classList.add("active");
-      var lv=sceneLevels[btn.dataset.scene];
-      $$("#lr-lights input").forEach(function(inp,i){inp.value=lv[i];paintSlider(inp)});
-      countLights();
-      $("#lr-sub").textContent=sceneNames[btn.dataset.scene]+" scene · Terrace door closed";
-      toast("Scene: "+sceneNames[btn.dataset.scene]);
+      var sc=SCENES[btn.dataset.scene]; if(!sc) return;
+      if(btn.dataset.scene==="cinema"){
+        btn.classList.toggle("active");
+      } else {
+        $$("#scenebar .scene").forEach(function(b){
+          if(b.dataset.scene!=="cinema") b.classList.remove("active");
+        });
+        btn.classList.add("active");
+      }
+      if(sc.lv){
+        $$("#lr-lights input").forEach(function(inp,i){ if(sc.lv[i]!=null){inp.value=sc.lv[i];paintSlider(inp);} });
+        countLights();
+      }
+      toast(sc.n+" — "+sc.t);
     });
   });
 
-  /* ---------- energy jitter ---------- */
+  /* ---------- solar: inverter active power, drifting ---------- */
   function jitter(){
     var s=6.2+(Math.random()-0.5)*0.5;
-    var h=2.8+(Math.random()-0.5)*0.4;
-    var g=Math.max(0,s-h);
-    $("#en-solar").textContent=s.toFixed(1);
-    $("#en-house").textContent=h.toFixed(1);
-    $("#en-grid").textContent=g.toFixed(1);
-    $("#solar-hdr").textContent=s.toFixed(1)+" kW";
+    var el=$("#en-solar"); if(el) el.textContent=s.toFixed(1);
+    var gs=$("#gs-now"); if(gs) gs.textContent=s.toFixed(1);
   }
   setInterval(jitter,3000);
 
@@ -1365,12 +2913,6 @@ select.sel option{background:var(--char-2);color:var(--washi)}
       e.stopPropagation();
       t.classList.toggle("on");
     });
-  });
-  $("#blind-tog").addEventListener("click",function(){
-    $("#blind-state").textContent=this.classList.contains("on")?"Lowered 80%":"Raised";
-  });
-  $("#dnd-tog").addEventListener("click",function(){
-    $("#dnd-state").textContent=this.classList.contains("on")?"On until 06:45":"Off";
   });
 
   /* ---------- media ---------- */
@@ -1408,22 +2950,14 @@ select.sel option{background:var(--char-2);color:var(--washi)}
   var dry=34*60;
   setInterval(function(){
     dry=Math.max(0,dry-60);
-    $("#dryer-left").textContent=Math.floor(dry/60)+":"+pad(dry%60===0?0:dry%60).slice(-2);
+    var txt=Math.floor(dry/60)+":"+pad(dry%60===0?0:dry%60).slice(-2);
+    $$("[data-dryer]").forEach(function(el){el.textContent=txt});
   },60000);
 
-  /* ---------- climate steppers ---------- */
-  var lrT=22.0, mbT=19.5;
-  $$("[data-clim]").forEach(function(b){b.addEventListener("click",function(){
-    lrT=Math.min(26,Math.max(16,lrT+parseFloat(b.dataset.clim)));
-    $("#lr-target").textContent=lrT.toFixed(1)+"°";
-  })});
-  $$("[data-mbclim]").forEach(function(b){b.addEventListener("click",function(){
-    mbT=Math.min(24,Math.max(15,mbT+parseFloat(b.dataset.mbclim)));
-    $("#mb-target").textContent=mbT.toFixed(1)+"°";
-  })});
-
+  /* No per-room climate entities exist on this instance — the whole house runs off one
+     BA-SVM heat pump, so room views link to it instead of pretending to hold a setpoint. */
   /* mchips exclusive */
-  $$(".steppers .mchip").forEach(function(c){
+  $$(".steppers .mchip, .excl .mchip").forEach(function(c){
     c.addEventListener("click",function(){
       c.parentElement.querySelectorAll(".mchip").forEach(function(x){x.classList.remove("on")});
       c.classList.add("on");
@@ -1477,21 +3011,30 @@ select.sel option{background:var(--char-2);color:var(--washi)}
   var sGauge=Gauge({box:"#sauna-gauge",fill:"#sauna-fill",handle:"#sauna-handle",
     min:20,max:110,step:1,arc:true,onset:function(v){sTarget=Math.max(40,Math.min(110,v));saunaPaint()}});
 
+  /* Home's "Running now" list mirrors whatever the room views are doing. */
+  function runRow(id,on,sub,val){
+    var r=$(id); if(!r) return;
+    r.classList.toggle("on",!!on); r.classList.toggle("idle",!on);
+    if(sub!=null){var e=r.querySelector("em"); if(e) e.textContent=sub;}
+    if(val!=null){var v=r.querySelector(".rv"); if(v) v.textContent=val;}
+    var list=$$("#runlist .runrow.on").length;
+    var c=$("#run-count");
+    if(c){ c.textContent = list ? list+" running" : "All quiet"; c.classList.toggle("live",list>0); }
+    seam($("#run-card"), list>0);
+  }
+
   function saunaPaint(){
     $("#sauna-temp").textContent=Math.round(sTemp);
     $("#sauna-target").textContent=Math.round(sTarget);
     sGauge.paint(sTemp,sTarget);
-    var hb=$("#home-sauna-bar");
-    if(hb) hb.style.width=Math.min(100,Math.round((sTemp-20)/(sTarget-20)*100))+"%";
   }
   function saunaIdleText(){
     $("#sauna-pill").textContent="Idle"; $("#sauna-pill").classList.remove("live");
     $("#sauna-eta").textContent = sTemp>40 ? "Cooling · "+Math.round(sTemp)+"°" : "Cold · 20 min to heat";
     $("#sauna-tog").classList.remove("on");
-    seam($("#sauna-card"),false); seam($("#home-sauna"),false);
+    seam($("#sauna-card"),false);
     var n=$("#sauna-note"); if(n) n.textContent="Sauna idle";
-    var hv=$("#home-sauna-v"); if(hv) hv.innerHTML=Math.round(sTemp)+'<small>°C · idle</small>';
-    var hs=$("#home-sauna-s"); if(hs) hs.textContent="Tap to open controls";
+    runRow("#run-sauna",false,"climate.sauna · off",Math.round(sTemp)+"°");
   }
   $$("[data-sauna]").forEach(function(b){
     b.addEventListener("click",function(){
@@ -1512,9 +3055,10 @@ select.sel option{background:var(--char-2);color:var(--washi)}
       $("#sauna-runtime").textContent="Last · today "+$("#clock").textContent;
       saunaIdleText(); toast("Sauna off"); return;
     }
-    seam($("#sauna-card"),true); seam($("#home-sauna"),true);
+    seam($("#sauna-card"),true);
     $("#sauna-pill").textContent="Heating"; $("#sauna-pill").classList.add("live");
     var n=$("#sauna-note"); if(n) n.textContent="Sauna heating";
+    runRow("#run-sauna",true,"heating to "+Math.round(sTarget)+"° · 9.0 kW",Math.round(sTemp)+"°");
     toast("Sauna heating to "+Math.round(sTarget)+"° — ready in ~"+Math.max(1,Math.round((sTarget-sTemp)/1.1))+" min");
     sTimer=setInterval(function(){
       sElapsed+=1;
@@ -1522,36 +3066,21 @@ select.sel option{background:var(--char-2);color:var(--washi)}
         sTemp=Math.min(sTarget,sTemp+0.4);
         $("#sauna-eta").textContent="Heating · ~"+Math.max(1,Math.round((sTarget-sTemp)/1.1))+" min";
         $("#sauna-runtime").textContent="Heating "+Math.floor(sElapsed/5)+" min";
-        var hv=$("#home-sauna-v"); if(hv) hv.innerHTML=Math.round(sTemp)+'<small>°C → '+Math.round(sTarget)+'°</small>';
-        var hs=$("#home-sauna-s"); if(hs) hs.textContent="Heating";
+        runRow("#run-sauna",true,"heating to "+Math.round(sTarget)+"° · 9.0 kW",Math.round(sTemp)+"°");
       } else {
         sTemp=sTarget;
         $("#sauna-pill").textContent="Ready";
         $("#sauna-eta").textContent="Ready · auto-off in "+sLen+" min";
         $("#sauna-runtime").textContent="At temperature";
         var n2=$("#sauna-note"); if(n2) n2.textContent="Sauna ready";
-        var hv2=$("#home-sauna-v"); if(hv2) hv2.innerHTML=Math.round(sTemp)+'<small>°C · ready</small>';
-        var hs2=$("#home-sauna-s"); if(hs2) hs2.textContent="Ready — enjoy";
+        runRow("#run-sauna",true,"at temperature · session "+sLen+" min",Math.round(sTemp)+"°");
       }
       saunaPaint();
     },200);
   });
   saunaPaint(); saunaIdleText();
 
-  /* ---------- SAUNA · light & sound ---------- */
-  $("#sa-led").addEventListener("click",function(){
-    $("#sa-led-st").textContent=this.classList.contains("on")?"Ember · solid":"Off";
-  });
-  $$("#sa-sw .sw").forEach(function(s){
-    s.addEventListener("click",function(){
-      $$("#sa-sw .sw").forEach(function(x){x.classList.remove("on")});
-      s.classList.add("on");
-      var c=s.dataset.col||"Fade";
-      $("#sa-led-st").textContent=c+(c==="Fade"?" · slow cycle":" · solid");
-      if(!$("#sa-led").classList.contains("on")) $("#sa-led").classList.add("on");
-      toast("Bench LED — "+c);
-    });
-  });
+  /* ---------- SAUNA · sound (Music Assistant on the nearest speaker) ---------- */
   $("#sa-pl").addEventListener("change",function(){
     var v=this.value;
     $("#sa-track").textContent = ({
@@ -1568,7 +3097,7 @@ select.sel option{background:var(--char-2);color:var(--washi)}
   });
 
   /* ---------- HOT TUB ---------- */
-  var tTemp=38.5, tTarget=38.5, tTimer=null;
+  var tTemp=37.4, tTarget=38.5, tTimer=null;
   var tGauge=Gauge({box:"#tub-gauge",fill:"#tub-fill",handle:"#tub-handle",
     min:10,max:42,step:0.5,arc:false,onset:function(v){tTarget=Math.max(20,Math.min(40,v));tubPaint();tubEval()}});
   function tubPaint(){
@@ -1588,12 +3117,14 @@ select.sel option{background:var(--char-2);color:var(--washi)}
       : "At temperature";
     $("#tub-heat-st").textContent = !on?"Off":(heating?"Heating · 3.0 kW":"Holding "+tTemp.toFixed(1)+"° · 0.4 kW");
     $("#tub-jet-st").textContent = bub?(pmp?"Bubbles and pump running":"Bubbles running"):(pmp?"Circulation only":"Idle");
+    var kw=(on?(heating?3.0:0.4):0)+(bub?0.8:0)+(pmp&&!on?0.1:0);
+    var pw=$("#tub-pw"); if(pw) pw.innerHTML=kw.toFixed(1)+"<span>kW</span>";
     seam($("#tub-card"), on || bub);
   }
   $$("[data-tub]").forEach(function(b){
     b.addEventListener("click",function(){
       tTarget=Math.max(20,Math.min(40,tTarget+parseFloat(b.dataset.tub)));
-      tubPaint(); tubEval(); startTub();
+      tubPaint(); tubEval(); startTub(); startTub();
     });
   });
   function startTub(){
@@ -1607,7 +3138,7 @@ select.sel option{background:var(--char-2);color:var(--washi)}
     },400);
   }
   $("#tub-heat").addEventListener("click",function(){ tubEval(); startTub(); toast(this.classList.contains("on")?"Hot tub heater on":"Hot tub heater off"); });
-  ["#tub-pump","#tub-bub"].forEach(function(id){
+  ["#tub-pump","#tub-bub","#tub-hydro"].forEach(function(id){
     $(id).addEventListener("click",function(){ this.classList.toggle("on"); tubEval(); });
   });
   $("#tub-auto").addEventListener("click",function(){
@@ -1625,6 +3156,7 @@ select.sel option{background:var(--char-2);color:var(--washi)}
     $("#pool-pill").textContent=f?"Filtering":"Filter off";
     $("#pool-pill").classList.toggle("live",f);
     $("#pool-filt-st").textContent=f?"09:00–13:00, 18:00–21:00":"Stopped · resumes 18:00";
+    var pp=$("#pool-pw"); if(pp) pp.textContent=f?"0.31 kW":"0.00 kW";
     seam($("#pool-card"),f);
   }
   $("#pool-filt").addEventListener("click",function(){poolEval()});
@@ -1632,20 +3164,28 @@ select.sel option{background:var(--char-2);color:var(--washi)}
     var on=this.classList.contains("on");
     toast(on?"Pool schedule resumed":"Pool schedule paused — manual control only");
   });
-  var botTimer=null;
-  $("#pool-bot-btn").addEventListener("click",function(){
-    var b=this;
-    if(botTimer){clearInterval(botTimer);botTimer=null;b.textContent="Clean now";
-      $("#pool-bot-st").textContent="Returning to dock";return;}
-    var m=0; b.textContent="Stop robot";
-    botTimer=setInterval(function(){m++;$("#pool-bot-st").textContent="Cleaning · "+m+" min"},1000);
-  });
   poolEval();
 
   /* ---------- ONSEN LIGHTING ---------- */
   $("#ol-all").addEventListener("click",function(){
-    ["#ol-path","#ol-deck","#ol-pool","#ol-rim","#ol-sauna"].forEach(function(id){$(id).classList.remove("on")});
+    ["#ol-1","#ol-2","#ol-3","#ol-4","#ol-5","#ol-socket"].forEach(function(id){$(id).classList.remove("on")});
     toast("Onsen lighting off");
+  });
+
+  /* ---------- FIRE PIT · lit = running, so it earns the seam ---------- */
+  $("#fire-tog").addEventListener("click",function(){
+    var on=this.classList.contains("on");
+    $("#fire-pill").textContent=on?"Lit":"Off";
+    $("#fire-pill").classList.toggle("live",on);
+    $("#fire-st").textContent=on?"Lit · auto-off in 3 h":"Auto-off 3 h";
+    seam($("#fire-card"),on);
+    toast(on?"Fire pit lit — off in 3 h":"Fire pit off");
+  });
+
+  /* ---------- GARDEN LIGHTING ---------- */
+  $("#gl-all").addEventListener("click",function(){
+    ["#gl-perim","#gl-drive","#gl-border"].forEach(function(id){$(id).classList.remove("on")});
+    toast("Garden lighting off");
   });
 
   /* ---------- SPRINKLERS ---------- */
@@ -1757,15 +3297,6 @@ select.sel option{background:var(--char-2);color:var(--washi)}
     $("#mf-next").textContent="Sat 10:30"; b.textContent="Mow now";
   });
 
-  /* ---------- kids' rooms climate ---------- */
-  var kidT={olaf:20.0,zoja:20.0};
-  $$("[data-kid]").forEach(function(b){
-    b.addEventListener("click",function(){
-      var k=b.dataset.kid;
-      kidT[k]=Math.min(24,Math.max(16,kidT[k]+parseFloat(b.dataset.d)));
-      $(k==="olaf"?"#ol-target":"#zo-target").textContent=kidT[k].toFixed(1)+"°";
-    });
-  });
 
   countLights();
 })();

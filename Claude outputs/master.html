@@ -1,0 +1,79 @@
+  <!-- ============ VIEW: BEDROOM ============ -->
+  <!-- The bedroom has two dimmable strips, two wall-switch banks and a rotary knob.
+       It has no temperature sensor and no blinds on this instance — nothing is shown for them. -->
+  <section class="view" id="v-master">
+    <div class="dash-head planks">
+      <div class="dh-row">
+        <div>
+          <div class="dh-kanji">寝 室</div>
+          <div class="dh-title">Bedroom</div>
+          <div class="dh-sub">Neon on at 8% · room marked occupied</div>
+        </div>
+        <div class="dh-clock">
+          <div class="dh-time" id="clock6">--:--</div>
+          <div class="dh-wx">Sleep <b>7 h 12 m</b> · Body battery <b>74</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">灯</span><span class="label">Lights</span></div>
+          <span class="pill">1 on</span>
+        </div>
+        <div class="light-row">
+          <div class="light"><span class="nm">Ceiling LED<em>GLEDOPTO controller</em></span>
+            <input type="range" min="0" max="100" value="0"><span class="pct">off</span></div>
+          <div class="light"><span class="nm">Neon<em>behind the bed</em></span>
+            <input type="range" min="0" max="100" value="8"><span class="pct">8%</span></div>
+        </div>
+        <div class="vrow" style="margin-top:10px"><div class="nm">Main switch<em>3-gang wall switch</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Atrium switch<em>2-gang · terrace side</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Knob<em>rotary dimmer · battery 78%</em></div><div class="val">Bound to Neon</div></div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card">
+          <div class="vhead">
+            <div class="ttl"><span class="k">眠</span><span class="label">Night</span></div>
+            <span class="pill" id="occ-pill">Occupied</span>
+          </div>
+          <div class="vrow" style="margin-top:2px"><div class="nm">Room occupied<em>input_boolean · drives the night rules</em></div><button class="toggle on" id="occ-tog"><i></i></button></div>
+          <div class="chiprow" style="margin-top:10px;flex-wrap:wrap;gap:6px">
+            <button class="mchip" data-toast="scene.time_to_sleep">Time to sleep</button>
+            <button class="mchip" data-toast="scene.dobranoc">Dobranoc</button>
+            <button class="mchip" data-toast="scene.bedrooms_lights_off">All bedrooms off</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="vhead">
+            <div class="ttl"><span class="k">音</span><span class="label">Bedside</span></div>
+          </div>
+          <div class="vrow" style="margin-top:2px"><div class="nm">Nest Mini<em>Bedroom speaker</em></div><div class="val">Idle</div></div>
+          <div class="vrow"><div class="nm">Tivik przy Łożu<em>Jellyfin client</em></div><div class="val">Off</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sect"><h3>Last night</h3><span class="k">記</span></div>
+    <div class="grid g4">
+      <div class="card a-copper person">
+        <div class="label">Sleep</div><div class="climate"><div class="big">7:12<small></small></div></div>
+        <div class="tgt">Bedtime <b>23:04</b> · woke 06:16</div>
+      </div>
+      <div class="card">
+        <div class="label">Body battery</div><div class="climate"><div class="big">74</div></div>
+        <div class="tgt">Charged <b>61</b> · drained 38</div>
+      </div>
+      <div class="card">
+        <div class="label">Training readiness</div><div class="climate"><div class="big">68</div></div>
+        <div class="tgt">Recovery <b>14 h</b></div>
+      </div>
+      <div class="card">
+        <div class="label">HRV status</div><div class="climate"><div class="big">Bal.</div></div>
+        <div class="tgt">Garmin Connect · Tomek</div>
+      </div>
+    </div>
+  </section>

@@ -1,0 +1,86 @@
+  <!-- ============ VIEW: MEZZANINE ============ -->
+  <!-- Multimedia corner and work corner. Real entities only: a 3-gang light switch, the
+       stairs LED switch, the TCL TV (two integrations), the PS5, and the Brother printer. -->
+  <section class="view" id="v-mezzanine">
+    <div class="dash-head planks">
+      <div class="dh-row">
+        <div>
+          <div class="dh-kanji">中 二 階</div>
+          <div class="dh-title">Mezzanine</div>
+          <div class="dh-sub">TV on · printer idle</div>
+        </div>
+        <div class="dh-clock">
+          <div class="dh-time" id="clock7">--:--</div>
+          <div class="dh-wx">PlayStation <b>offline</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card" id="mz-tv">
+        <div class="vhead">
+          <div class="ttl"><span class="k">映</span><span class="label">Smart TV Pro</span></div>
+          <span class="pill live">Playing</span>
+        </div>
+        <div class="media">
+          <div class="art"></div>
+          <div style="min-width:0">
+            <div class="tt">Jellyfin — Shogun, s01e04</div>
+            <div class="ar">TCL P7K · Android TV remote</div>
+            <div class="transport">
+              <button>◁</button><button id="mz-play">❚❚</button><button>▷|</button><span>24:18 / 58:02</span>
+            </div>
+          </div>
+        </div>
+        <div class="selrow">
+          <select class="sel"><option>Jellyfin</option><option>Chromecast</option><option>HomeKit input</option></select>
+          <select class="sel"><option>TV speakers</option><option>GoogleTV9526</option><option>All speakers no kids</option></select>
+        </div>
+        <div class="vrow" style="margin-top:8px"><div class="nm">Mute<em>homekit_controller</em></div><button class="toggle"><i></i></button></div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card">
+          <div class="vhead">
+            <div class="ttl"><span class="k">遊</span><span class="label">PlayStation 5</span></div>
+            <span class="pill">Offline</span>
+          </div>
+          <div class="vrow" style="margin-top:2px"><div class="nm">Console<em>herunohazumi · PSN</em></div><div class="val">Standby</div></div>
+          <div class="vrow"><div class="nm">PlayStation Plus</div><div class="val">Active</div></div>
+        </div>
+
+        <div class="card">
+          <div class="vhead">
+            <div class="ttl"><span class="k">灯</span><span class="label">Lights</span></div>
+          </div>
+          <div class="vrow" style="margin-top:2px"><div class="nm">Main light<em>3-gang · gang 1</em></div><button class="toggle"><i></i></button></div>
+          <div class="vrow"><div class="nm">Work corner<em>3-gang · gang 2</em></div><button class="toggle"><i></i></button></div>
+          <div class="vrow"><div class="nm">Stairs LED<em>main switch stairs</em></div><button class="toggle on"><i></i></button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sect"><h3>Work corner</h3><span class="k">仕事</span></div>
+    <div class="grid g3">
+      <div class="card span2">
+        <div class="vhead">
+          <div class="ttl"><span class="k">印</span><span class="label">Brother HL-1210W</span></div>
+          <span class="pill ok" id="prn-pill">Sleep</span>
+        </div>
+        <div class="readings" style="grid-template-columns:repeat(3,1fr)">
+          <div class="rd"><div class="l">Black toner</div><div class="n">42<small>%</small></div>
+            <div class="band"><span class="safe" style="left:25%;right:0"></span><span class="pin" style="left:42%"></span></div>
+            <div class="note">Order at 15%</div></div>
+          <div class="rd"><div class="l">Drum life</div><div class="n">71<small>%</small></div>
+            <div class="band"><span class="safe" style="left:20%;right:0"></span><span class="pin" style="left:71%"></span></div>
+            <div class="note">8 400 pages left</div></div>
+          <div class="rd"><div class="l">Status</div><div class="n">Idle</div><div class="note">Ready to print</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="vhead"><div class="ttl"><span class="k">机</span><span class="label">Desk</span></div></div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Desk lighting<em>no dedicated entity yet</em></div><div class="val">—</div></div>
+        <div class="vrow"><div class="nm">Speaker<em>nearest: Hall Nest Mini</em></div><div class="val">Idle</div></div>
+      </div>
+    </div>
+  </section>

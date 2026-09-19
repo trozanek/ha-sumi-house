@@ -11,15 +11,22 @@
 #  ── Bound to the live Bestway/Lay-Z-Spa MQTT integration (verified against
 #     the instance on 2026-09-17 — adjust here if the entity ids ever change). ──
 #    climate.layzspa_sterowanie_temperatura   temperature, current + target
-#    switch.layzspa_regulacja_grzania         heater (the persistent toggle —
-#                                              not switch.layzspa_przycisk_grzalki,
-#                                              which is a momentary button)
 #    switch.layzspa_pompa                     circulation pump
 #    switch.layzspa_babelki                   bubbles
 #    binary_sensor.layzspa_grzalka            the device's own "element firing"
 #                                              sensor (device_class heat) — used
 #                                              directly, no heuristic needed
 #    sensor.layzspa_energia                   lifetime kWh, state_class total_increasing
+#
+#  This controller has no standalone heater switch — only climate.hvac_mode
+#  turns the element on and off (switch.layzspa_regulacja_grzania looked like
+#  one by name but isn't it). The card wants a `switch` domain entity for the
+#  heater row (spec §3.1: the climate entity is for temperature only, so there
+#  is exactly one source of truth for "is the heater on"). `switch.hot_tub_heater`
+#  below is a template switch whose state is a pure read of climate.hvac_mode
+#  and whose actions just call climate.set_hvac_mode — it cannot drift from the
+#  climate entity because it has no state of its own, so this doesn't reopen
+#  the two-sources-of-truth problem the spec is guarding against.
 #
 #  Service tracking lives entirely on the controller — four "days since" sensors
 #  and four reset buttons, wired straight into the card's config (not this
@@ -64,6 +71,28 @@ input_number:
   tub_slot_4_temp: { name: Hot tub slot 4 temperature, min: 20, max: 40, step: 0.5, unit_of_measurement: "°C", mode: box }
 
 template:
+  - switch:
+      # Wraps climate.hvac_mode because this controller has no real heater
+      # switch (see the file header). State is read straight from the climate
+      # entity every time, so the two can never disagree.
+      - name: Hot tub heater
+        unique_id: sumi_tub_heater
+        availability: >
+          {{ states('climate.layzspa_sterowanie_temperatura') not in ['unknown', 'unavailable'] }}
+        state: "{{ is_state('climate.layzspa_sterowanie_temperatura', 'heat') }}"
+        turn_on:
+          action: climate.set_hvac_mode
+          target:
+            entity_id: climate.layzspa_sterowanie_temperatura
+          data:
+            hvac_mode: heat
+        turn_off:
+          action: climate.set_hvac_mode
+          target:
+            entity_id: climate.layzspa_sterowanie_temperatura
+          data:
+            hvac_mode: "off"
+
   - binary_sensor:
       # The card reads this fixed name; the Bestway bridge already computes
       # "element actually firing" itself (binary_sensor.layzspa_grzalka), so
@@ -176,6 +205,8 @@ automation:
           entity_id: climate.layzspa_sterowanie_temperatura
         data:
           temperature: "{{ states('sensor.hot_tub_scheduled_temperature') | float(38) }}"
-      - action: switch.turn_on
+      - action: climate.set_hvac_mode
         target:
-          entity_id: switch.layzspa_regulacja_grzania
+          entity_id: climate.layzspa_sterowanie_temperatura
+        data:
+          hvac_mode: heat

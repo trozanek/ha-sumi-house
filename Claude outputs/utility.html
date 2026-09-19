@@ -1,0 +1,148 @@
+  <!-- ============ VIEW: UTILITY & GUEST ============ -->
+  <!-- Low-traffic spaces, one compact card each. There is no attic device on this instance,
+       and the guest suite has only a bulb and a SwitchBot meter — no lock, no kitchenette. -->
+  <section class="view" id="v-utility">
+    <div class="dash-head planks">
+      <div class="dh-row">
+        <div>
+          <div class="dh-kanji">奥 の 間</div>
+          <div class="dh-title">Utility &amp; guest</div>
+          <div class="dh-sub">Garage closed · Suszarka <span data-dryer>0:34</span> left · guest suite empty</div>
+        </div>
+        <div class="dh-clock">
+          <div class="dh-time" id="clock8">--:--</div>
+          <div class="dh-wx">Hot water <b>48.2°</b> · Pralka done</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sect"><h3>Entrance &amp; halls</h3><span class="k">玄</span></div>
+    <div class="grid g3">
+      <div class="card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">玄</span><span class="label">Entrance</span></div>
+          <span class="pill" id="dbl-pill">Visitor 17:42</span>
+        </div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Main lights<em>Zha entrance · main</em></div><button class="toggle on"><i></i></button></div>
+        <div class="vrow"><div class="nm">Entrance LED</div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Closet light</div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Outside light<em>porch bulbs group</em></div><button class="toggle on"><i></i></button></div>
+        <div class="svcline">
+          <div class="s"><span class="l">Closets</span><span class="d">both closed</span></div>
+          <div class="s"><span class="l">Motion</span><span class="d">clear</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">呼</span><span class="label">Doorbell</span></div>
+          <span class="pill">Reolink PoE</span>
+        </div>
+        <div class="cam" style="margin-top:8px">
+          <svg viewBox="0 0 160 100" preserveAspectRatio="none"><path d="M0 78 L60 40 L100 62 L160 30 L160 100 L0 100 Z" fill="#1E1811"/><path d="M60 40 L60 100" stroke="#2A2219" stroke-width="1"/></svg>
+          <span class="rec">LIVE</span><span class="label">Front door</span>
+        </div>
+        <div class="vrow" style="margin-top:10px"><div class="nm">Last visitor<em>person detected</em></div><div class="val">17:42</div></div>
+        <div class="vrow"><div class="nm">Chime<em>doorbell button sound</em></div><button class="toggle on"><i></i></button></div>
+        <div class="vrow"><div class="nm">Siren<em>manual trigger</em></div><button class="act ghost" data-toast="siren.main_entrance_doorbell_siren" style="margin-top:0">Sound</button></div>
+      </div>
+
+      <div class="card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">廊</span><span class="label">Hall</span></div>
+          <span class="pill">Quiet</span>
+        </div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Rooms light<em>hall main switch</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Entrance lights<em>hall main switch · gang 2</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Hall LED<em>night path</em></div><button class="toggle on"><i></i></button></div>
+        <div class="vrow"><div class="nm">Motion</div><div class="val">3 min ago</div></div>
+        <div class="svcline">
+          <div class="s"><span class="l">Link rules</span><span class="d">entrance + rooms</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sect"><h3>Bathroom</h3><span class="k">風呂</span></div>
+    <div class="grid g2">
+      <div class="card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">湯</span><span class="label">Main bathroom</span></div>
+          <span class="pill" id="bath-pill">Clear</span>
+        </div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">LED<em>GLEDOPTO controller</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Sink light<em>sink switch</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Main switch<em>2-gang, with backlight</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Presence<em>mmWave · iHseno</em></div><div class="val">Clear</div></div>
+        <div class="vrow"><div class="nm">Door<em>Sonoff contact</em></div><div class="val">Open</div></div>
+      </div>
+      <div class="card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">水</span><span class="label">Hot water</span></div>
+          <span class="pill live">Charging</span>
+        </div>
+        <div class="readings" style="grid-template-columns:repeat(2,1fr)">
+          <div class="rd"><div class="l">Hot water</div><div class="n">48.2<small>°C</small></div><div class="note">Top 51.0°</div></div>
+          <div class="rd"><div class="l">Mode</div><div class="n">Eco</div><div class="note">Hot water amount</div></div>
+        </div>
+        <div class="vrow" style="margin-top:14px"><div class="nm">Temporary lux<em>one-off boost</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Full heat pump<em>BA-SVM 10-200/12 E</em></div><button class="act ghost" data-goto="home" style="margin-top:0">Open</button></div>
+      </div>
+    </div>
+
+    <div class="sect"><h3>Laundry &amp; garage</h3><span class="k">洗</span></div>
+    <div class="grid g2">
+      <div class="card veined" id="laundry-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">洗</span><span class="label">Laundry</span></div>
+          <span class="pill live">Dryer running</span>
+        </div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Pralka<em>machine state · stopped</em></div><div class="val">Done</div></div>
+        <div class="vrow"><div class="nm">Suszarka<em>job state · drying</em></div><div class="val" data-dryer>0:34</div></div>
+        <div class="vrow"><div class="nm">Wrinkle prevent<em>active after the cycle</em></div><button class="toggle on"><i></i></button></div>
+        <div class="vrow"><div class="nm">Room light<em>storage main switch</em></div><button class="toggle"><i></i></button></div>
+        <div class="svcline">
+          <div class="s"><span class="l">Pralka energy</span><span class="d">0.62 kWh</span></div>
+          <div class="s"><span class="l">Suszarka</span><span class="d">1.10 kWh</span></div>
+          <div class="s"><span class="l">Motion</span><span class="d">clear</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">車</span><span class="label">Garage</span></div>
+          <span class="pill ok">Closed</span>
+        </div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Door<em>contact sensor · battery 61%</em></div><div class="val">Closed · 08:10</div></div>
+        <div class="vrow"><div class="nm">Garage light</div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Outside light<em>driveway side</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Motion</div><div class="val">Clear</div></div>
+      </div>
+    </div>
+
+    <div class="sect"><h3>Pantry &amp; guest suite</h3><span class="k">客</span></div>
+    <div class="grid g2">
+      <div class="card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">蔵</span><span class="label">Pantry</span></div>
+          <span class="pill">Clear</span>
+        </div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Light<em>2-gang Tuya switch</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Second gang</div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Motion<em>battery 88%</em></div><div class="val">Clear</div></div>
+      </div>
+
+      <div class="card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">客</span><span class="label">Guest suite</span></div>
+          <span class="pill">Empty</span>
+        </div>
+        <div class="readings" style="grid-template-columns:repeat(2,1fr)">
+          <div class="rd"><div class="l">Temperature</div><div class="n">19.8<small>°C</small></div><div class="note">SwitchBot 4C23</div></div>
+          <div class="rd"><div class="l">Humidity</div><div class="n">51<small>%</small></div><div class="note">Battery 92%</div></div>
+        </div>
+        <div class="vrow" style="margin-top:14px"><div class="nm">Lamp<em>Yeelight Color4</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Own entrance<em>no contact or lock connected</em></div><div class="val">—</div></div>
+        <div class="vrow"><div class="nm">Kitchenette<em>no smart socket connected</em></div><div class="val">—</div></div>
+      </div>
+    </div>
+  </section>

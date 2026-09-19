@@ -1,0 +1,223 @@
+  <!-- ============ VIEW: HOME ============ -->
+  <!-- Every row below maps to an entity that exists in docs/migration/entities.csv.
+       No room temperatures are shown for rooms that have no sensor — only Living Room
+       (LR Temperature sensor), the guest suite (SwitchBot 4C23) and outdoors (SwitchBot 73EA). -->
+  <section class="view on" id="v-home">
+    <div class="dash-head planks">
+      <div class="dh-row">
+        <div>
+          <div class="dh-kanji">墨 の 家</div>
+          <div class="dh-title" id="greet">Good evening</div>
+          <div class="dh-sub" id="home-sub"><span id="home-who">Tomek, Olaf and Zoja home</span> · <span id="lights-count">5</span> lights on · <span id="sauna-note">Sauna idle</span></div>
+        </div>
+        <div class="dh-clock">
+          <div class="dh-time" id="clock2">--:--</div>
+          <div class="dh-wx"><b id="out-temp">18.9°</b> outside · 71% · Sunset 20:14</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- people — person.tomasz / ania / olaf / zoja, coloured by the fixed identity system -->
+    <div class="people" id="people">
+      <div class="per a-copper"><i></i><span class="n">Tomek</span><span class="s">Home</span></div>
+      <div class="per a-oak away"><i></i><span class="n">Ania</span><span class="s">Poznań · 25 min</span></div>
+      <div class="per a-moss"><i></i><span class="n">Olaf</span><span class="s">Home</span></div>
+      <div class="per a-mizu"><i></i><span class="n">Zoja</span><span class="s">Home</span></div>
+      <button class="per ghost" data-goto="utility"><i class="dot alert"></i><span class="n">Doorbell</span><span class="s">Visitor 17:42</span></button>
+    </div>
+
+    <!-- attention — only conditions a real entity can report -->
+    <div class="attn" id="attn">
+      <span class="label">Needs a hand</span>
+      <button class="note alert" data-goto="garden"><i class="dot alert"></i>Front mower<span class="t">E1 · blade jam</span></button>
+      <button class="note" data-goto="onsen"><i class="dot caution"></i>Hot tub filter<span class="t">14 d · rinse due</span></button>
+      <button class="note" data-goto="utility"><i class="dot caution"></i>Dryer<span class="t" data-dryer>0:34 left</span></button>
+      <button class="note" data-goto="utility"><i class="dot caution"></i>Batteries<span class="t">3 below 20%</span></button>
+    </div>
+
+    <!-- what the house is actually doing — the kintsugi card: copper only on rows that run -->
+    <div class="grid g2">
+      <div class="card" id="run-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">動</span><span class="label">Running now</span></div>
+          <span class="pill live" id="run-count">4 running</span>
+        </div>
+        <div class="runlist" id="runlist">
+          <button class="runrow idle" id="run-sauna" data-goto="onsen">
+            <span class="rk">蒸</span>
+            <span class="rn">Sauna<em id="run-sauna-sub">climate.sauna · off</em></span>
+            <span class="rv" id="run-sauna-v">64°</span>
+          </button>
+          <button class="runrow on" id="run-tub" data-goto="onsen">
+            <span class="rk">湯</span>
+            <span class="rn">Hot tub<em id="run-tub-sub">heating to 38.5° · 2.1 kW</em></span>
+            <span class="rv" id="run-tub-v">37.4°</span>
+          </button>
+          <button class="runrow on" id="run-pool" data-goto="onsen">
+            <span class="rk">泳</span>
+            <span class="rn">Pool filter<em>schedule · until 21:00</em></span>
+            <span class="rv">0.31 kW</span>
+          </button>
+          <button class="runrow on" id="run-dryer" data-goto="utility">
+            <span class="rk">洗</span>
+            <span class="rn">Suszarka<em>cupboard dry · wrinkle prevent</em></span>
+            <span class="rv" data-dryer>0:34</span>
+          </button>
+          <button class="runrow on" id="run-heat" data-goto="utility">
+            <span class="rk">熱</span>
+            <span class="rn">Heat pump<em>compressor 42 Hz · hot water 48°</em></span>
+            <span class="rv">on</span>
+          </button>
+          <button class="runrow idle" id="run-media" data-goto="living">
+            <span class="rk">音</span>
+            <span class="rn">Music<em>living room speakers · idle</em></span>
+            <span class="rv">—</span>
+          </button>
+          <button class="runrow idle" id="run-mow" data-goto="garden">
+            <span class="rk">刈</span>
+            <span class="rn">Mowers<em>Tyl docked · M1 held on fault</em></span>
+            <span class="rv">100 · 66%</span>
+          </button>
+          <button class="runrow idle" id="run-spr" data-goto="garden">
+            <span class="rk">撒</span>
+            <span class="rn">Sprinklers<em>next cycle 05:30 · 4 zones</em></span>
+            <span class="rv">idle</span>
+          </button>
+          <button class="runrow idle" id="run-vac" data-goto="living">
+            <span class="rk">掃</span>
+            <span class="rn">Deebot<em>docked · charged</em></span>
+            <span class="rv">idle</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- energy — FusionSolar inverter (live) + Forecast.Solar (curve). No live house or grid
+           meter exists on this instance, so none is shown. -->
+      <div class="card veined a-copper" id="solar-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">陽</span><span class="label">Solar</span></div>
+          <span class="pill live" id="solar-pill">Producing</span>
+        </div>
+        <div class="enow">
+          <div class="big"><span id="en-solar">6.2</span><small>kW</small></div>
+          <div class="estack">
+            <div class="l">Inverter</div>
+            <div class="d">Huawei · 22 strings · 97.4%</div>
+          </div>
+        </div>
+        <div class="ecurve">
+          <svg viewBox="0 0 600 54" preserveAspectRatio="none">
+            <path class="band" d="M0 54 C 90 54, 120 30, 180 18 C 250 4, 330 2, 400 14 C 470 26, 520 46, 600 54 Z"/>
+            <path class="line" d="M0 54 C 90 54, 120 30, 180 18 C 250 4, 330 2, 400 14 C 470 26, 520 46, 600 54"/>
+            <line class="nowline" x1="330" y1="0" x2="330" y2="54"/>
+            <circle cx="330" cy="6" r="3" fill="#DE9163"/>
+          </svg>
+        </div>
+        <div class="estat">
+          <div class="e"><div class="l">Today</div><div class="v">31.4<span>kWh</span></div></div>
+          <div class="e"><div class="l">Left today</div><div class="v">4.2<span>kWh</span></div></div>
+          <div class="e"><div class="l">Tomorrow</div><div class="v">27<span>kWh</span></div></div>
+          <div class="e"><div class="l">Fed in · year</div><div class="v">4.1<span>MWh</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- the house's real scenes, scripts and mode helpers -->
+    <div class="scenes" id="scenebar">
+      <button class="scene" data-scene="cinema"><span class="k">映</span>Cinema</button>
+      <button class="scene" data-scene="screen"><span class="k">幕</span>Screen down</button>
+      <button class="scene" data-scene="sleep"><span class="k">寝</span>Time to sleep</button>
+      <button class="scene" data-scene="dobranoc"><span class="k">眠</span>Dobranoc</button>
+      <button class="scene" data-scene="outside"><span class="k">消</span>Outside lights off</button>
+      <button class="scene" data-scene="alarm"><span class="k">守</span>Arm alarm</button>
+    </div>
+
+    <div class="sect"><h3>Rooms</h3><span class="k">間</span></div>
+    <div class="grid g4">
+      <button class="card rtile" data-goto="living"><span class="k">居間</span><span class="b"><span class="nm">Living room</span><span class="st" id="rt-living"><b>22.4°</b> · 44% · 3 lights on</span></span></button>
+      <button class="card rtile" data-goto="living"><span class="k">台所</span><span class="b"><span class="nm">Kitchen</span><span class="st">Island light on · oven off</span></span></button>
+      <button class="card rtile" data-goto="mezzanine"><span class="k">中二階</span><span class="b"><span class="nm">Mezzanine</span><span class="st">TV on · lights off</span></span></button>
+      <button class="card rtile" data-goto="master"><span class="k">寝室</span><span class="b"><span class="nm">Bedroom</span><span class="st">Neon on · 8%</span></span></button>
+      <button class="card rtile" data-goto="kids"><span class="k">息子</span><span class="b"><span class="nm">Olaf's room</span><span class="st">Bed light on · speaker idle</span></span></button>
+      <button class="card rtile" data-goto="kids"><span class="k">娘</span><span class="b"><span class="nm">Zoja's room</span><span class="st">All lights off</span></span></button>
+      <button class="card rtile" data-goto="utility"><span class="k">風呂</span><span class="b"><span class="nm">Bathroom</span><span class="st">Presence clear · door open</span></span></button>
+      <button class="card rtile" data-goto="utility"><span class="k">玄関</span><span class="b"><span class="nm">Entrance</span><span class="st">Lights on · motion 6 min ago</span></span></button>
+      <button class="card rtile" data-goto="utility"><span class="k">廊下</span><span class="b"><span class="nm">Hall</span><span class="st">Lights off · motion 3 min ago</span></span></button>
+      <button class="card rtile" data-goto="utility"><span class="k">洗濯</span><span class="b"><span class="nm">Laundry</span><span class="st">Pralka done · Suszarka <b data-dryer>0:34</b></span></span></button>
+      <button class="card rtile" data-goto="utility"><span class="k">車庫</span><span class="b"><span class="nm">Garage</span><span class="st">Door closed · lights off</span></span></button>
+      <button class="card rtile" data-goto="utility"><span class="k">客間</span><span class="b"><span class="nm">Guest suite</span><span class="st"><b>19.8°</b> · 51% · empty</span></span></button>
+    </div>
+
+    <div class="sect"><h3>Doors, motion &amp; cameras</h3><span class="k">目</span></div>
+    <div class="grid g3">
+      <div class="card span2">
+        <div class="vhead">
+          <div class="ttl"><span class="k">戸</span><span class="label">Openings &amp; motion</span></div>
+          <div class="chiprow">
+            <span class="mchip" id="alarm-chip">Alarm off</span>
+            <button class="toggle" id="alarm-tog"><i></i></button>
+          </div>
+        </div>
+        <div class="wgrid">
+          <div class="wcol">
+            <div class="wrow"><div class="nm">Garage door<em>Zigbee contact</em></div><div class="v">Closed · 08:10</div></div>
+            <div class="wrow"><div class="nm">Bathroom door<em>Sonoff contact</em></div><div class="v">Open</div></div>
+            <div class="wrow"><div class="nm">Closet doors<em>Entrance, left and right</em></div><div class="v">Both closed</div></div>
+            <div class="wrow"><div class="nm">Kitchen drawer<em>Contact sensor</em></div><div class="v">Closed</div></div>
+          </div>
+          <div class="wcol">
+            <div class="wrow"><div class="nm">Entrance motion<em>Clear since 17:48</em></div><div class="v">Clear</div></div>
+            <div class="wrow"><div class="nm">Hall motion<em>Last 3 min ago</em></div><div class="v">Clear</div></div>
+            <div class="wrow"><div class="nm">Living room presence<em>mmWave · occupied</em></div><div class="v">Occupied</div></div>
+            <div class="wrow"><div class="nm">Atrium detection<em>Person, vehicle, animal</em></div><div class="v">Clear</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="camstack">
+        <div class="cam">
+          <svg viewBox="0 0 160 100" preserveAspectRatio="none"><path d="M0 78 L60 40 L100 62 L160 30 L160 100 L0 100 Z" fill="#1E1811"/><path d="M60 40 L60 100" stroke="#2A2219" stroke-width="1"/></svg>
+          <span class="rec">LIVE</span><span class="label">Doorbell</span>
+        </div>
+        <div class="cam">
+          <svg viewBox="0 0 160 100" preserveAspectRatio="none"><ellipse cx="80" cy="86" rx="70" ry="20" fill="#17222A" opacity=".8"/><path d="M0 62 Q80 44 160 66 L160 100 L0 100 Z" fill="#1B1710" opacity=".85"/></svg>
+          <span class="rec">LIVE</span><span class="label">Atrium</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sect"><h3>Heating &amp; hot water</h3><span class="k">熱</span></div>
+    <div class="grid g3">
+      <div class="card span2 veined a-oak" id="hp-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">熱</span><span class="label">BA-SVM 10-200/12 E</span></div>
+          <span class="pill live">Compressor on</span>
+        </div>
+        <div class="readings">
+          <div class="rd"><div class="l">Hot water</div><div class="n">48.2<small>°C</small></div><div class="note">Charging · top 51°</div></div>
+          <div class="rd"><div class="l">System 1</div><div class="n">21.4<small>°C</small></div><div class="note">Set point 21.0°</div></div>
+          <div class="rd"><div class="l">Outdoor</div><div class="n">18.9<small>°C</small></div><div class="note">Average 16.2°</div></div>
+          <div class="rd"><div class="l">Compressor</div><div class="n">42<small>Hz</small></div><div class="note">Requested 45 Hz</div></div>
+        </div>
+        <div class="vrow" style="margin-top:14px">
+          <div class="nm">Operating mode<em>op. mode (47137)</em></div>
+          <div class="chiprow excl">
+            <span class="mchip on">Auto</span><span class="mchip">Manual</span><span class="mchip">Add heat</span>
+          </div>
+        </div>
+        <div class="vrow">
+          <div class="nm">Hot water boost<em>Temporary lux (50004)</em></div>
+          <button class="toggle" id="hp-lux"><i></i></button>
+        </div>
+      </div>
+      <div class="card a-mizu">
+        <div class="vhead">
+          <div class="ttl"><span class="k">天</span><span class="label">Outside</span></div>
+        </div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Temperature<em>SwitchBot by the tub</em></div><div class="val">18.9 °C</div></div>
+        <div class="vrow"><div class="nm">Humidity</div><div class="val">71 %</div></div>
+        <div class="vrow"><div class="nm">Wind<em>OpenWeatherMap</em></div><div class="val">6 km/h</div></div>
+        <div class="vrow"><div class="nm">Rain today</div><div class="val">0.0 mm</div></div>
+        <div class="vrow"><div class="nm">Pollen<em>Trawy, brzoza</em></div><div class="val">Low</div></div>
+      </div>
+    </div>
+  </section>

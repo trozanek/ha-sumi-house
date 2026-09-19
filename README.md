@@ -35,7 +35,8 @@ ha-sumi-house/
 │  ├─ INSTALL.md                 fresh HA → themed dashboard, HACS or sync script, troubleshooting
 │  ├─ PROTOTYPE_DISCREPANCIES.md where the spec and the prototype disagree, and what the theme does
 │  ├─ tokens.md                  token reference with contrast measurements (generated)
-│  └─ cards/                     one specification per custom card (entity contract, YAML schema, behaviour)
+│  ├─ cards/                     one specification per custom card (entity contract, YAML schema, behaviour)
+│  └─ migration/                 snapshot of the live instance's devices, automations and dashboards before migration
 ├─ examples/
 │  ├─ configuration.yaml         the frontend: + homeassistant: packages: blocks
 │  ├─ seam-tile-card.yaml        how a card ignites its kintsugi seam

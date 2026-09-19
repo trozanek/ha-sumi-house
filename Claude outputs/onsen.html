@@ -1,0 +1,260 @@
+  <!-- ============ VIEW: ONSEN ============ -->
+  <!-- Sauna = BleBox saunaBox, one climate entity (no lights of its own).
+       Hot tub = Lay-Z-Spa MQTT bridge, 67 entities, all of the rows below exist.
+       Pool = one power-monitored filter socket. There is no pH, chlorine or pressure
+       probe on this instance, so the pool card reports the filter, not the water. -->
+  <section class="view" id="v-onsen">
+    <div class="dash-head planks">
+      <div class="dh-row">
+        <div>
+          <div class="dh-kanji">湯 の 間</div>
+          <div class="dh-title">Onsen</div>
+          <div class="dh-sub">Sauna idle · Hot tub heating to 38.5° · Pool filtering</div>
+        </div>
+        <div class="dh-clock">
+          <div class="dh-time" id="clock3">--:--</div>
+          <div class="dh-wx">Outside <b>18.9°</b> · Sunset 20:14</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g2">
+
+      <!-- ── SAUNA · open arc ── -->
+      <div class="card vessel a-oak" id="sauna-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">蒸</span><span class="label">Sauna</span></div>
+          <span class="pill" id="sauna-pill">Idle</span>
+        </div>
+        <div class="vbody">
+          <div class="vleft">
+            <div class="gauge arc" id="sauna-gauge">
+              <svg viewBox="0 0 160 160">
+                <circle class="gtrack" cx="80" cy="80" r="70" stroke-dasharray="329.9 439.8"/>
+                <circle class="gfill" id="sauna-fill" cx="80" cy="80" r="70" stroke-dasharray="0 439.8"/>
+                <circle class="ghandle" id="sauna-handle" cx="150" cy="80" r="5"/>
+              </svg>
+              <div class="gcenter">
+                <div class="gnum"><span id="sauna-temp">64</span><small>°C</small></div>
+                <div class="gtgt">→ <b id="sauna-target">85</b>°</div>
+              </div>
+            </div>
+            <div class="gsteps">
+              <button class="gbtn" data-sauna="-5">−</button>
+              <button class="gbtn" data-sauna="5">+</button>
+            </div>
+            <div class="geta" id="sauna-eta">Cooling · 64°</div>
+          </div>
+          <div class="vright">
+            <div class="vrow">
+              <div class="nm">Heating<em id="sauna-runtime">Last · yesterday 21:10</em></div>
+              <button class="toggle" id="sauna-tog"><i></i></button>
+            </div>
+            <div class="vrow">
+              <div class="nm">Session<em>input_select + timer</em></div>
+              <div class="chiprow">
+                <span class="mchip" data-slen="60">60m</span>
+                <span class="mchip on" data-slen="90">90m</span>
+                <span class="mchip" data-slen="120">120m</span>
+              </div>
+            </div>
+            <div class="vrow">
+              <div class="nm">Session timer</div>
+              <div class="val">Idle</div>
+            </div>
+            <div class="vrow">
+              <div class="nm">Heater<em>9 kW element · modelled, not metered</em></div>
+              <div class="val">0.0 kW</div>
+            </div>
+            <div class="vrow">
+              <div class="nm">Nearest speaker<em>no speaker in the cabin</em></div>
+              <div class="val">Atrium</div>
+            </div>
+          </div>
+        </div>
+        <div class="strip">
+          <div class="art sm"></div>
+          <div class="mtitle"><span id="sa-track">Shakuhachi — Evening Rain</span><em id="sa-src">Music Assistant</em></div>
+          <div class="transport">
+            <button id="sa-prev">◁◁</button><button id="sa-play">▷</button><button id="sa-next">▷▷</button>
+            <span id="sa-vol">28%</span>
+          </div>
+        </div>
+        <div class="selrow">
+          <select class="sel" id="sa-pl">
+            <option>Onsen</option><option>Shakuhachi</option><option>Rain</option><option>Koto</option><option>Ambient jazz</option>
+          </select>
+          <select class="sel" id="sa-spk">
+            <option>Atrium Speaker</option><option>Garden</option><option>Living room and garden</option><option>All speakers no kids</option>
+          </select>
+        </div>
+        <div class="cost">
+          <div class="c"><div class="l">September</div><div class="n" id="sauna-cm">214<span>zł</span></div></div>
+          <div class="c"><div class="l">Year to date</div><div class="n" id="sauna-cy">1 840<span>zł</span></div></div>
+        </div>
+      </div>
+
+      <!-- ── HOT TUB · closed ring ── -->
+      <div class="card vessel a-mizu veined" id="tub-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">湯</span><span class="label">Hot tub</span></div>
+          <span class="pill live" id="tub-pill">Heating</span>
+        </div>
+        <div class="vbody">
+          <div class="vleft">
+            <div class="gauge ring" id="tub-gauge">
+              <svg viewBox="0 0 160 160">
+                <circle class="gtrack" cx="80" cy="80" r="70"/>
+                <circle class="gfill" id="tub-fill" cx="80" cy="80" r="70" stroke-dasharray="0 439.8"/>
+                <circle class="ghandle" id="tub-handle" cx="150" cy="80" r="5"/>
+              </svg>
+              <div class="gcenter">
+                <div class="gnum"><span id="tub-temp">37.4</span><small>°C</small></div>
+                <div class="gtgt">→ <b id="tub-target">38.5</b>°</div>
+              </div>
+            </div>
+            <div class="gsteps">
+              <button class="gbtn" data-tub="-0.5">−</button>
+              <button class="gbtn" data-tub="0.5">+</button>
+            </div>
+            <div class="geta" id="tub-eta">~24 min to 38.5°</div>
+          </div>
+          <div class="vright">
+            <div class="vrow">
+              <div class="nm">Heater<em id="tub-heat-st">Heating · 2.1 kW</em></div>
+              <button class="toggle on" id="tub-heat"><i></i></button>
+            </div>
+            <div class="vrow">
+              <div class="nm">Pump &amp; bubbles<em id="tub-jet-st">Circulation only</em></div>
+              <div class="chiprow">
+                <span class="mchip on" id="tub-pump">Pump</span>
+                <span class="mchip" id="tub-bub">Bubbles</span>
+                <span class="mchip" id="tub-hydro">Jets</span>
+              </div>
+            </div>
+            <div class="vrow">
+              <div class="nm">In the tub<em>input_boolean · pauses notifications</em></div>
+              <button class="toggle" id="tub-inuse"><i></i></button>
+            </div>
+            <div class="vrow">
+              <div class="nm">Schedule<em id="tub-auto-pill">Auto on</em></div>
+              <button class="toggle on" id="tub-auto"><i></i></button>
+            </div>
+            <div class="stripline" id="tub-sched-list">
+              <div class="s"><span class="l">Slot 1</span><span class="d">06:30 · 36.0°</span></div>
+              <div class="s"><span class="l">Slot 2</span><span class="d">12:00 · 37.0°</span></div>
+              <div class="s"><span class="l">Slot 3</span><span class="d">17:30 · 38.5°</span></div>
+              <div class="s"><span class="l">Slot 4</span><span class="d">22:30 · 36.0°</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="svcline">
+          <div class="s"><span class="l">Chlorine age</span><span class="d">9 d</span></div>
+          <div class="s due"><span class="l">Filter age</span><span class="d">14 d</span></div>
+          <div class="s"><span class="l">Rinse</span><span class="d">4 d ago</span></div>
+          <div class="s"><span class="l">Error</span><span class="d">none</span></div>
+        </div>
+        <div class="cost">
+          <div class="c"><div class="l">Now</div><div class="n" id="tub-pw">2.1<span>kW</span></div></div>
+          <div class="c"><div class="l">Today</div><div class="n">6.4<span>kWh</span></div></div>
+          <div class="c"><div class="l">September</div><div class="n" id="tub-cm">386<span>zł</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── pool + onsen lighting ── -->
+    <div class="grid g3">
+      <div class="card span2 a-mizu veined" id="pool-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">泳</span><span class="label">Pool</span></div>
+          <div style="display:flex;align-items:center;gap:9px">
+            <span class="pill live" id="pool-pill">Filtering</span>
+            <button class="toggle on" id="pool-auto"><i></i></button>
+          </div>
+        </div>
+        <div class="readings" style="grid-template-columns:repeat(3,1fr)">
+          <div class="rd"><div class="l">Filter draw</div><div class="n" id="pool-pw">0.31<small>kW</small></div><div class="note">Power-monitored socket</div></div>
+          <div class="rd"><div class="l">Today</div><div class="n">1.8<small>kWh</small></div><div class="note">≈ 1.30 zł at current tariff</div></div>
+          <div class="rd"><div class="l">Chlorine timer</div><div class="n">2<small>d</small></div><div class="note warn">timer.chlor · dose then reset</div></div>
+        </div>
+        <div class="vrow" style="margin-top:16px">
+          <div class="nm">Filtration<em id="pool-filt-st">09:00–13:00, 18:00–21:00</em></div>
+          <button class="toggle on" id="pool-filt"><i></i></button>
+        </div>
+        <div class="vrow">
+          <div class="nm">Schedule<em>input_boolean.pool_filter_schedule_active</em></div>
+          <div class="val">Active</div>
+        </div>
+        <div class="svcline">
+          <div class="s"><span class="l">Water probes</span><span class="d">none connected</span></div>
+          <div class="s"><span class="l">Robot</span><span class="d">manual, not in HA</span></div>
+        </div>
+      </div>
+
+      <div class="card a-oak" id="onsen-lights">
+        <div class="vhead">
+          <div class="ttl"><span class="k">行灯</span><span class="label">Porch &amp; onsen lights</span></div>
+        </div>
+        <div class="vrow" style="margin-top:4px">
+          <div class="nm">Corner<em>Porch Led 1</em></div>
+          <button class="toggle on" id="ol-1"><i></i></button>
+        </div>
+        <div class="vrow">
+          <div class="nm">Hot side<em>Porch Led 2 · hs</em></div>
+          <button class="toggle" id="ol-2"><i></i></button>
+        </div>
+        <div class="vrow">
+          <div class="nm">Swing<em>Porch Led 3</em></div>
+          <button class="toggle" id="ol-3"><i></i></button>
+        </div>
+        <div class="vrow">
+          <div class="nm">Atrium<em>Porch Led 4</em></div>
+          <button class="toggle on" id="ol-4"><i></i></button>
+        </div>
+        <div class="vrow">
+          <div class="nm">Hot tub<em>Porch Led 5 + tub bulb</em></div>
+          <button class="toggle on" id="ol-5"><i></i></button>
+        </div>
+        <div class="vrow">
+          <div class="nm">Atrium socket<em>ceiling socket · 0 W</em></div>
+          <button class="toggle" id="ol-socket"><i></i></button>
+        </div>
+        <div class="vrow">
+          <div class="nm">Keep porch on<em>holds the dusk rule</em></div>
+          <button class="toggle" id="ol-keep"><i></i></button>
+        </div>
+        <button class="act ghost" id="ol-all" style="width:100%">All porch lights off</button>
+      </div>
+    </div>
+
+    <!-- ── onsen exterior: fire pit, atrium camera, weather at the tub ── -->
+    <div class="sect"><h3>Onsen exterior</h3><span class="k">外</span></div>
+    <div class="grid g3">
+      <div class="card a-oak" id="fire-card">
+        <div class="vhead">
+          <div class="ttl"><span class="k">焚</span><span class="label">Fire pit</span></div>
+          <span class="pill" id="fire-pill">Off</span>
+        </div>
+        <div class="vrow" style="margin-top:4px">
+          <div class="nm">Lampa ognisko<em id="fire-st">Tuya breaker · no auto-off yet</em></div>
+          <button class="toggle" id="fire-tog"><i></i></button>
+        </div>
+        <div class="vrow">
+          <div class="nm">On terrace<em>input_boolean.on_terrace</em></div>
+          <button class="toggle" id="fire-terrace"><i></i></button>
+        </div>
+      </div>
+
+      <div class="cam"><svg viewBox="0 0 160 100" preserveAspectRatio="none"><path d="M0 70 L40 52 L120 58 L160 44 L160 100 L0 100 Z" fill="#1C1711"/><ellipse cx="72" cy="80" rx="34" ry="9" fill="#17222A" opacity=".8"/><path d="M40 52 L40 100 M120 58 L120 100" stroke="#2A2219" stroke-width="1"/></svg><span class="rec">LIVE</span><span class="label">Atrium</span></div>
+
+      <div class="card a-mizu">
+        <div class="vhead">
+          <div class="ttl"><span class="k">天</span><span class="label">By the tub</span></div>
+        </div>
+        <div class="vrow" style="margin-top:4px"><div class="nm">Temperature<em>SwitchBot 73EA</em></div><div class="val">18.9 °C</div></div>
+        <div class="vrow"><div class="nm">Humidity</div><div class="val">71 %</div></div>
+        <div class="vrow"><div class="nm">Atrium detection<em>person · vehicle · animal</em></div><div class="val">Clear</div></div>
+        <div class="vrow"><div class="nm">Day / night<em>camera state</em></div><div class="val">Day</div></div>
+      </div>
+    </div>
+  </section>

@@ -1,0 +1,63 @@
+  <!-- ============ VIEW: KIDS' ROOMS ============ -->
+  <!-- Neither room has a climate or temperature entity. What exists: a main light switch
+       with dim/brighten gangs, a GLEDOPTO strip, a bed light belt and a Nest Mini each. -->
+  <section class="view" id="v-kids">
+    <div class="dash-head planks">
+      <div class="dh-row">
+        <div>
+          <div class="dh-kanji">子 供 部 屋</div>
+          <div class="dh-title">Kids' rooms</div>
+          <div class="dh-sub">Olaf and Zoja home · bedrooms-off scene at 20:30</div>
+        </div>
+        <div class="dh-clock">
+          <div class="dh-time" id="clock4">--:--</div>
+          <div class="dh-wx">Kids' speakers <b>idle</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card person a-moss">
+        <div class="vhead"><div class="ttl"><span class="k">森</span><span class="label">Olaf</span></div><span class="pill ok">Home</span></div>
+        <div class="light-row" style="margin-top:10px">
+          <div class="light"><span class="nm">Strip<em>Olaf LED controller</em></span>
+            <input type="range" min="0" max="100" value="0"><span class="pct">off</span></div>
+        </div>
+        <div class="vrow" style="margin-top:10px"><div class="nm">Main light<em>wall switch · gang 1</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Bed lights<em>light belt above the bed</em></div><button class="toggle on"><i></i></button></div>
+        <div class="vrow"><div class="nm">Speaker<em>Olaf's Nest Mini</em></div><div class="val">Idle</div></div>
+        <div class="svcline">
+          <div class="s"><span class="l">Dim / brighten</span><span class="d">wall buttons</span></div>
+          <div class="s"><span class="l">PlayStation</span><span class="d">offline</span></div>
+        </div>
+      </div>
+
+      <div class="card person a-mizu">
+        <div class="vhead"><div class="ttl"><span class="k">水</span><span class="label">Zoja</span></div><span class="pill ok">Home</span></div>
+        <div class="light-row" style="margin-top:10px">
+          <div class="light"><span class="nm">Strip<em>Zoe's LED controller</em></span>
+            <input type="range" min="0" max="100" value="0"><span class="pct">off</span></div>
+          <div class="light"><span class="nm">Dimmer<em>Zoe's lights</em></span>
+            <input type="range" min="0" max="100" value="0"><span class="pct">off</span></div>
+        </div>
+        <div class="vrow" style="margin-top:10px"><div class="nm">Main light<em>wall switch · gang 1</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Bed lights<em>light belt above the bed</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Outside light<em>her window, garden side</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Speaker<em>Zoe's Nest Mini</em></div><div class="val">Idle</div></div>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card">
+        <div class="vhead"><div class="ttl"><span class="k">風呂</span><span class="label">Kids' bathroom</span></div></div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">LED<em>GLEDOPTO controller</em></div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Mirror switch</div><button class="toggle"><i></i></button></div>
+        <div class="vrow"><div class="nm">Speaker<em>Kids bathroom · cast</em></div><div class="val">Idle</div></div>
+      </div>
+      <div class="card">
+        <div class="vhead"><div class="ttl"><span class="k">眠</span><span class="label">Bedtime</span></div></div>
+        <div class="vrow" style="margin-top:2px"><div class="nm">Both rooms off<em>scene.bedrooms_lights_off</em></div><button class="act ghost" data-toast="scene.bedrooms_lights_off" style="margin-top:0">Run</button></div>
+        <div class="vrow"><div class="nm">Kids' speakers<em>cast group · pause all</em></div><button class="act ghost" data-toast="media_player.kids_speakers · pause" style="margin-top:0">Pause</button></div>
+      </div>
+    </div>
+  </section>
