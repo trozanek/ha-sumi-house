@@ -295,7 +295,13 @@ There is no queue service without Music Assistant, so the card builds the queue:
 1. `hass.callWS({ type: 'media_source/browse_media', media_content_id: <path> })`
 2. Keep `children` where `can_play` is true; sort by title, or shuffle if
    `media.shuffle`.
-3. First track: `media_player.play_media` with `enqueue: replace`.
+3. First track: `media_player.play_media` with `enqueue: replace`, then **wait for the
+   speaker to actually report that track as `media_title`** before sending anything
+   else. Cast has no queue to insert into until the receiver has loaded the track that
+   opened it; `callService` resolving only means HA accepted the call, not that the
+   receiver has caught up. Skipping this wait was the cause of the sauna player
+   appearing to only ever play one song — every `add` right behind `replace` raced the
+   receiver and was silently dropped.
 4. Next `queue_window − 1` tracks: same action with `enqueue: add`.
 5. Watch the speaker; when fewer than `queue_refill_at` tracks remain, push the next
    batch.
@@ -422,3 +428,11 @@ Tokens, spacing and the seam behaviour come from the theme — the card must con
   entity wins when the hold expires.
 - Test harness: `python3 scripts/preview.py` then open `/preview/sauna.html`
   (`?heat=1` starts a simulated heat-up). Every action is logged on the page.
+
+### v0.2.1
+
+- Fixed: `_pushQueue` now waits (`_waitForTrack`, 6s timeout) for the speaker's
+  `media_title` to confirm the opening track before enqueueing the rest of the batch,
+  instead of firing every `play_media` call back-to-back. See §7.3 — the previous
+  behaviour was the reported "plays only one song" bug: the `add` calls raced the
+  Cast receiver's queue setup and were dropped.
