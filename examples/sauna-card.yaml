@@ -37,20 +37,19 @@ lights:
       - { name: Fade,  effect: "Slow Fade", gradient: ["#C0754A", "#4A3A6B"] }
 
 media:
-  default_speaker: media_player.sauna
+  entity: media_player.spotifyplus      # the one SpotifyPlus entity — always used
+  default_speaker: "Sauna Echo"         # Spotify Connect device id or name — verify in Developer Tools → Actions
   speakers:
-    - { entity: media_player.sauna,       name: Sauna }
-    - { entity: media_player.terrace,     name: Terrace }
-    - { entity: media_player.onsen_group, name: Onsen group }
+    - { id: "Sauna Echo",   name: Sauna }
+    - { id: "Terrace Echo", name: Terrace }
+    - { id: "Onsen group",  name: Onsen group }
   playlists:
-    - { name: Onsen,        path: "media-source://media_source/local/Music/Onsen" }
-    - { name: Shakuhachi,   path: "media-source://media_source/local/Music/Shakuhachi" }
-    - { name: Rain,         path: "media-source://media_source/local/Music/Rain" }
-    - { name: Koto,         path: "media-source://media_source/local/Music/Koto" }
-    - { name: Ambient jazz, path: "media-source://media_source/local/Music/Ambient jazz" }
+    - { name: Onsen,        uri: "spotify:playlist:REPLACE_WITH_ONSEN_PLAYLIST_ID" }
+    - { name: Shakuhachi,   uri: "spotify:playlist:REPLACE_WITH_SHAKUHACHI_PLAYLIST_ID" }
+    - { name: Rain,         uri: "spotify:playlist:REPLACE_WITH_RAIN_PLAYLIST_ID" }
+    - { name: Koto,         uri: "spotify:playlist:REPLACE_WITH_KOTO_PLAYLIST_ID" }
+    - { name: Ambient jazz, uri: "spotify:playlist:REPLACE_WITH_AMBIENT_JAZZ_PLAYLIST_ID" }
   shuffle: true
-  queue_window: 20
-  queue_refill_at: 5
 
 cost:
   monthly: sensor.sauna_cost_monthly

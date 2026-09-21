@@ -20,7 +20,7 @@ import {
   COLOR_MODES, swatchButtonsHtml, paintSwatches,
 } from "./sumi-vessel-shared.js";
 
-const VERSION = "0.2.1";
+const VERSION = "0.3.0";
 const CARD = "sumi-sauna-card";
 
 const DEFAULTS = {
@@ -32,7 +32,7 @@ const DEFAULTS = {
   temperature: { min: null, max: null, step: null, step_button: 5, commit_delay: 400, optimistic_hold: 2000 },
   session: { select: "input_select.sauna_session_length", timer: "timer.sauna_session" },
   lights: {},
-  media: { shuffle: true, queue_window: 20, queue_refill_at: 5, speakers: [], playlists: [] },
+  media: { entity: "media_player.spotifyplus", shuffle: true, default_speaker: null, speakers: [], playlists: [] },
   cost: { currency: "zł" },
 };
 
@@ -41,6 +41,7 @@ const ICONS = {
   next: "M16 6h2v12h-2zm-1.5 6L6 18V6z",
   play: "M8 5v14l11-7z",
   pause: "M6 5h4v14H6zm8 0h4v14h-4z",
+  library: "M4 4h6v6H4zm10 0h6v6h-6zM4 14h6v6H4zm10 0h6v6h-6z",
 };
 const svgIcon = (name) => sharedSvgIcon(ICONS, name);
 
@@ -73,6 +74,9 @@ const STYLE = VESSEL_BASE_STYLE + `
   .sel select:hover, .sel select:focus { color: var(--washi); border-color: var(--copper-lo); }
   .sel select option { background: var(--sumi-surface-raised, var(--card-background-color)); color: var(--washi); }
   .sel::after { content: ""; position: absolute; right: 10px; top: 50%; width: 5px; height: 5px; border-right: 1px solid var(--stone); border-bottom: 1px solid var(--stone); transform: translateY(-70%) rotate(45deg); pointer-events: none; }
+  .libbtn { flex: none; width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid var(--seam); border-radius: var(--r-chip); color: var(--stone); transition: color var(--fast) var(--ease), border-color var(--fast) var(--ease); }
+  .libbtn:hover { color: var(--copper-hi); border-color: var(--copper-lo); }
+  .libbtn svg { width: 14px; height: 14px; fill: currentColor; }
 `;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -98,7 +102,6 @@ class SumiSaunaCard extends HTMLElement {
     this._tick = null;
     this._speaker = null;
     this._playlist = null;
-    this._queue = null;
     this._warnedRange = false;
   }
 
@@ -107,7 +110,7 @@ class SumiSaunaCard extends HTMLElement {
     this._config = merge(DEFAULTS, config);
     if (!ACCENTS[this._config.accent]) this._config.accent = "oak";
     if (!GEOM[this._config.gauge]) this._config.gauge = "arc";
-    this._speaker = this._config.media.default_speaker || this._config.media.speakers?.[0]?.entity || null;
+    this._speaker = this._config.media.default_speaker || this._config.media.speakers?.[0]?.id || null;
     this._gauge = new VesselGauge({
       range: () => this._range(),
       entityValue: () => {
@@ -175,7 +178,7 @@ class SumiSaunaCard extends HTMLElement {
     const g = GEOM[c.gauge];
     const lights = c.lights || {};
     const swatches = swatchButtonsHtml(lights.bench?.colors);
-    const speakers = (c.media.speakers || []).map((s) => `<option value="${s.entity}">${s.name || s.entity}</option>`).join("");
+    const speakers = (c.media.speakers || []).map((s) => `<option value="${s.id}">${s.name || s.id}</option>`).join("");
     const playlists = (c.media.playlists || []).map((p, i) => `<option value="${i}">${p.name}</option>`).join("");
 
     this.shadowRoot.innerHTML = `
@@ -238,6 +241,7 @@ class SumiSaunaCard extends HTMLElement {
           </div>
           <div class="selects">
             <div class="sel" ${playlists ? "" : "hidden"}><select id="playlist"><option value="">Playlist…</option>${playlists}</select></div>
+            <button class="libbtn" id="library" title="Browse Spotify library" aria-label="Browse Spotify library">${svgIcon("library")}</button>
             <div class="sel" ${speakers ? "" : "hidden"}><select id="speaker">${speakers}</select></div>
           </div>
         </div>
@@ -254,7 +258,7 @@ class SumiSaunaCard extends HTMLElement {
       chips: $("#chips"), sessionRow: $("#session-row"), vestRow: $("#vest-row"), vestTg: $("#vest-tg"),
       benchRow: $("#bench-row"), benchTg: $("#bench-tg"), benchSub: $("#bench-sub"), swrow: $("#swrow"),
       media: $("#media"), art: $("#art"), mt: $("#mt"), ma: $("#ma"), play: $("#playpause"), vol: $("#vol"), volpct: $("#volpct"),
-      playlist: $("#playlist"), speaker: $("#speaker"), cost: $("#cost"), costMl: $("#cost-ml"), costM: $("#cost-m"), costY: $("#cost-y"),
+      playlist: $("#playlist"), library: $("#library"), speaker: $("#speaker"), cost: $("#cost"), costMl: $("#cost-ml"), costM: $("#cost-m"), costY: $("#cost-y"),
     };
     this._bind();
     this._built = true;
@@ -317,8 +321,9 @@ class SumiSaunaCard extends HTMLElement {
       this._call("light", "turn_on", data);
     });
 
-    // media
-    const sp = () => ({ entity_id: this._speaker });
+    // media — always the single SpotifyPlus entity; the speaker picker only ever
+    // selects which Spotify Connect device that entity targets (spec §7.4)
+    const sp = () => ({ entity_id: c.media.entity });
     this.shadowRoot.getElementById("prev").addEventListener("click", () => this._call("media_player", "media_previous_track", sp()));
     this.shadowRoot.getElementById("next").addEventListener("click", () => this._call("media_player", "media_next_track", sp()));
     e.play.addEventListener("click", () => this._call("media_player", "media_play_pause", sp()));
@@ -328,12 +333,17 @@ class SumiSaunaCard extends HTMLElement {
       clearTimeout(this._volTimer);
       this._volTimer = setTimeout(() => this._call("media_player", "volume_set", { ...sp(), volume_level: Number(e.vol.value) / 100 }), 300);
     });
-    e.speaker.addEventListener("change", () => { this._speaker = e.speaker.value; this._update(); });
+    e.speaker.addEventListener("change", () => {
+      this._speaker = e.speaker.value;
+      const player = this._st(c.media.entity);
+      if (player && player.state === "playing") this._transferPlayback(this._speaker);
+    });
     e.playlist.addEventListener("change", () => {
       const i = e.playlist.value; if (i === "") return;
       this._playlist = Number(i);
       this._playPlaylist(c.media.playlists[this._playlist]).catch((err) => console.error(`${CARD}: playlist failed`, err));
     });
+    e.library.addEventListener("click", () => this._openLibrary());
   }
 
   // ── temperature: geometry, drag, debounce and the optimistic hold all live in
@@ -469,10 +479,10 @@ class SumiSaunaCard extends HTMLElement {
       e.benchSub.textContent = !benchOn ? "off" : activeName ? `${activeName} · ${effect && effect !== "None" ? effect.toLowerCase() : "solid"}` : effect && effect !== "None" ? effect.toLowerCase() : `${bench.attributes.brightness ? Math.round(bench.attributes.brightness / 2.55) + " %" : "on"}`;
     }
 
-    // media
-    const speakerCfg = c.media.speakers || [];
-    const player = this._speaker ? this._st(this._speaker) : null;
-    e.media.hidden = speakerCfg.length === 0 || !player;
+    // media — one SpotifyPlus entity always; the speaker select only ever picks
+    // which Spotify Connect device it targets (spec §7)
+    const player = c.media.entity ? this._st(c.media.entity) : null;
+    e.media.hidden = !player;
     if (player) {
       const a = player.attributes;
       const playing = player.state === "playing";
@@ -484,8 +494,7 @@ class SumiSaunaCard extends HTMLElement {
         const v = Math.round((a.volume_level ?? 0) * 100);
         e.vol.value = v; e.vol.style.setProperty("--v", `${v}%`); e.volpct.textContent = `${v}%`;
       }
-      if (e.speaker.value !== this._speaker) e.speaker.value = this._speaker;
-      this._maybeRefillQueue(player);
+      if (this._speaker && e.speaker.value !== this._speaker) e.speaker.value = this._speaker;
     }
 
     // cost
@@ -502,70 +511,37 @@ class SumiSaunaCard extends HTMLElement {
     }
   }
 
-  // ── playlists: a folder is a playlist; the card builds the queue (spec §7) ──
+  // ── SpotifyPlus: a playlist is a Spotify context URI, and Spotify owns the queue —
+  // no folder browsing, no queue building (spec §7). One call plays the context
+  // straight to the selected Connect device. ──────────────────────────────────
   async _playPlaylist(pl) {
-    if (!pl || !this._speaker) return;
-    const res = await this._hass.callWS({ type: "media_source/browse_media", media_content_id: pl.path });
-    let items = (res?.children || []).filter((ch) => ch.can_play);
-    if (this._config.media.shuffle) {
-      for (let i = items.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [items[i], items[j]] = [items[j], items[i]]; }
-    } else {
-      items.sort((a, b) => String(a.title).localeCompare(String(b.title)));
-    }
-    if (!items.length) { console.warn(`${CARD}: playlist "${pl.name}" has no playable items`); return; }
-    this._queue = { items, pushed: 0, speaker: this._speaker, lastTitle: null, idx: -1 };
-    await this._pushQueue(true);
+    if (!pl) return;
+    const data = { entity_id: this._config.media.entity, context_uri: pl.uri, shuffle: Boolean(this._config.media.shuffle) };
+    if (this._speaker) data.device_id = this._speaker;
+    await this._call("spotifyplus", "player_media_play_context", data);
   }
 
-  async _pushQueue(replace) {
-    const q = this._queue; if (!q) return;
-    const n = Math.max(1, this._config.media.queue_window);
-    const batch = q.items.slice(q.pushed, q.pushed + (replace ? n : Math.max(1, n - this._config.media.queue_refill_at)));
-    for (let i = 0; i < batch.length; i++) {
-      const opening = replace && i === 0;
-      await this._call("media_player", "play_media", {
-        entity_id: q.speaker,
-        media_content_id: batch[i].media_content_id,
-        media_content_type: "music",
-        enqueue: opening ? "replace" : "add",
-      });
-      q.pushed++;
-      // Cast has no queue to insert into until the receiver has actually loaded the
-      // track that opened it — `callService` only resolves once HA has accepted the
-      // call, well before that. Firing every "add" right behind "replace" races the
-      // receiver, the inserts are dropped, and only the opening track ever plays.
-      if (opening) await this._waitForTrack(q.speaker, batch[i].title);
-    }
-  }
-
-  _waitForTrack(speaker, title, timeoutMs = 6000) {
-    return new Promise((resolve) => {
-      const start = Date.now();
-      const check = () => {
-        const st = this._hass?.states?.[speaker];
-        if (st?.attributes?.media_title === title) { resolve(); return; }
-        if (Date.now() - start > timeoutMs) {
-          console.warn(`${CARD}: speaker never confirmed "${title}" started; queueing the rest anyway`);
-          resolve();
-          return;
-        }
-        setTimeout(check, 150);
-      };
-      check();
+  /** Move the already-playing session to a newly picked Connect device without
+   *  interrupting it (spec §7.4) — used when the speaker is changed mid-playback. */
+  async _transferPlayback(deviceId) {
+    if (!deviceId) return;
+    await this._call("spotifyplus", "player_transfer_playback", {
+      entity_id: this._config.media.entity, device_id: deviceId, play: true,
     });
   }
 
-  _maybeRefillQueue(player) {
-    const q = this._queue; if (!q || player.entity_id !== q.speaker) return;
-    const title = player.attributes.media_title;
-    if (!title || title === q.lastTitle) return;
-    q.lastTitle = title;
-    const found = q.items.findIndex((it, i) => i > q.idx && String(it.title) === String(title));
-    q.idx = found >= 0 ? found : q.idx + 1;
-    const remaining = q.pushed - (q.idx + 1);
-    if (remaining < this._config.media.queue_refill_at && q.pushed < q.items.length) {
-      this._pushQueue(false).catch((err) => console.error(`${CARD}: queue refill failed`, err));
-    }
+  /** Opens HA's standard media browser against the SpotifyPlus entity (its
+   *  `async_browse_media` support), so a track/album/show can be picked straight
+   *  from the Spotify library instead of only the preset playlist dropdown.
+   *  This is the same more-info dialog any media_player entity opens; it already
+   *  has its own "browse media" affordance for entities that support it, so the
+   *  card does not need to hand-roll a browser or a picked-item callback. */
+  _openLibrary() {
+    this.dispatchEvent(new CustomEvent("hass-more-info", {
+      detail: { entityId: this._config.media.entity },
+      bubbles: true,
+      composed: true,
+    }));
   }
 }
 
