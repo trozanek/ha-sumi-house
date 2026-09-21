@@ -37,20 +37,19 @@ lights:
       - { name: Fade,  effect: "Slow Fade", gradient: ["#C0754A", "#4A3A6B"] }
 
 media:
-  default_speaker: media_player.sauna
+  entity: media_player.spotifyplus            # default — the one SpotifyPlus entity for the house
+  default_speaker: Sauna                       # a Spotify Connect device name
   speakers:
-    - { entity: media_player.sauna,       name: Sauna }
-    - { entity: media_player.terrace,     name: Terrace }
-    - { entity: media_player.onsen_group, name: Onsen group }
+    - { id: Sauna,       name: Sauna }
+    - { id: Terrace,     name: Terrace }
+    - { id: Onsen group, name: Onsen group }
   playlists:
-    - { name: Onsen,        path: "media-source://media_source/local/Music/Onsen" }
-    - { name: Shakuhachi,   path: "media-source://media_source/local/Music/Shakuhachi" }
-    - { name: Rain,         path: "media-source://media_source/local/Music/Rain" }
-    - { name: Koto,         path: "media-source://media_source/local/Music/Koto" }
-    - { name: Ambient jazz, path: "media-source://media_source/local/Music/Ambient jazz" }
+    - { name: Onsen,        uri: "spotify:playlist:37i9dQZF1DWZqd5JICZI0u" }
+    - { name: Shakuhachi,   uri: "spotify:playlist:REPLACE_WITH_REAL_ID" }
+    - { name: Rain,         uri: "spotify:playlist:REPLACE_WITH_REAL_ID" }
+    - { name: Koto,         uri: "spotify:playlist:REPLACE_WITH_REAL_ID" }
+    - { name: Ambient jazz, uri: "spotify:playlist:REPLACE_WITH_REAL_ID" }
   shuffle: true
-  queue_window: 20
-  queue_refill_at: 5
 
 cost:
   monthly: sensor.sauna_cost_monthly

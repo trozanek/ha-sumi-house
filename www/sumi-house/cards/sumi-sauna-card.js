@@ -20,7 +20,7 @@ import {
   COLOR_MODES, swatchButtonsHtml, paintSwatches,
 } from "./sumi-vessel-shared.js";
 
-const VERSION = "0.2.1";
+const VERSION = "0.3.0";
 const CARD = "sumi-sauna-card";
 
 const DEFAULTS = {
@@ -32,7 +32,7 @@ const DEFAULTS = {
   temperature: { min: null, max: null, step: null, step_button: 5, commit_delay: 400, optimistic_hold: 2000 },
   session: { select: "input_select.sauna_session_length", timer: "timer.sauna_session" },
   lights: {},
-  media: { shuffle: true, queue_window: 20, queue_refill_at: 5, speakers: [], playlists: [] },
+  media: { entity: "media_player.spotifyplus", shuffle: true, speakers: [], playlists: [] },
   cost: { currency: "zł" },
 };
 
@@ -98,7 +98,6 @@ class SumiSaunaCard extends HTMLElement {
     this._tick = null;
     this._speaker = null;
     this._playlist = null;
-    this._queue = null;
     this._warnedRange = false;
   }
 
@@ -107,7 +106,7 @@ class SumiSaunaCard extends HTMLElement {
     this._config = merge(DEFAULTS, config);
     if (!ACCENTS[this._config.accent]) this._config.accent = "oak";
     if (!GEOM[this._config.gauge]) this._config.gauge = "arc";
-    this._speaker = this._config.media.default_speaker || this._config.media.speakers?.[0]?.entity || null;
+    this._speaker = this._config.media.default_speaker || this._config.media.speakers?.[0]?.id || null;
     this._gauge = new VesselGauge({
       range: () => this._range(),
       entityValue: () => {
@@ -175,7 +174,7 @@ class SumiSaunaCard extends HTMLElement {
     const g = GEOM[c.gauge];
     const lights = c.lights || {};
     const swatches = swatchButtonsHtml(lights.bench?.colors);
-    const speakers = (c.media.speakers || []).map((s) => `<option value="${s.entity}">${s.name || s.entity}</option>`).join("");
+    const speakers = (c.media.speakers || []).map((s) => `<option value="${s.id}">${s.name || s.id}</option>`).join("");
     const playlists = (c.media.playlists || []).map((p, i) => `<option value="${i}">${p.name}</option>`).join("");
 
     this.shadowRoot.innerHTML = `
@@ -317,8 +316,9 @@ class SumiSaunaCard extends HTMLElement {
       this._call("light", "turn_on", data);
     });
 
-    // media
-    const sp = () => ({ entity_id: this._speaker });
+    // media — always the one SpotifyPlus entity; the speaker dropdown only selects
+    // which Spotify Connect device receives it (spec §7)
+    const sp = () => ({ entity_id: c.media.entity });
     this.shadowRoot.getElementById("prev").addEventListener("click", () => this._call("media_player", "media_previous_track", sp()));
     this.shadowRoot.getElementById("next").addEventListener("click", () => this._call("media_player", "media_next_track", sp()));
     e.play.addEventListener("click", () => this._call("media_player", "media_play_pause", sp()));
@@ -328,7 +328,11 @@ class SumiSaunaCard extends HTMLElement {
       clearTimeout(this._volTimer);
       this._volTimer = setTimeout(() => this._call("media_player", "volume_set", { ...sp(), volume_level: Number(e.vol.value) / 100 }), 300);
     });
-    e.speaker.addEventListener("change", () => { this._speaker = e.speaker.value; this._update(); });
+    e.speaker.addEventListener("change", () => {
+      this._speaker = e.speaker.value;
+      this._update();
+      this._transferPlayback().catch((err) => console.error(`${CARD}: speaker transfer failed`, err));
+    });
     e.playlist.addEventListener("change", () => {
       const i = e.playlist.value; if (i === "") return;
       this._playlist = Number(i);
@@ -469,9 +473,10 @@ class SumiSaunaCard extends HTMLElement {
       e.benchSub.textContent = !benchOn ? "off" : activeName ? `${activeName} · ${effect && effect !== "None" ? effect.toLowerCase() : "solid"}` : effect && effect !== "None" ? effect.toLowerCase() : `${bench.attributes.brightness ? Math.round(bench.attributes.brightness / 2.55) + " %" : "on"}`;
     }
 
-    // media
+    // media — the strip always reflects the single SpotifyPlus entity, regardless
+    // of which Spotify Connect device (speaker) is currently selected
     const speakerCfg = c.media.speakers || [];
-    const player = this._speaker ? this._st(this._speaker) : null;
+    const player = c.media.entity ? this._st(c.media.entity) : null;
     e.media.hidden = speakerCfg.length === 0 || !player;
     if (player) {
       const a = player.attributes;
@@ -485,7 +490,6 @@ class SumiSaunaCard extends HTMLElement {
         e.vol.value = v; e.vol.style.setProperty("--v", `${v}%`); e.volpct.textContent = `${v}%`;
       }
       if (e.speaker.value !== this._speaker) e.speaker.value = this._speaker;
-      this._maybeRefillQueue(player);
     }
 
     // cost
@@ -502,70 +506,29 @@ class SumiSaunaCard extends HTMLElement {
     }
   }
 
-  // ── playlists: a folder is a playlist; the card builds the queue (spec §7) ──
+  // ── playlists: SpotifyPlus owns the queue once it has a context uri, so the
+  // card only ever fires one service call per playlist choice (spec §7) ──────
   async _playPlaylist(pl) {
     if (!pl || !this._speaker) return;
-    const res = await this._hass.callWS({ type: "media_source/browse_media", media_content_id: pl.path });
-    let items = (res?.children || []).filter((ch) => ch.can_play);
-    if (this._config.media.shuffle) {
-      for (let i = items.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [items[i], items[j]] = [items[j], items[i]]; }
-    } else {
-      items.sort((a, b) => String(a.title).localeCompare(String(b.title)));
-    }
-    if (!items.length) { console.warn(`${CARD}: playlist "${pl.name}" has no playable items`); return; }
-    this._queue = { items, pushed: 0, speaker: this._speaker, lastTitle: null, idx: -1 };
-    await this._pushQueue(true);
-  }
-
-  async _pushQueue(replace) {
-    const q = this._queue; if (!q) return;
-    const n = Math.max(1, this._config.media.queue_window);
-    const batch = q.items.slice(q.pushed, q.pushed + (replace ? n : Math.max(1, n - this._config.media.queue_refill_at)));
-    for (let i = 0; i < batch.length; i++) {
-      const opening = replace && i === 0;
-      await this._call("media_player", "play_media", {
-        entity_id: q.speaker,
-        media_content_id: batch[i].media_content_id,
-        media_content_type: "music",
-        enqueue: opening ? "replace" : "add",
-      });
-      q.pushed++;
-      // Cast has no queue to insert into until the receiver has actually loaded the
-      // track that opened it — `callService` only resolves once HA has accepted the
-      // call, well before that. Firing every "add" right behind "replace" races the
-      // receiver, the inserts are dropped, and only the opening track ever plays.
-      if (opening) await this._waitForTrack(q.speaker, batch[i].title);
-    }
-  }
-
-  _waitForTrack(speaker, title, timeoutMs = 6000) {
-    return new Promise((resolve) => {
-      const start = Date.now();
-      const check = () => {
-        const st = this._hass?.states?.[speaker];
-        if (st?.attributes?.media_title === title) { resolve(); return; }
-        if (Date.now() - start > timeoutMs) {
-          console.warn(`${CARD}: speaker never confirmed "${title}" started; queueing the rest anyway`);
-          resolve();
-          return;
-        }
-        setTimeout(check, 150);
-      };
-      check();
+    await this._call("spotifyplus", "player_media_play_context", {
+      entity_id: this._config.media.entity,
+      context_uri: pl.uri,
+      device_id: this._speaker,
+      shuffle: this._config.media.shuffle,
     });
   }
 
-  _maybeRefillQueue(player) {
-    const q = this._queue; if (!q || player.entity_id !== q.speaker) return;
-    const title = player.attributes.media_title;
-    if (!title || title === q.lastTitle) return;
-    q.lastTitle = title;
-    const found = q.items.findIndex((it, i) => i > q.idx && String(it.title) === String(title));
-    q.idx = found >= 0 ? found : q.idx + 1;
-    const remaining = q.pushed - (q.idx + 1);
-    if (remaining < this._config.media.queue_refill_at && q.pushed < q.items.length) {
-      this._pushQueue(false).catch((err) => console.error(`${CARD}: queue refill failed`, err));
-    }
+  // Moving the speaker dropdown while something is already playing carries the
+  // session to the newly selected device instead of leaving audio behind (spec §7.4).
+  async _transferPlayback() {
+    if (!this._speaker) return;
+    const player = this._st(this._config.media.entity);
+    if (!player || player.state !== "playing") return;
+    await this._call("spotifyplus", "player_transfer_playback", {
+      entity_id: this._config.media.entity,
+      device_id: this._speaker,
+      play: true,
+    });
   }
 }
 

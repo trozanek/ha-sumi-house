@@ -104,10 +104,14 @@ Both are exercised against a fake `hass` in `preview/sauna.html` / `preview/hot-
   is `heat`/`off`). Seam ignites while state is `heat` (not `hvac_action`, which cycles
   too fast to be a meaningful signal). 270° open arc, `oak` accent, 蒸 kanji. Session
   length via `input_select` + `timer` from `packages/sumi_sauna.yaml`. Cost is modelled
-  (no real power metering) from a 9 kW element assumption. Media playlists are folders
-  under a mounted SMB share (not `.m3u` — HA's Cast integration only plays the first
-  entry of a playlist file) — this whole approach was designed around **not** running
-  Music Assistant; see §5, that assumption is now wrong.
+  (no real power metering) from a 9 kW element assumption. Media is
+  [SpotifyPlus](https://github.com/thlucas1/homeassistantplugin_spotifyplus) (v0.3.0,
+  superseding the original Cast/SMB-folder design built around not running Music
+  Assistant — that assumption was already flagged wrong by §5's migration snapshot):
+  one `media_player.spotifyplus` entity for every play/transport action, a playlist
+  dropdown of Spotify context URIs, and a speaker dropdown of Spotify Connect device
+  names passed as `device_id` — never a per-speaker `media_player` entity. See
+  `docs/cards/sauna.md` §7.
 - **Hot tub** — Bestway/Lay-Z-Spa MQTT bridge (`layzspa_*` entities). `climate.hot_tub`
   is temperature-only; `switch.hot_tub_heater/pump/bubbles` are authoritative for on/off
   (two sources of truth for one fact is exactly what this avoids). Seam ignites on

@@ -14,9 +14,8 @@ const states = {
   "light.sauna_vestibule": { entity_id: "light.sauna_vestibule", state: "on", attributes: { supported_color_modes: ["onoff"] } },
   "light.sauna_bench_led": { entity_id: "light.sauna_bench_led", state: "on",
     attributes: { supported_color_modes: ["rgb"], rgb_color: [190, 118, 76], effect: "None", effect_list: ["None", "Slow Fade"], brightness: 180 } },
-  "media_player.sauna": { entity_id: "media_player.sauna", state: "playing",
-    attributes: { media_title: "Evening Rain", media_artist: "Shakuhachi", volume_level: 0.28, friendly_name: "Sauna" } },
-  "media_player.terrace": { entity_id: "media_player.terrace", state: "idle", attributes: { volume_level: 0.4 } },
+  "media_player.spotifyplus": { entity_id: "media_player.spotifyplus", state: "playing",
+    attributes: { media_title: "Evening Rain", media_artist: "Shakuhachi", volume_level: 0.28, friendly_name: "Spotify", source: "Sauna" } },
   "sensor.sauna_cost_monthly": { entity_id: "sensor.sauna_cost_monthly", state: "214.3", attributes: {} },
   "sensor.sauna_cost_yearly": { entity_id: "sensor.sauna_cost_yearly", state: "1840", attributes: {} },
   "sensor.sauna_hours_monthly": { entity_id: "sensor.sauna_hours_monthly", state: "23.8", attributes: {} },
@@ -67,8 +66,11 @@ function callService(domain, service, data) {
       set(id, { attributes: { media_title: nxt } }); break;
     }
     case "media_player.volume_set": set(id, { attributes: { volume_level: data.volume_level } }); break;
-    case "media_player.play_media":
-      if (data.enqueue === "replace") set(id, { state: "playing", attributes: { media_title: data.media_content_id.split("/").pop().replace(/\.\w+$/, ""), media_artist: "" } });
+    case "spotifyplus.player_media_play_context":
+      set(id, { state: "playing", attributes: { media_title: tracks[0], media_artist: "", source: data.device_id } });
+      break;
+    case "spotifyplus.player_transfer_playback":
+      set(id, { state: data.play ? "playing" : states[id].state, attributes: { source: data.device_id } });
       break;
   }
   setTimeout(publish, 120); // a little latency, like a real device
@@ -98,10 +100,10 @@ const full = {
       { name: "Moss", rgb: [139, 150, 120] }, { name: "Mizu", rgb: [126, 147, 160] }, { name: "Deep", rgb: [74, 58, 107] },
       { name: "Fade", effect: "Slow Fade", gradient: ["#C0754A", "#4A3A6B"] }, { name: "Storm", effect: "Storm", gradient: ["#333", "#7E93A0"] } ] },
   },
-  media: { default_speaker: "media_player.sauna",
-    speakers: [{ entity: "media_player.sauna", name: "Sauna" }, { entity: "media_player.terrace", name: "Terrace" }],
-    playlists: [{ name: "Onsen", path: "media-source://media_source/local/Music/Onsen" }, { name: "Rain", path: "media-source://media_source/local/Music/Rain" }],
-    shuffle: true, queue_window: 6, queue_refill_at: 2 },
+  media: { entity: "media_player.spotifyplus", default_speaker: "Sauna",
+    speakers: [{ id: "Sauna", name: "Sauna" }, { id: "Terrace", name: "Terrace" }],
+    playlists: [{ name: "Onsen", uri: "spotify:playlist:onsen" }, { name: "Rain", uri: "spotify:playlist:rain" }],
+    shuffle: true },
   cost: { monthly: "sensor.sauna_cost_monthly", yearly: "sensor.sauna_cost_yearly", currency: "zł", hours_monthly: "sensor.sauna_hours_monthly" },
 };
 const minimal = { entity: "climate.sauna", name: "Sauna (minimal)", accent: "mizu", gauge: "ring" };
@@ -141,7 +143,7 @@ function simulateHeating() {
 document.getElementById("sim-heat").addEventListener("click", simulateHeating);
 document.getElementById("sim-off").addEventListener("click", () => callService("climate", "set_hvac_mode", { entity_id: "climate.sauna", hvac_mode: "off" }));
 document.getElementById("sim-unavail").addEventListener("click", () => {
-  const s = states["media_player.sauna"];
-  set("media_player.sauna", { state: s.state === "unavailable" ? "playing" : "unavailable" }); publish();
+  const s = states["media_player.spotifyplus"];
+  set("media_player.spotifyplus", { state: s.state === "unavailable" ? "playing" : "unavailable" }); publish();
 });
 if (q.get("heat") === "1") setTimeout(simulateHeating, 300);

@@ -8,7 +8,7 @@ Implemented as a custom web component in Shadow DOM, registered as a dashboard
 resource at `/local/sumi-house/cards/sumi-sauna-card.js`. Prototype:
 [`Concepts/sumi-house-mock.html`](../../Concepts/sumi-house-mock.html), Wellness tab.
 
-- **Status:** built (v0.1.0) — `www/sumi-house/cards/sumi-sauna-card.js`, exercised against a fake `hass` in `preview/sauna.html`; not yet run on a live instance
+- **Status:** built (v0.3.0) — `www/sumi-house/cards/sumi-sauna-card.js`, exercised against a fake `hass` in `preview/sauna.html`; not yet run on a live instance
 - **Hardware:** BleBox saunaBox (WiFi sauna controller), 9 kW element
 - **Package:** [`packages/sumi_sauna.yaml`](../../packages/sumi_sauna.yaml) — required
 
@@ -69,7 +69,7 @@ rather than the attribute, so the card does not need to care.
 | `binary_sensor.sauna_heating` | package | yes |
 | `sensor.sauna_cost_monthly` / `_yearly` | package | no — cost block hides if absent |
 | `light.*` vestibule and bench | your lighting setup | no — rows hide if absent |
-| `media_player.*` speakers | Google Cast | no — media strip hides if absent |
+| `media_player.spotifyplus` | SpotifyPlus | no — media strip hides if absent |
 
 Every optional block degrades by disappearing, never by rendering empty.
 
@@ -115,21 +115,20 @@ lights:
       - { name: Fade,  effect: "Slow Fade", gradient: ["#C0754A", "#4A3A6B"] }
 
 media:
-  default_speaker: media_player.sauna
+  entity: media_player.spotifyplus     # default — the one SpotifyPlus entity for the house
+  default_speaker: Sauna                # a Spotify Connect device name
   speakers:
-    - { entity: media_player.sauna,       name: Sauna }
-    - { entity: media_player.terrace,     name: Terrace }
-    - { entity: media_player.pool,        name: Pool }
-    - { entity: media_player.onsen_group, name: Onsen group }
+    - { id: Sauna,       name: Sauna }
+    - { id: Terrace,     name: Terrace }
+    - { id: Pool,        name: Pool }
+    - { id: Onsen group, name: Onsen group }
   playlists:
-    - { name: Onsen,        path: "media-source://media_source/local/Music/Onsen" }
-    - { name: Shakuhachi,   path: "media-source://media_source/local/Music/Shakuhachi" }
-    - { name: Rain,         path: "media-source://media_source/local/Music/Rain" }
-    - { name: Koto,         path: "media-source://media_source/local/Music/Koto" }
-    - { name: Ambient jazz, path: "media-source://media_source/local/Music/Ambient jazz" }
+    - { name: Onsen,        uri: "spotify:playlist:37i9dQZF1DWZqd5JICZI0u" }
+    - { name: Shakuhachi,   uri: "spotify:playlist:XXXXXXXXXXXXXXXXXXXXXX" }
+    - { name: Rain,         uri: "spotify:playlist:XXXXXXXXXXXXXXXXXXXXXX" }
+    - { name: Koto,         uri: "spotify:playlist:XXXXXXXXXXXXXXXXXXXXXX" }
+    - { name: Ambient jazz, uri: "spotify:playlist:XXXXXXXXXXXXXXXXXXXXXX" }
   shuffle: true
-  queue_window: 20                   # tracks pushed to the speaker at once
-  queue_refill_at: 5                 # top up when this many remain
 
 cost:
   monthly: sensor.sauna_cost_monthly
@@ -252,83 +251,87 @@ Rules:
 
 ---
 
-## 7. Media — and how playlists are defined
+## 7. Media — SpotifyPlus
 
-You asked how to define playlists over files on a shared drive. Here is the answer,
-and the reasoning, because the obvious approach does not work.
+Superseded the original folder/Cast design (queue-building over `media_source`
+folders, documented at length in earlier revisions of this file) once Music
+Assistant turned out to already be running (§5) and the house moved to
+[SpotifyPlus](https://github.com/thlucas1/homeassistantplugin_spotifyplus) for
+Spotify Connect control. The playlist dropdown now lists real Spotify playlists;
+the speaker dropdown lists Spotify Connect devices, not `media_player` entities.
 
-### 7.1 Why not .m3u
+### 7.1 One entity, many devices
 
-The natural instinct is an `.m3u` file per playlist. **Do not** — Home Assistant's
-Cast integration parses `.m3u` and `.pls` and then plays only the *first* entry
-(core [PR #70047](https://github.com/home-assistant/core/pull/70047)). You would get
-one track and silence. M3U only becomes useful with Music Assistant in the picture,
-which you have chosen not to run for now.
+SpotifyPlus exposes Spotify Connect as a **single `media_player` entity**
+(`media_player.spotifyplus` by default) — there is one Spotify account, and it can
+be told to play on whichever registered Connect device (a Sonos, a Cast group
+registered as a Connect receiver, a phone, etc.) you name. The card never targets a
+per-speaker `media_player` entity the way the old Cast design did; it always calls
+services against `media.entity` and passes the chosen device along as a parameter.
 
-### 7.2 A playlist is a folder
+This is exactly the shape the issue asked for: "Music player will always use
+SpotifyPlus media_player entity but will have to pass to it the correct speaker
+identifier."
 
-```
-//shared-drive/Music/
-├── Onsen/           ← a playlist
-├── Shakuhachi/      ← a playlist
-├── Rain/
-├── Koto/
-└── Ambient jazz/
-```
+### 7.2 Playlists
 
-Setup:
-
-1. Mount the share in HA: **Settings → System → Storage → Add network storage**,
-   protocol SMB, usage **Media**. It appears under the local media source
-   automatically — no `media_dirs` editing, no restart.
-2. Each top-level folder under `Music/` is a playlist. To add one, make a folder
-   and drop files in it.
-3. List it in the card's `media.playlists` with its `media-source://` path.
-
-Adding a playlist is a one-line YAML edit. That is the cost of not running Music
-Assistant, and it is a small one at five playlists.
+`media.playlists` is a plain list of names and Spotify context URIs
+(`spotify:playlist:<id>`) — copy the ID from a playlist's Spotify share link. There
+is no folder to mount and no shuffle/queue logic for the card to own: a context URI
+*is* a queue, and Spotify manages it server-side once playback starts.
 
 ### 7.3 How the card plays one
 
-There is no queue service without Music Assistant, so the card builds the queue:
+Choosing a playlist calls:
 
-1. `hass.callWS({ type: 'media_source/browse_media', media_content_id: <path> })`
-2. Keep `children` where `can_play` is true; sort by title, or shuffle if
-   `media.shuffle`.
-3. First track: `media_player.play_media` with `enqueue: replace`, then **wait for the
-   speaker to actually report that track as `media_title`** before sending anything
-   else. Cast has no queue to insert into until the receiver has loaded the track that
-   opened it; `callService` resolving only means HA accepted the call, not that the
-   receiver has caught up. Skipping this wait was the cause of the sauna player
-   appearing to only ever play one song — every `add` right behind `replace` raced the
-   receiver and was silently dropped.
-4. Next `queue_window − 1` tracks: same action with `enqueue: add`.
-5. Watch the speaker; when fewer than `queue_refill_at` tracks remain, push the next
-   batch.
+```yaml
+spotifyplus.player_media_play_context:
+  entity_id: media_player.spotifyplus
+  context_uri: "spotify:playlist:37i9dQZF1DWZqd5JICZI0u"
+  device_id: Sauna            # the selected speaker (§7.4)
+  shuffle: true                # from media.shuffle
+```
 
-`media_content_id` is passed as the `media-source://` URI — the `play_media` service
-resolves it to a signed HTTP URL server-side. `media_content_type` is `music`.
-
-**The one weakness of this design, stated plainly:** HA signs those URLs with an
-expiry. A forty-track queue pushed at once risks the tail expiring before it plays.
-The rolling window above is the mitigation, and it is why `queue_window` is a config
-knob rather than "enqueue everything". Verify the real expiry against your instance
-when the card is built; if it bites, the fix is Music Assistant, whose whole purpose
-is owning the queue properly. Treat that as the documented upgrade path.
+One service call, no polling, no rebuild-the-queue logic — the entire class of
+"only the first track plays" problems the old Cast design had to work around
+(§7 history above) does not exist here, because SpotifyPlus's own queue is what's
+playing.
 
 ### 7.4 Speakers
 
-`media.speakers` is a plain list of Cast `media_player` entities. Selecting one sets
-the target for every subsequent media action.
+`media.speakers` is a list of **Spotify Connect device names** — `id` is the device
+name as Spotify Connect (and SpotifyPlus) knows it, not an entity id:
 
-To play to several speakers at once, use a **Google Cast speaker group** created in
-the Google Home app and list its entity like any other. Do not target several entity
-ids in one call — they drift out of sync by a second or more, which in an open
-terrace-and-sauna space is audible and unpleasant.
+```yaml
+speakers:
+  - { id: Sauna,   name: Sauna }
+  - { id: Terrace, name: Terrace }
+```
 
-Transport uses the standard actions: `media_play_pause`, `media_previous_track`,
-`media_next_track`, `volume_set`. Now-playing text comes from `media_title` and
-`media_artist`, artwork from `entity_picture`.
+Picking a speaker while nothing is playing just remembers the choice for the next
+playlist tap. Picking a speaker **while something is already playing** carries the
+session over immediately via:
+
+```yaml
+spotifyplus.player_transfer_playback:
+  entity_id: media_player.spotifyplus
+  device_id: Terrace
+  play: true
+```
+
+Transport (`media_play_pause`, `media_previous_track`, `media_next_track`,
+`volume_set`) uses the standard `media_player` actions against `media.entity` — the
+same one entity regardless of which speaker is selected, since SpotifyPlus tracks
+playback state for whichever device is currently active. Now-playing text comes
+from `media_title` / `media_artist`, artwork from `entity_picture`, same as before.
+
+**Verify before relying on this:** the service names and parameters above
+(`player_media_play_context`, `player_transfer_playback`, their `device_id`/
+`context_uri`/`play` fields) are SpotifyPlus's documented API as of this writing.
+Confirm them against **Developer Tools → Actions** on the live instance — the
+integration's own service descriptions there are authoritative — before wiring the
+card up for real, the same verification discipline §5 and `scripts/ha_frontend_variables.txt`
+already require for anything not yet checked against a running instance.
 
 ---
 
@@ -407,11 +410,13 @@ Tokens, spacing and the seam behaviour come from the theme — the card must con
 - [ ] `packages/sumi_sauna.yaml` installed and reloaded ✔ *(written)*
 - [ ] `packages/sumi_common.yaml` installed, `input_number.energy_price` set to `0.98`
 - [ ] `input_number.sauna_heater_power` set to `9`
-- [ ] Share mounted as media, one folder per playlist
+- [ ] SpotifyPlus integration installed and configured; `media_player.spotifyplus` present
 - [x] Resource registered in `examples/resources.yaml`; full config in `examples/sauna-card.yaml`
 - [ ] Verify `hvac_action` is present on your saunaBox firmware — if absent, the
       fallback is in play and the cost model is coarser
-- [ ] Verify signed-URL expiry against a long playlist
+- [ ] Verify `spotifyplus.player_media_play_context` / `player_transfer_playback`
+      service names and fields in Developer Tools → Actions (spec §7.4)
+- [ ] Replace the placeholder playlist URIs in `examples/sauna-card.yaml` with real ones
 
 ---
 
@@ -420,9 +425,6 @@ Tokens, spacing and the seam behaviour come from the theme — the card must con
 - The card renders its own `<ha-card>` inside its shadow root and sets `--sumi-seam-opacity`
   and `--sumi-active` on it while the entity is `heat`, so the theme's kintsugi seam and
   frame trace apply with no `card_mod` on the dashboard.
-- Queue tracking without Music Assistant matches the speaker's `media_title` against the
-  titles the card pushed; when a title is not found it assumes one track advanced. Good
-  enough to refill in time, not a real queue position.
 - The `- / +` buttons and the drag share one debounce (`commit_delay`), then an optimistic
   hold (`optimistic_hold`) during which inbound `temperature` changes are ignored; the
   entity wins when the hold expires.
@@ -431,8 +433,32 @@ Tokens, spacing and the seam behaviour come from the theme — the card must con
 
 ### v0.2.1
 
-- Fixed: `_pushQueue` now waits (`_waitForTrack`, 6s timeout) for the speaker's
+- Fixed: `_pushQueue` now waited (`_waitForTrack`, 6s timeout) for the speaker's
   `media_title` to confirm the opening track before enqueueing the rest of the batch,
-  instead of firing every `play_media` call back-to-back. See §7.3 — the previous
-  behaviour was the reported "plays only one song" bug: the `add` calls raced the
-  Cast receiver's queue setup and were dropped.
+  instead of firing every `play_media` call back-to-back — the previous behaviour was
+  the reported "plays only one song" bug: the `add` calls raced the Cast receiver's
+  queue setup and were dropped. Superseded by v0.3.0, which removed the Cast
+  queue-building path entirely.
+
+### v0.3.0 — SpotifyPlus
+
+- Replaced the Cast/`media_source`-folder media design (§7 history: `.m3u` doesn't
+  work, so the card built and refilled its own queue over `media_player.play_media`)
+  with [SpotifyPlus](https://github.com/thlucas1/homeassistantplugin_spotifyplus),
+  now that Music Assistant/SpotifyPlus is actually running on the live instance (§5).
+- `media.entity` (new, defaults to `media_player.spotifyplus`) is the one entity every
+  media action now targets, regardless of which speaker is selected.
+- `media.speakers[].entity` → `media.speakers[].id`: a Spotify Connect device name,
+  not a `media_player` entity id.
+- `media.playlists[].path` (a `media-source://` folder) → `media.playlists[].uri`
+  (a `spotify:playlist:<id>` context URI).
+- Removed `media.queue_window` / `media.queue_refill_at` and the queue-building code
+  (`_pushQueue`, `_waitForTrack`, `_maybeRefillQueue`) — a context URI is itself a
+  queue that SpotifyPlus manages, so the card only ever fires one service call per
+  playlist choice.
+- Selecting a playlist calls `spotifyplus.player_media_play_context`; changing the
+  speaker while something is playing calls `spotifyplus.player_transfer_playback`
+  to carry the session over. See §7.4 for the verification step this still needs
+  against a live instance.
+- **Breaking config change** — existing `media:` blocks written against v0.2.x must
+  be updated to the new schema (§3, §7).
